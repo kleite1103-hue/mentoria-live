@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mentoria Live — Efeito Vendas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080a; --panel:#0d0f13; --panel2:#12151b; --line:#1e2230;
+  --orange:#ff4d1c; --purple:#7B2FFF; --txt:#e8eaf0; --muted:#8a90a3;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--line)}
+h1{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px}
+h1 span{color:var(--orange)}
+.timer{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--purple)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px 24px;height:calc(100vh - 70px)}
+@media(max-width:900px){.grid{grid-template-columns:1fr;height:auto}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;overflow:hidden}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
+.panel-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--muted)}
+.panel-body{flex:1;overflow-y:auto;padding:16px}
+input.cliente{background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:8px 12px;font-family:'Outfit';font-size:14px;width:220px}
+button{font-family:'Outfit',sans-serif;font-weight:600;border:none;border-radius:10px;cursor:pointer;transition:.15s}
+.btn-mic{background:var(--orange);color:#fff;padding:10px 22px;font-size:15px;display:flex;align-items:center;gap:8px}
+.btn-mic.rec{background:#c62828;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(198,40,40,.5)}50%{box-shadow:0 0 0 10px rgba(198,40,40,0)}}
+.btn-plan{background:var(--purple);color:#fff;padding:12px 26px;font-size:15px}
+.btn-ghost{background:var(--panel2);color:var(--muted);padding:8px 14px;font-size:13px;border:1px solid var(--line)}
+.btn-ghost:hover{color:var(--txt)}
+#transcript{white-space:pre-wrap;font-size:15px;line-height:1.7}
+#interim{color:var(--muted);font-style:italic}
+.tags{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;border-top:1px solid var(--line)}
+.tag{background:var(--panel2);border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer}
+.tag:hover{border-color:var(--orange);color:var(--orange)}
+textarea#notas{width:100%;min-height:90px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px;font-family:'Outfit';font-size:14px;resize:vertical;margin-top:10px}
+#plano{font-size:14px;line-height:1.7}
+#plano h2{font-family:'Bebas Neue';letter-spacing:2px;color:var(--orange);font-size:22px;margin:16px 0 6px}
+#plano h3{color:var(--purple);font-size:15px;margin:12px 0 4px}
+#plano ul{margin-left:18px;margin-bottom:8px}
+#plano li{margin-bottom:4px}
+#plano strong{color:var(--orange)}
+.status{font-size:12px;color:var(--muted);padding:6px 16px}
+.loading{display:inline-block;width:14px;height:14px;border:2px solid var(--purple);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.foot{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header>
+  <h1>MENTORIA <span>LIVE</span> · EFEITO VENDAS</h1>
+  <input class="cliente" id="cliente" placeholder="Nome da cliente / loja">
+  <input class="cliente" id="apikey" type="password" placeholder="Chave API Anthropic (sk-ant-...)" style="width:260px" onchange="saveKey()">
+  <div class="timer" id="timer">00:00</div>
+</header>
+
+<div class="grid">
+  <!-- ESQUERDA: transcrição -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">TRANSCRIÇÃO AO VIVO</div>
+      <button class="btn-mic" id="btnMic">🎙 Iniciar escuta</button>
+    </div>
+    <div class="status" id="status">Clique em "Iniciar escuta" e permita o microfone (Chrome).</div>
+    <div class="panel-body">
+      <div id="transcript"></div>
+      <div id="interim"></div>
+    </div>
+    <div class="tags">
+      <div class="tag" onclick="mark('💰 PRECIFICAÇÃO')">💰 Precificação</div>
+      <div class="tag" onclick="mark('🔻 FUNIL')">🔻 Funil</div>
+      <div class="tag" onclick="mark('📋 CADASTRO')">📋 Cadastro</div>
+      <div class="tag" onclick="mark('🛠 FERRAMENTAS')">🛠 Ferramentas</div>
+      <div class="tag" onclick="mark('🤝 AFILIADOS')">🤝 Afiliados</div>
+      <div class="tag" onclick="mark('📢 ADS')">📢 Ads</div>
+      <div class="tag" onclick="mark('⭐ IMPORTANTE')">⭐ Importante</div>
+      <div class="tag" onclick="mark('✅ AÇÃO')">✅ Ação</div>
+    </div>
+    <div style="padding:0 16px 12px">
+      <textarea id="notas" placeholder="Anotações manuais rápidas (números, metas, contexto da loja)..."></textarea>
+    </div>
+  </div>
+
+  <!-- DIREITA: plano -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">PLANO DE AÇÃO — MÉTODO EFEITO VENDAS</div>
+      <button class="btn-plan" id="btnPlan">⚡ Gerar Plano</button>
+    </div>
+    <div class="panel-body" id="plano">
+      <p style="color:var(--muted)">O plano será gerado aqui a partir da transcrição + suas anotações, seguindo a ordem de análise: <strong style="color:var(--orange)">1. Precificação → 2. Funil → 3. Cadastro → 4. Ferramentas → 5. Afiliados → 6. Ads</strong>, com quadrantes OURO/ESCALA/NICHO/FRACO e regras GMVMax.</p>
+    </div>
+    <div class="foot">
+      <button class="btn-ghost" onclick="copyPlan()">📋 Copiar plano</button>
+      <button class="btn-ghost" onclick="copyPrompt()">🤖 Copiar prompt p/ Claude (fallback)</button>
+      <button class="btn-ghost" onclick="downloadTxt()">💾 Baixar tudo (.txt)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== TIMER =====
+let sec=0; setInterval(()=>{sec++;const m=String(Math.floor(sec/60)).padStart(2,'0'),s=String(sec%60).padStart(2,'0');document.getElementById('timer').textContent=m+':'+s;},1000);
+
+// ===== SPEECH =====
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec=null, listening=false, finalText='';
+const tEl=document.getElementById('transcript'), iEl=document.getElementById('interim'), st=document.getElementById('status'), btn=document.getElementById('btnMic');
+
+function initRec(){
+  rec = new SR();
+  rec.lang='pt-BR'; rec.continuous=true; rec.interimResults=true;
+  rec.onresult=e=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if(e.results[i].isFinal){ finalText+=t.trim()+'\n'; tEl.textContent=finalText; }
+      else interim+=t;
+    }
+    iEl.textContent=interim;
+    tEl.parentElement.scrollTop=tEl.parentElement.scrollHeight;
+  };
+  rec.onerror=e=>{
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+      st.innerHTML='⚠️ Microfone bloqueado neste ambiente. <b>Baixe o arquivo e abra direto no Chrome</b> — aí funciona. Enquanto isso, use as anotações manuais abaixo.';
+      listening=false; btn.classList.remove('rec'); btn.textContent='🎙 Iniciar escuta';
+    }
+  };
+  rec.onend=()=>{ if(listening){ try{rec.start();}catch(_){}} }; // auto-restart
+}
+
+btn.onclick=()=>{
+  if(!SR){ st.textContent='⚠️ Navegador sem suporte a voz. Use o Chrome. Anote manualmente abaixo.'; return; }
+  if(!rec) initRec();
+  if(!listening){
+    try{ rec.start(); listening=true; btn.classList.add('rec'); btn.textContent='⏸ Pausar escuta'; st.textContent='🔴 Escutando... fale normalmente.'; }
+    catch(e){ st.textContent='Erro ao iniciar: '+e.message; }
+  } else {
+    listening=false; rec.stop(); btn.classList.remove('rec'); btn.textContent='🎙 Iniciar escuta'; st.textContent='Pausado.';
+  }
+};
+
+function mark(tag){
+  finalText += '\n══ '+tag+' ══\n';
+  tEl.textContent=finalText;
+  tEl.parentElement.scrollTop=tEl.parentElement.scrollHeight;
+}
+
+// ===== CONTEXTO DO MÉTODO =====
+const METODO = `Você é a IA da Efeito Vendas (Karina Leite), especialista no Método Efeito Vendas para crescimento na Shopee.
+Gere um PLANO DE AÇÃO DE CRESCIMENTO para a cliente com base na transcrição da mentoria.
+
+TOM OBRIGATÓRIO — ASSERTIVO:
+- Escreva como consultora sênior que DECIDE, não que sugere. Verbos no imperativo: "Suba", "Pause", "Reprecifique", "Ative".
+- PROIBIDO usar: "considere", "talvez", "pode ser interessante", "seria bom", "avalie a possibilidade".
+- Toda ação tem NÚMERO e PRAZO: valor de orçamento, meta de ROAS, % de ajuste, dia da semana. Nada genérico.
+- Se a cliente citou números (faturamento, ticket, ROAS, margem), USE-OS nos cálculos. Calcule o ROAS mínimo dela (100 ÷ margem%) e cite o resultado.
+- Máximo 3 prioridades por semana. Menos ações, mais impacto. Ordene por alavanca de crescimento.
+- Feche o diagnóstico com UMA frase: "O gargalo principal desta conta é X." — escolha um só.
+- Sistema > esforço. Dado > opinião. Cada ação deve dizer QUAL métrica ela move.
+
+REGRAS DO MÉTODO (obrigatórias):
+- Ordem de análise: 1-Precificação 2-Funil de vendas 3-Qualidade do cadastro 4-Ferramentas de marketing 5-Afiliados 6-Ads
+- Comissão Shopee: 14% ou 20%+R$4. FSS grátis desde março/2026.
+- GMVMax: Lance Automático = produtos novos (0-100 cliques, ROAS 2-4x, R$15-30/dia, sem mexer por 7 dias). Meta de ROAS = produtos maduros (200+ cliques, 20+ conversões). ROAS mínimo = 100 ÷ margem%.
+- Curvas: A = ROAS >8x + CTR >2% (replicar). B = 4-8x (otimizar). C = 2-4x (reformular). PAUSAR = <2x + CTR <1%.
+- Quadrantes: OURO / ESCALA / NICHO / FRACO.
+- CPM = (Ticket × Conversão × CTR × 1000) ÷ ROAS. Conversão é a variável soberana.
+- Aquecimento TAE: 7d cliques → 7d engajamento → 7d conversão. CTR mínimo 1,5%, ideal 2%+.
+- Métricas diárias: ROAS blended >6x, CTR >1,8%, CAC <R$15, margem líquida >25%.
+- 7 Regras: não mexer em ROAS >8x, replicar Curva A mensalmente, Oferta Relâmpago 24h nos mais visitados, ajuste progressivo de preço, priorizar ticket médio. Ticket ideal R$50-150. Kits/combos ~37% mais ROAS.
+
+FORMATO DA RESPOSTA (HTML simples com h2, h3, ul, li, strong — sem markdown):
+<h2>🔴 Veredito</h2> (1 frase: o gargalo principal da conta + 1 frase: a maior alavanca de crescimento)
+<h2>📊 Diagnóstico</h2> (3-5 bullets, cada um com dado + conclusão. Ex: "Ticket R$32 — abaixo da faixa ideal R$50-150 → montar kits")
+<h2>🎯 Plano de Ação — 30 dias</h2>
+<h3>Semana 1 (impacto imediato)</h3><ul>máx 3 ações com número + prazo</ul>
+<h3>Semana 2</h3><ul>máx 3 ações</ul>
+<h3>Semanas 3-4 (escala)</h3><ul>máx 3 ações</ul>
+<h2>📈 Metas — checar todo dia</h2> (números-alvo: ROAS blended, CTR, CAC, margem — com o valor exato que ela precisa bater)
+<h2>⛔ Não fazer</h2> (2-3 erros que ela deve evitar, ex: mexer em anúncio com ROAS >8x)
+Se faltou dado em alguma etapa da ordem de análise, coloque como ação: "Levantar [dado] até [dia]" — nunca como incerteza.`;
+
+// ===== API KEY (fica salva só no SEU navegador) =====
+function saveKey(){
+  localStorage.setItem('ev_apikey', document.getElementById('apikey').value.trim());
+  st.textContent='🔑 Chave salva neste navegador.';
+}
+window.addEventListener('load',()=>{
+  const k=localStorage.getItem('ev_apikey');
+  if(k) document.getElementById('apikey').value=k;
+});
+
+// ===== GERAR PLANO =====
+document.getElementById('btnPlan').onclick=async()=>{
+  const cliente=document.getElementById('cliente').value||'Cliente';
+  const notas=document.getElementById('notas').value;
+  const conteudo='CLIENTE: '+cliente+'\n\nTRANSCRIÇÃO DA MENTORIA:\n'+finalText+'\n\nANOTAÇÕES MANUAIS:\n'+notas;
+  if(finalText.trim().length<20 && notas.trim().length<20){
+    document.getElementById('plano').innerHTML='<p style="color:var(--orange)">⚠️ Capture pelo menos algumas falas ou anotações antes de gerar o plano.</p>';
+    return;
+  }
+  const pl=document.getElementById('plano');
+  pl.innerHTML='<p><span class="loading"></span> Gerando plano com IA (Método Efeito Vendas)...</p>';
+  const key=(document.getElementById('apikey').value||'').trim();
+  const headers={'Content-Type':'application/json'};
+  if(key){
+    headers['x-api-key']=key;
+    headers['anthropic-version']='2023-06-01';
+    headers['anthropic-dangerous-direct-browser-access']='true';
+  }
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:headers,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:key?2000:1000,
+        messages:[{role:'user',content:METODO+'\n\n'+conteudo}]})
+    });
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'Erro da API');
+    const txt=(d.content||[]).map(c=>c.text||'').join('\n');
+    if(!txt) throw new Error('Resposta vazia');
+    pl.innerHTML=txt.replace(/```html|```/g,'');
+  }catch(e){
+    pl.innerHTML='<p style="color:var(--orange)">⚠️ Erro ao conectar: '+e.message+'.<br><br>'+(key?'Verifique se a chave está correta e tem crédito em console.anthropic.com.':'Cole sua chave da API Anthropic no campo do topo (sk-ant-...) — ela fica salva só neste navegador.')+'<br><br>Alternativa: botão <b>"Copiar prompt p/ Claude"</b> abaixo e cole em um chat comigo.</p>';
+  }
+};
+
+// ===== UTILS =====
+function copyPlan(){
+  const t=document.getElementById('plano').innerText;
+  navigator.clipboard.writeText(t).then(()=>alert('Plano copiado!'));
+}
+function copyPrompt(){
+  const cliente=document.getElementById('cliente').value||'Cliente';
+  const notas=document.getElementById('notas').value;
+  const p=METODO+'\n\nCLIENTE: '+cliente+'\n\nTRANSCRIÇÃO:\n'+finalText+'\n\nANOTAÇÕES:\n'+notas;
+  navigator.clipboard.writeText(p).then(()=>alert('Prompt copiado! Cole em um chat com o Claude.'));
+}
+function downloadTxt(){
+  const cliente=document.getElementById('cliente').value||'cliente';
+  const blob=new Blob(['MENTORIA — '+cliente+'\n\nTRANSCRIÇÃO:\n'+finalText+'\n\nANOTAÇÕES:\n'+document.getElementById('notas').value+'\n\nPLANO:\n'+document.getElementById('plano').innerText],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mentoria-'+cliente.replace(/\s+/g,'-').toLowerCase()+'.txt';a.click();
+}
+</script>
+</body>
+</html>
