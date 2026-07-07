@@ -52,7 +52,8 @@ textarea#notas{width:100%;min-height:90px;background:var(--panel2);border:1px so
 <header>
   <h1>MENTORIA <span>LIVE</span> · EFEITO VENDAS</h1>
   <input class="cliente" id="cliente" placeholder="Nome da cliente / loja">
-  <input class="cliente" id="apikey" type="password" placeholder="Chave API Anthropic (sk-ant-...)" style="width:260px" onchange="saveKey()">
+  <input class="cliente" id="apikey" type="password" placeholder="Chave Anthropic (sk-ant-...)" style="width:200px" onchange="saveKey()">
+  <input class="cliente" id="falkey" type="password" placeholder="Chave fal.ai (transcrição)" style="width:200px" onchange="saveFalKey()">
   <div class="timer" id="timer">00:00</div>
 </header>
 
@@ -64,6 +65,14 @@ textarea#notas{width:100%;min-height:90px;background:var(--panel2);border:1px so
       <button class="btn-mic" id="btnMic">🎙 Iniciar escuta</button>
     </div>
     <div class="status" id="status">Clique em "Iniciar escuta" e permita o microfone (Chrome).</div>
+    <div style="padding:10px 16px;border-bottom:1px solid var(--line)">
+      <div id="dropzone" style="border:2px dashed var(--purple);border-radius:12px;padding:14px;text-align:center;cursor:pointer;font-size:13px;color:var(--muted)">
+        📼 <b style="color:var(--txt)">Upload da gravação do Zoom</b><br>
+        Arraste aqui o <b>audio_only.m4a</b> (ou .mp3/.mp4) — transcreve os dois lados com identificação de quem fala
+        <input type="file" id="fileInput" accept="audio/*,video/mp4,.m4a,.mp3,.mp4,.wav,.ogg" style="display:none">
+      </div>
+      <div id="upStatus" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
+    </div>
     <div class="panel-body">
       <div id="transcript"></div>
       <div id="interim"></div>
@@ -186,12 +195,60 @@ Se faltou dado em alguma etapa da ordem de análise, coloque como ação: "Levan
 // ===== API KEY (fica salva só no SEU navegador) =====
 function saveKey(){
   localStorage.setItem('ev_apikey', document.getElementById('apikey').value.trim());
-  st.textContent='🔑 Chave salva neste navegador.';
+  st.textContent='🔑 Chave Anthropic salva neste navegador.';
+}
+function saveFalKey(){
+  localStorage.setItem('ev_falkey', document.getElementById('falkey').value.trim());
+  st.textContent='🔑 Chave fal.ai salva neste navegador.';
 }
 window.addEventListener('load',()=>{
   const k=localStorage.getItem('ev_apikey');
   if(k) document.getElementById('apikey').value=k;
+  const f=localStorage.getItem('ev_falkey');
+  if(f) document.getElementById('falkey').value=f;
 });
+
+// ===== UPLOAD + TRANSCRIÇÃO (fal.ai Whisper) =====
+const dz=document.getElementById('dropzone'), fi=document.getElementById('fileInput'), upSt=document.getElementById('upStatus');
+dz.onclick=()=>fi.click();
+dz.ondragover=e=>{e.preventDefault();dz.style.borderColor='var(--orange)';};
+dz.ondragleave=()=>{dz.style.borderColor='var(--purple)';};
+dz.ondrop=e=>{e.preventDefault();dz.style.borderColor='var(--purple)';if(e.dataTransfer.files[0])transcrever(e.dataTransfer.files[0]);};
+fi.onchange=()=>{if(fi.files[0])transcrever(fi.files[0]);};
+
+async function transcrever(file){
+  const key=(document.getElementById('falkey').value||'').trim();
+  if(!key){upSt.innerHTML='⚠️ Cole sua chave fal.ai no campo do topo primeiro (fal.ai/dashboard/keys).';return;}
+  if(!window.falClient){upSt.textContent='⚠️ Cliente fal.ai ainda carregando... tente de novo em 3 segundos.';return;}
+  const fal=window.falClient;
+  fal.config({credentials:key});
+  try{
+    upSt.innerHTML='<span class="loading"></span> 1/3 Enviando áudio ('+(file.size/1048576).toFixed(1)+' MB)...';
+    const audioUrl=await fal.storage.upload(file);
+    upSt.innerHTML='<span class="loading"></span> 2/3 Transcrevendo com IA (identificando falantes)... pode levar alguns minutos para calls longas.';
+    const result=await fal.subscribe('fal-ai/whisper',{
+      input:{audio_url:audioUrl,task:'transcribe',language:'pt',chunk_level:'segment',version:'3',diarize:true,num_speakers:2},
+      logs:false
+    });
+    upSt.innerHTML='<span class="loading"></span> 3/3 Formatando...';
+    const d=result.data||result;
+    let out='';
+    if(d.chunks&&d.chunks.length&&d.chunks[0].speaker!==undefined&&d.chunks[0].speaker!==null){
+      let last=null;
+      for(const c of d.chunks){
+        const sp=c.speaker||'?';
+        if(sp!==last){out+='\n【'+(sp==='SPEAKER_00'?'FALANTE 1':sp==='SPEAKER_01'?'FALANTE 2':sp)+'】\n';last=sp;}
+        out+=c.text.trim()+' ';
+      }
+    } else { out=d.text||''; }
+    if(!out.trim()) throw new Error('Transcrição vazia — verifique o arquivo.');
+    finalText+= '\n══ 📼 TRANSCRIÇÃO DA GRAVAÇÃO ══\n'+out.trim()+'\n';
+    tEl.textContent=finalText;
+    upSt.innerHTML='✅ Transcrição concluída! Agora clique em <b>⚡ Gerar Plano</b>.';
+  }catch(e){
+    upSt.innerHTML='⚠️ Erro: '+(e.message||JSON.stringify(e)).slice(0,200)+'<br>Verifique a chave fal.ai e o crédito em fal.ai/dashboard.';
+  }
+}
 
 // ===== GERAR PLANO =====
 document.getElementById('btnPlan').onclick=async()=>{
@@ -243,6 +300,10 @@ function downloadTxt(){
   const blob=new Blob(['MENTORIA — '+cliente+'\n\nTRANSCRIÇÃO:\n'+finalText+'\n\nANOTAÇÕES:\n'+document.getElementById('notas').value+'\n\nPLANO:\n'+document.getElementById('plano').innerText],{type:'text/plain'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mentoria-'+cliente.replace(/\s+/g,'-').toLowerCase()+'.txt';a.click();
 }
+</script>
+<script type="module">
+import { fal } from "https://esm.run/@fal-ai/client";
+window.falClient = fal;
 </script>
 </body>
 </html>
