@@ -319,21 +319,21 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
     <div class="kicker">Passo 3 de 4</div>
     <h2 class="disp">O cálculo mágico</h2>
     <div class="formula" style="margin-top:14px;max-width:900px">META DE FATURAMENTO = CUSTOS FIXOS ÷ ÍNDICE DA MARGEM<small>Quantos reais você precisa faturar para a sobra de cada venda cobrir todo o custo fixo.</small></div>
-    <div class="metric-wrap" style="margin-top:24px">
-      <div class="metric-blocks">
-        <div class="mblock"><div class="lab">Por que dividir</div><div class="val">Se de cada venda sobra <b>22%</b>, você precisa faturar o suficiente para que esses 22% cubram <b>todo o custo fixo</b>.</div></div>
-        <div class="mblock p"><div class="lab">Leitura Efeito Vendas</div><div class="val">Margem baixa exige <b>faturamento alto</b>. Antes de vender mais, veja se dá para <b>melhorar a margem</b>.</div></div>
-      </div>
+    <div class="metric-wrap" style="margin-top:22px">
       <div class="example-box">
-        <div class="et">A engrenagem · seus números</div>
+        <div class="et">A conta · seus números</div>
         <div class="calc-chain">
           <div class="chain-row"><span>Custos fixos</span><b id="m3_fix">R$ 3.000,00</b></div>
-          <div class="chain-row"><span>Índice da margem</span><b id="m3_ind">0,22</b></div>
-          <div class="chain-row big"><span>Meta de faturamento</span><b id="m3_meta">R$ 13.636,36</b></div>
+          <div class="chain-row"><span>÷ Índice da margem</span><b id="m3_ind">0,22</b></div>
+          <div class="chain-row big"><span>= Meta de faturamento</span><b id="m3_meta">R$ 13.636,36</b></div>
         </div>
       </div>
+      <div class="example-box" style="border-color:var(--orange)">
+        <div class="et" style="color:var(--red)">Atenção: esse valor NÃO é lucro</div>
+        <div class="calc-chain" id="m3_break"></div>
+      </div>
     </div>
-    <div class="verdict-strip">Esse é o valor que a sua loja precisa faturar <b>só para não dar prejuízo</b>.</div>
+    <div class="verdict-strip">Faturar <b id="m3_meta2">R$ 13.636</b> não põe dinheiro no bolso. <b>Só paga a conta.</b></div>
   </section>
 
   <!-- 7 PASSO 4 -->
@@ -359,27 +359,28 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
     </div>
   </section>
 
-  <!-- 8 A LEITURA DO NÚMERO (slider) -->
+  <!-- 8 A LEITURA DO NÚMERO -->
   <section class="slide">
     <div class="kicker">A Leitura do Número</div>
     <h2 class="disp">Um pedido muda tudo</h2>
-    <p class="lead" style="margin-top:8px">Arraste e veja o momento exato em que a sua loja <span class="hlr">sai do prejuízo</span> e <span class="hlg">começa a lucrar</span>.</p>
-    <div class="slider-wrap">
-      <div class="slider-head">
+    <p class="lead" style="margin-top:8px">Sua loja precisa vender <b id="ln_meta">274 pedidos</b> para começar a lucrar. Olha o que acontece <span class="hlr">um pedido antes</span> e <span class="hlg">um pedido depois</span>.</p>
+    <div class="three-states" id="ln_cards"></div>
+    <div class="slider-wrap" style="margin-top:22px;padding:20px 26px">
+      <div class="slider-head" style="margin-bottom:12px">
         <div>
-          <div class="sh-l">Pedidos no mês</div>
-          <div class="sh-v" id="sl_ped">274</div>
+          <div class="sh-l">Simule: pedidos no mês</div>
+          <div class="sh-v" id="sl_ped" style="font-size:clamp(30px,3.6vw,46px)">274</div>
         </div>
         <div style="text-align:right">
-          <div class="sh-l">Resultado final</div>
-          <div class="sh-v" id="sl_res">R$ 14</div>
+          <div class="sh-l">Resultado no fim do mês</div>
+          <div class="sh-v" id="sl_res" style="font-size:clamp(30px,3.6vw,46px)">R$ 14</div>
         </div>
       </div>
       <input type="range" id="slider" min="0" max="400" value="274">
-      <div class="out" style="margin-top:18px">
+      <div class="out" style="margin-top:14px">
         <div class="out-row"><span>Faturamento</span><b id="sl_fat">R$ 13.700,00</b></div>
-        <div class="out-row"><span>Sobra bruta (margem total)</span><b id="sl_sobra">R$ 3.014,00</b></div>
-        <div class="out-row neg"><span>Custos fixos</span><b id="sl_fix">- R$ 3.000,00</b></div>
+        <div class="out-row"><span>Sobra depois de produto, taxas, imposto e Ads</span><b id="sl_sobra">R$ 3.014,00</b></div>
+        <div class="out-row neg"><span>(-) Custos fixos</span><b id="sl_fix">- R$ 3.000,00</b></div>
       </div>
       <div id="sl_badge"></div>
     </div>
@@ -551,6 +552,24 @@ function calcAll(){
   document.getElementById('m3_fix').textContent=brl(fixo);
   document.getElementById('m3_ind').textContent=num2(indice).replace('.',',');
   document.getElementById('m3_meta').textContent=indice>0?brl(metaFat):'impossível';
+  document.getElementById('m3_meta2').textContent=indice>0?brl0(metaFat):'—';
+
+  /* Passo 3 — para onde vai esse faturamento */
+  if(indice>0 && preco>0){
+    const un=metaFat/preco;
+    document.getElementById('m3_break').innerHTML=`
+      <div class="chain-row"><span>Faturamento da meta</span><b>${brl(metaFat)}</b></div>
+      <div class="chain-row neg"><span>(-) Custo dos produtos</span><b>${brl(un*prod)}</b></div>
+      <div class="chain-row neg"><span>(-) Embalagem</span><b>${brl(un*emb)}</b></div>
+      <div class="chain-row neg"><span>(-) Taxa fixa + comissão Shopee</span><b>${brl(un*tx.fixa+metaFat*tx.comissao/100)}</b></div>
+      <div class="chain-row neg"><span>(-) Imposto (${impPct}%)</span><b>${brl(metaFat*impPct/100)}</b></div>
+      ${antPct>0?`<div class="chain-row neg"><span>(-) Antecipa (${antPct}%)</span><b>${brl(metaFat*antPct/100)}</b></div>`:''}
+      <div class="chain-row neg"><span>(-) Ads (ROAS ${roas}x)</span><b>${brl(metaFat*adsPct/100)}</b></div>
+      <div class="chain-row big"><span>= Sobra, que paga os custos fixos</span><b>${brl(fixo)}</b></div>`;
+  } else {
+    document.getElementById('m3_break').innerHTML=
+      `<div class="chain-row"><span>Ajuste a margem no Passo 2</span><b>—</b></div>`;
+  }
 
   /* PASSO 4 */
   const exato=margem>0?fixo/margem:0;
@@ -565,6 +584,26 @@ function calcAll(){
   sl.max=Math.max(50,Math.ceil(metaPed*1.5));
   if(+sl.dataset.touched!==1) sl.value=metaPed;
   atualizaSlider(margem,fixo,preco);
+
+  /* A LEITURA DO NÚMERO — três cenários explícitos */
+  document.getElementById('ln_meta').textContent=margem>0?metaPed+' pedidos':'—';
+  if(margem>0){
+    let cards='';
+    [metaPed-2,metaPed-1,metaPed].forEach((q,i)=>{
+      const res=q*margem-fixo;
+      const cls=res<0?'low':(i===2?'high':'mid');
+      const lbl=res<0?'Prejuízo':(i===2?'Sua meta':'Zero a zero');
+      const txt=res<0?'faltam '+brl(Math.abs(res)):'sobra '+brl(res);
+      cards+=`<div class="state ${cls}">
+        <div class="sl">${q} pedidos</div>
+        <div class="sv">${lbl}</div>
+        <p>Faturamento ${brl(q*preco)}<br><b style="color:var(--t1)">${txt}</b></p>
+      </div>`;
+    });
+    document.getElementById('ln_cards').innerHTML=cards;
+  } else {
+    document.getElementById('ln_cards').innerHTML='';
+  }
 
   /* PROVA REAL */
   const q=metaPed;
