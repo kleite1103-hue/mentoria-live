@@ -144,6 +144,14 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .next-banner h4{font-family:var(--disp);font-size:30px;letter-spacing:.5px;margin-top:4px}
 .next-banner p{font-size:13.5px;color:var(--t2);font-weight:300;margin-top:4px;max-width:680px}
 .hint{font-size:12px;color:var(--t3);font-weight:300;margin-top:10px;text-align:center;font-family:var(--mono);letter-spacing:.5px}
+.faixa-badge{background:var(--orange-soft);border:1px solid var(--orange);border-radius:9px;padding:9px 13px;font-family:var(--mono);font-size:12px;letter-spacing:.5px;color:var(--orange);text-align:center;margin:-4px 0 13px}
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}
+.tier{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 18px;text-align:center;transition:.3s}
+.tier.on{border-color:var(--orange);background:var(--orange-soft);transform:translateY(-4px)}
+.tier .tf{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:12px;line-height:1.4}
+.tier .tc{font-family:var(--disp);font-size:clamp(30px,3.6vw,48px);color:var(--orange);line-height:.9}
+.tier .tx{font-size:13px;color:var(--t2);font-weight:300;margin-top:8px}
+.tier .tx b{color:var(--t1);font-family:var(--mono)}
 @media(max-width:920px){
   .metric-wrap,.calc-grid,.split{grid-template-columns:1fr}
   .three-states,.steps4{grid-template-columns:1fr 1fr}
@@ -247,6 +255,24 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
     </div>
   </section>
 
+  <!-- 4B AS FAIXAS DA SHOPEE -->
+  <section class="slide">
+    <div class="kicker">Antes do Passo 2</div>
+    <h2 class="disp">As taxas mudam por faixa de preço</h2>
+    <p class="lead" style="margin-top:10px">Esse é o custo variável que quase todo mundo erra. A comissão e a taxa fixa <span class="hl">dependem do preço do produto</span>. Não é chute, é tabela.</p>
+    <div class="tiers">
+      <div class="tier" id="t1"><div class="tf">Até<br>R$ 79,99</div><div class="tc">20%</div><div class="tx">+ taxa fixa<br><b>R$ 4,00</b></div></div>
+      <div class="tier" id="t2"><div class="tf">R$ 80 a<br>R$ 99,99</div><div class="tc">14%</div><div class="tx">+ taxa fixa<br><b>R$ 16,00</b></div></div>
+      <div class="tier" id="t3"><div class="tf">R$ 100 a<br>R$ 199,99</div><div class="tc">14%</div><div class="tx">+ taxa fixa<br><b>R$ 20,00</b></div></div>
+      <div class="tier" id="t4"><div class="tf">Acima de<br>R$ 200</div><div class="tc">14%</div><div class="tx">+ taxa fixa<br><b>R$ 26,00</b></div></div>
+    </div>
+    <div class="metric-blocks" style="margin-top:22px;max-width:1000px">
+      <div class="mblock"><div class="lab">A pegadinha da faixa</div><div class="val">Um produto de <b>R$ 79,00</b> paga 20% + R$ 4. Um de <b>R$ 80,00</b> paga 14% + R$ 16. <b>Um real de diferença muda a conta inteira.</b></div></div>
+      <div class="mblock p"><div class="lab">O Ads entra por ROAS</div><div class="val">Custo de Ads por venda = <b>preço ÷ ROAS</b>. ROAS 10 significa <b>10% do preço</b> gasto em anúncio. ROAS 8 significa 12,5%.</div></div>
+    </div>
+    <div class="verdict-strip">Precificar sem saber a faixa é <b>chutar no escuro</b>. A faixa define quanto sobra.</div>
+  </section>
+
   <!-- 5 PASSO 2 -->
   <section class="slide">
     <div class="kicker">Passo 2 de 4</div>
@@ -257,15 +283,23 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
         <h3>Um produto seu</h3>
         <div class="ch-sub">Preencha os custos variáveis dessa venda</div>
         <div class="field"><label>Preço de venda (R$)</label><input id="p_preco" type="number" value="50" step="0.01"></div>
+        <div class="faixa-badge" id="faixaBadge">FAIXA: ATÉ R$ 79,99 · 20% + R$ 4,00</div>
         <div class="field"><div class="row2">
           <div><label>Custo do produto (R$)</label><input id="p_prod" type="number" value="15" step="0.01"></div>
           <div><label>Embalagem (R$)</label><input id="p_emb" type="number" value="1" step="0.01"></div>
         </div></div>
         <div class="field"><div class="row2">
-          <div><label>Imposto (%)</label><input id="p_imp" type="number" value="8" step="0.1"></div>
-          <div><label>Ads / CPA (%)</label><input id="p_ads" type="number" value="10" step="0.1"></div>
+          <div><label>Imposto NF (%)</label><input id="p_imp" type="number" value="8" step="0.1"></div>
+          <div><label>ROAS do Ads</label><input id="p_roas" type="number" value="10" step="0.5"></div>
         </div></div>
-        <div class="field"><label>Taxas do marketplace (R$)</label><input id="p_taxa" type="number" value="14" step="0.01"></div>
+        <div class="field"><label>Shopee Antecipa</label>
+          <select id="p_ant" style="width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:9px 13px;color:var(--t1);font-family:var(--mono);font-size:15px">
+            <option value="0">Não uso</option>
+            <option value="1">Loja Oficial (1%)</option>
+            <option value="2.5">Vendedor Indicado (2,5%)</option>
+            <option value="3.5">Demais (3,5%)</option>
+          </select>
+        </div>
       </div>
       <div class="calc">
         <h3>A conta da venda</h3>
@@ -455,6 +489,14 @@ const brl=n=>'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFrac
 const brl0=n=>'R$ '+n.toLocaleString('pt-BR',{maximumFractionDigits:0});
 const num2=n=>n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
+/* Faixas reais de taxa da Shopee */
+function getTaxas(p){
+  if(p<80)  return {comissao:20,fixa:4, faixa:'ATÉ R$ 79,99',      idx:0};
+  if(p<100) return {comissao:14,fixa:16,faixa:'R$ 80 – R$ 99,99',  idx:1};
+  if(p<200) return {comissao:14,fixa:20,faixa:'R$ 100 – R$ 199,99',idx:2};
+  return           {comissao:14,fixa:26,faixa:'ACIMA DE R$ 200',   idx:3};
+}
+
 function calcAll(){
   /* PASSO 1 */
   const fixo=v('f1')+v('f2')+v('f3')+v('f4')+v('f5');
@@ -462,24 +504,47 @@ function calcAll(){
   document.getElementById('fixDia').textContent=brl0(fixo/30);
   document.getElementById('fixSem').textContent=brl0(fixo/4.33);
 
-  /* PASSO 2 */
-  const preco=v('p_preco'), prod=v('p_prod'), emb=v('p_emb'), taxa=v('p_taxa');
-  const imp=preco*v('p_imp')/100, ads=preco*v('p_ads')/100;
-  const margem=preco-prod-emb-imp-taxa-ads;
+  /* PASSO 2 — regras reais da Shopee */
+  const preco=v('p_preco'), prod=v('p_prod'), emb=v('p_emb');
+  const tx=getTaxas(preco);
+  const roas=v('p_roas')||0;
+  const adsPct=roas>0?100/roas:0;
+  const antPct=+document.getElementById('p_ant').value||0;
+  const impPct=v('p_imp');
+
+  const comissao=preco*tx.comissao/100;
+  const taxa=comissao+tx.fixa;
+  const imp=preco*impPct/100;
+  const ads=preco*adsPct/100;
+  const ant=preco*antPct/100;
+  const margem=preco-prod-emb-tx.fixa-comissao-imp-ads-ant;
   const indice=preco>0?margem/preco:0;
+
+  document.getElementById('faixaBadge').textContent=
+    `FAIXA: ${tx.faixa} · ${tx.comissao}% + ${brl(tx.fixa)}`;
+  ['t1','t2','t3','t4'].forEach((id,i)=>
+    document.getElementById(id).classList.toggle('on',i===tx.idx));
 
   document.getElementById('margemOut').innerHTML=`
     <div class="out-row"><span>Preço de venda</span><b>${brl(preco)}</b></div>
     <div class="out-row neg"><span>(-) Custo do produto</span><b>${brl(prod)}</b></div>
-    <div class="out-row neg"><span>(-) Embalagem</span><b>${brl(emb)}</b></div>
-    <div class="out-row neg"><span>(-) Imposto</span><b>${brl(imp)}</b></div>
-    <div class="out-row neg"><span>(-) Taxas do marketplace</span><b>${brl(taxa)}</b></div>
-    <div class="out-row neg"><span>(-) Ads / CPA</span><b>${brl(ads)}</b></div>
+    <div class="out-row neg"><span>(-) Embalagem / outros</span><b>${brl(emb)}</b></div>
+    <div class="out-row neg"><span>(-) Taxa fixa Shopee</span><b>${brl(tx.fixa)}</b></div>
+    <div class="out-row neg"><span>(-) Comissão Shopee (${tx.comissao}%)</span><b>${brl(comissao)}</b></div>
+    <div class="out-row neg"><span>(-) Imposto NF (${impPct}%)</span><b>${brl(imp)}</b></div>
+    ${antPct>0?`<div class="out-row neg"><span>(-) Shopee Antecipa (${antPct}%)</span><b>${brl(ant)}</b></div>`:''}
+    <div class="out-row neg"><span>(-) Ads (ROAS ${roas}x = ${adsPct.toFixed(1)}%)</span><b>${brl(ads)}</b></div>
     <div class="out-row ${margem>0?'win':'neg'}"><span>Sobra (margem de contribuição)</span><b>${brl(margem)}</b></div>`;
   document.getElementById('indice').textContent=num2(indice).replace('.',',');
-  document.getElementById('indicePct').textContent=margem>0
-    ? 'ou '+(indice*100).toFixed(0)+'% de cada venda sobra'
-    : 'margem negativa: cada venda dá prejuízo';
+  const pct=indice*100;
+  let leitura,lcor;
+  if(margem<=0){leitura='PREJUÍZO — cada venda tira dinheiro do seu bolso';lcor='var(--red)';}
+  else if(pct<10){leitura='CRÍTICO — abaixo de 10%, qualquer imprevisto come o lucro';lcor='var(--red)';}
+  else if(pct<25){leitura='ATENÇÃO — dá para vender, mas a margem é apertada';lcor='var(--yellow)';}
+  else {leitura='SAUDÁVEL — acima de 25%, referência Efeito Vendas';lcor='var(--green)';}
+  document.getElementById('indicePct').innerHTML=margem>0
+    ? `ou ${pct.toFixed(1)}% de cada venda sobra<br><span style="color:${lcor};font-weight:600">${leitura}</span>`
+    : `<span style="color:${lcor};font-weight:600">${leitura}</span>`;
 
   /* PASSO 3 */
   const metaFat=indice>0?fixo/indice:0;
@@ -508,10 +573,12 @@ function calcAll(){
     ['Faturamento total',`${q} x ${brl(preco)}`,fat,''],
     ['(-) Custo produtos',`${q} x ${brl(prod)}`,q*prod,'neg'],
     ['(-) Embalagem',`${q} x ${brl(emb)}`,q*emb,'neg'],
-    ['(-) Impostos',`${v('p_imp')}% do faturamento`,fat*v('p_imp')/100,'neg'],
-    ['(-) Taxas do marketplace',`${q} x ${brl(taxa)}`,q*taxa,'neg'],
-    ['(-) Ads / CPA',`${v('p_ads')}% do faturamento`,fat*v('p_ads')/100,'neg'],
+    ['(-) Taxa fixa Shopee',`${q} x ${brl(tx.fixa)}`,q*tx.fixa,'neg'],
+    [`(-) Comissão Shopee`,`${tx.comissao}% do faturamento`,fat*tx.comissao/100,'neg'],
+    ['(-) Impostos',`${impPct}% do faturamento`,fat*impPct/100,'neg'],
   ];
+  if(antPct>0) rows.push(['(-) Shopee Antecipa',`${antPct}% do faturamento`,fat*antPct/100,'neg']);
+  rows.push(['(-) Ads / CPA',`ROAS ${roas}x = ${adsPct.toFixed(1)}%`,fat*adsPct/100,'neg']);
   const sobraBruta=q*margem;
   let html='';
   rows.forEach(r=>{html+=`<tr class="${r[3]}"><td>${r[0]}</td><td>${r[1]}</td><td>${brl(r[2])}</td></tr>`;});
@@ -546,8 +613,9 @@ function atualizaSlider(margem,fixo,preco){
   document.getElementById('sl_badge').innerHTML=`<div class="badge ${c}">${i} ${b}</div>`;
 }
 
-['f1','f2','f3','f4','f5','p_preco','p_prod','p_emb','p_imp','p_ads','p_taxa']
+['f1','f2','f3','f4','f5','p_preco','p_prod','p_emb','p_imp','p_roas']
   .forEach(id=>document.getElementById(id).addEventListener('input',calcAll));
+document.getElementById('p_ant').addEventListener('change',calcAll);
 document.getElementById('slider').addEventListener('input',e=>{
   e.target.dataset.touched=1;
   calcAll();
