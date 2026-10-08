@@ -1,0 +1,505 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A conta regressiva do Q4 | Efeito Vendas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080a; --bg2:#0d0f13; --card:#101319; --card2:#161a22;
+  --line:#1e232d; --line2:#2a313d;
+  --orange:#ff4d1c; --orange-soft:rgba(255,77,28,.12); --orange-glow:rgba(255,77,28,.35);
+  --purple:#7B2FFF; --purple-soft:rgba(123,47,255,.12);
+  --green:#1fd47a; --green-soft:rgba(31,212,122,.12);
+  --yellow:#ffcb45; --yellow-soft:rgba(255,203,69,.12);
+  --red:#ff3b5c; --red-soft:rgba(255,59,92,.12);
+  --t1:#f4f6fa; --t2:#aab2c0; --t3:#6b7280;
+  --mono:'JetBrains Mono',monospace; --disp:'Bebas Neue',sans-serif; --body:'Outfit',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--t1);font-family:var(--body);-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(900px 500px at 12% -5%,rgba(255,77,28,.10),transparent 60%),radial-gradient(800px 600px at 95% 110%,rgba(123,47,255,.10),transparent 55%)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.035;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:46px 46px}
+.deck{position:relative;z-index:1;height:100vh;width:100vw}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:5vh 6vw;opacity:0;visibility:hidden;transform:translateY(24px);transition:opacity .45s ease,transform .45s ease;overflow-y:auto}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.slide::-webkit-scrollbar{width:6px}
+.slide::-webkit-scrollbar-thumb{background:var(--line2);border-radius:6px}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.kicker::before{content:'';width:26px;height:2px;background:var(--orange)}
+h1.disp{font-family:var(--disp);font-size:clamp(48px,8vw,108px);line-height:.92;letter-spacing:1px}
+h2.disp{font-family:var(--disp);font-size:clamp(34px,5.2vw,66px);line-height:.95;letter-spacing:.5px;margin-bottom:6px}
+.lead{font-size:clamp(15px,1.5vw,21px);color:var(--t2);max-width:860px;line-height:1.55;font-weight:300}
+.hl{color:var(--orange);font-weight:600}
+.hlg{color:var(--green);font-weight:600}
+.hlr{color:var(--red);font-weight:600}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:5px 11px;border-radius:6px;border:1px solid var(--line2);color:var(--t2)}
+.nav{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:14px;background:rgba(13,15,19,.85);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:50px;padding:8px 12px}
+.nav button{background:none;border:none;color:var(--t2);cursor:pointer;font-size:18px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.2s}
+.nav button:hover{background:var(--orange-soft);color:var(--orange)}
+.dots{display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line2);cursor:pointer;transition:.25s}
+.dot.on{background:var(--orange);width:22px;border-radius:5px}
+.counter{font-family:var(--mono);font-size:12px;color:var(--t3);min-width:52px;text-align:center}
+.brand-corner{position:fixed;top:22px;right:28px;z-index:40;font-family:var(--disp);font-size:20px;letter-spacing:1px;color:var(--t3)}
+.brand-corner b{color:var(--orange)}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--orange);z-index:60;transition:width .4s ease;box-shadow:0 0 12px var(--orange-glow)}
+.metric-wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:start;margin-top:10px}
+.metric-blocks{display:flex;flex-direction:column;gap:13px}
+.mblock{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px 18px;border-left:3px solid var(--orange)}
+.mblock.p{border-left-color:var(--purple)}
+.mblock.g{border-left-color:var(--green)}
+.mblock.r{border-left-color:var(--red)}
+.mblock .lab{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.mblock .val{font-size:15px;color:var(--t1);line-height:1.55;font-weight:300}
+.mblock .val b{font-weight:600}
+.formula{background:var(--bg2);border:1px dashed var(--line2);border-radius:12px;padding:18px 22px;font-family:var(--mono);font-size:clamp(13px,1.6vw,20px);color:var(--orange);text-align:center;letter-spacing:.5px}
+.formula small{color:var(--t3);font-size:12px;display:block;margin-top:8px;letter-spacing:0}
+.example-box{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line2);border-radius:16px;padding:22px}
+.example-box .et{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin-bottom:14px}
+.calc-chain{display:flex;flex-direction:column;gap:8px}
+.chain-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:8px 0;border-bottom:1px solid var(--line)}
+.chain-row:last-child{border-bottom:none}
+.chain-row span{color:var(--t2);font-weight:300}
+.chain-row b{font-family:var(--mono);color:var(--t1);font-size:15px}
+.chain-row.neg b{color:var(--red)}
+.chain-row.big b{color:var(--orange);font-size:19px}
+.chain-row.win b{color:var(--green);font-size:19px}
+.three-states{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:32px}
+.state{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;text-align:center;transition:.3s}
+.state.mid{border-color:var(--orange);background:var(--orange-soft)}
+.state .sl{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+.state .sv{font-family:var(--disp);font-size:clamp(28px,3.4vw,46px);letter-spacing:.5px}
+.state.low .sv{color:var(--red)}
+.state.mid .sv{color:var(--orange)}
+.state.high .sv{color:var(--green)}
+.state p{font-size:12.5px;color:var(--t2);font-weight:300;margin-top:8px;line-height:1.45}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:28px}
+.col{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px}
+.col.fix{border-top:3px solid var(--purple)}
+.col.var{border-top:3px solid var(--orange)}
+.col h3{font-family:var(--disp);font-size:30px;letter-spacing:.5px;margin-bottom:4px}
+.col .cs{font-size:13px;color:var(--t3);margin-bottom:16px;font-weight:300}
+.col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.col li{font-size:15px;color:var(--t2);padding-left:24px;position:relative;font-weight:300}
+.col li::before{content:'▸';position:absolute;left:0;color:var(--orange);font-weight:700}
+.col.fix li::before{color:var(--purple)}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px}
+.calc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column}
+.calc h3{font-family:var(--disp);font-size:25px;letter-spacing:.5px;margin-bottom:4px}
+.calc .ch-sub{font-size:12.5px;color:var(--t3);margin-bottom:16px;font-weight:300}
+.field{margin-bottom:11px}
+.field label{display:block;font-size:12px;color:var(--t2);margin-bottom:5px;font-weight:500}
+.field input{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:9px 13px;color:var(--t1);font-family:var(--mono);font-size:15px;transition:.2s}
+.field input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.out{margin-top:4px;background:var(--bg2);border:1px solid var(--line);border-radius:13px;padding:15px;display:flex;flex-direction:column;gap:8px}
+.out-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px}
+.out-row span{color:var(--t2);font-weight:300}
+.out-row b{font-family:var(--mono);font-size:16px;color:var(--t1)}
+.out-row.hot b{color:var(--orange);font-size:18px}
+.out-row.neg b{color:var(--red)}
+.out-row.win b{color:var(--green);font-size:18px}
+.bigres{background:linear-gradient(135deg,var(--orange-soft),transparent);border:1px solid var(--orange);border-radius:16px;padding:22px;text-align:center;margin-top:14px}
+.bigres .brl{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:6px}
+.bigres .brv{font-family:var(--disp);font-size:clamp(40px,5.5vw,74px);color:var(--t1);line-height:1;letter-spacing:1px}
+.bigres .brs{font-size:13px;color:var(--t2);font-weight:300;margin-top:8px}
+.slider-wrap{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;margin-top:20px}
+.slider-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.slider-head .sh-l{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--t3)}
+.slider-head .sh-v{font-family:var(--disp);font-size:clamp(38px,5vw,64px);line-height:.9;letter-spacing:1px}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:5px;background:var(--line2);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--orange);cursor:pointer;box-shadow:0 0 14px var(--orange-glow);border:3px solid var(--bg)}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--orange);cursor:pointer;border:3px solid var(--bg)}
+.verdict-strip{margin-top:22px;background:var(--orange-soft);border:1px solid var(--orange);border-radius:14px;padding:17px 24px;font-size:clamp(15px,1.6vw,19px);text-align:center;font-weight:300}
+.verdict-strip b{color:var(--orange);font-weight:700}
+.badge{display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.5px;padding:14px 18px;border-radius:12px;margin-top:16px}
+.badge.go{background:var(--green-soft);color:var(--green);border:1px solid rgba(31,212,122,.4)}
+.badge.warn{background:var(--yellow-soft);color:var(--yellow);border:1px solid rgba(255,203,69,.4)}
+.badge.stop{background:var(--red-soft);color:var(--red);border:1px solid rgba(255,59,92,.4)}
+.plan-table{width:100%;border-collapse:collapse;margin-top:18px;font-size:14.5px}
+.plan-table th{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);text-align:left;padding:11px 12px;border-bottom:1px solid var(--line2);font-weight:500}
+.plan-table td{padding:11px 12px;border-bottom:1px solid var(--line);color:var(--t2);font-weight:300}
+.plan-table td:last-child,.plan-table th:last-child{text-align:right;font-family:var(--mono);color:var(--t1)}
+.plan-table tr.neg td:last-child{color:var(--red)}
+.plan-table tr.sum td{background:var(--card);color:var(--t1);font-weight:500}
+.plan-table tr.sum td:last-child{color:var(--orange);font-size:16px}
+.plan-table tr.final td{background:var(--green-soft);color:var(--t1);font-weight:600}
+.plan-table tr.final td:last-child{color:var(--green);font-size:18px}
+.steps4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px}
+.stepc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;position:relative;transition:.3s}
+.stepc:hover{border-color:var(--orange);transform:translateY(-4px)}
+.stepc .si{font-family:var(--disp);font-size:46px;color:var(--line2);line-height:.8;position:absolute;top:12px;right:16px}
+.stepc:hover .si{color:var(--orange-glow)}
+.stepc h4{font-family:var(--disp);font-size:24px;letter-spacing:.5px;margin:2px 0 8px}
+.stepc p{font-size:13px;color:var(--t2);line-height:1.5;font-weight:300}
+.next-banner{margin-top:30px;background:linear-gradient(135deg,var(--purple-soft),transparent);border:1px solid rgba(123,47,255,.4);border-radius:16px;padding:22px 26px}
+.next-banner .nb-tag{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--purple)}
+.next-banner h4{font-family:var(--disp);font-size:30px;letter-spacing:.5px;margin-top:4px}
+.next-banner p{font-size:13.5px;color:var(--t2);font-weight:300;margin-top:4px;max-width:680px}
+.hint{font-size:12px;color:var(--t3);font-weight:300;margin-top:10px;text-align:center;font-family:var(--mono);letter-spacing:.5px}
+.faixa-badge{background:var(--orange-soft);border:1px solid var(--orange);border-radius:9px;padding:9px 13px;font-family:var(--mono);font-size:12px;letter-spacing:.5px;color:var(--orange);text-align:center;margin:-4px 0 13px}
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}
+.tier{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 18px;text-align:center;transition:.3s}
+.tier.on{border-color:var(--orange);background:var(--orange-soft);transform:translateY(-4px)}
+.tier .tf{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:12px;line-height:1.4}
+.tier .tc{font-family:var(--disp);font-size:clamp(30px,3.6vw,48px);color:var(--orange);line-height:.9}
+.tier .tx{font-size:13px;color:var(--t2);font-weight:300;margin-top:8px}
+.tier .tx b{color:var(--t1);font-family:var(--mono)}
+@media(max-width:920px){
+  .metric-wrap,.calc-grid,.split{grid-template-columns:1fr}
+  .three-states,.steps4{grid-template-columns:1fr 1fr}
+  .slide{padding:7vh 6vw}
+}
+
+.out-row{padding:6px 0;display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px}
+.out-row b{font-family:var(--mono);font-weight:600}
+.out-row.tot{border-top:1px solid var(--line2);padding-top:10px;margin-top:5px;font-size:16.5px;font-weight:600}
+.calc .brl{margin-bottom:12px}
+.field label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+.field input,.field select{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:11px 13px;color:var(--t1);font-family:var(--mono);font-size:15px;font-weight:600;outline:none}
+.field input:focus{border-color:var(--orange)}
+.mblock .val{font-family:var(--disp);font-size:31px;line-height:1.05}
+.mblock .lab{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+.mblock .obs{font-family:var(--mono);font-size:10.5px;color:var(--t3);margin-top:4px}
+.verdict-strip{text-align:left}
+.cadeia{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.cd-row{display:grid;grid-template-columns:32px 1fr auto;gap:13px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:12px 15px}
+.cd-row .n{font-family:var(--disp);font-size:20px;color:var(--orange)}
+.cd-row .q{font-size:14px}.cd-row .q span{display:block;font-family:var(--mono);font-size:10.5px;color:var(--t3)}
+.cd-row .r{font-family:var(--disp);font-size:24px;color:var(--t1)}
+.cd-seta{font-family:var(--mono);font-size:11px;color:var(--t3);padding-left:46px}
+.diag{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
+.dg{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px 17px;border-left:3px solid var(--line2)}
+.dg.ok{border-left-color:var(--green)}.dg.mal{border-left-color:var(--red)}.dg.meio{border-left-color:var(--yellow)}
+.dg .dq{font-size:14px;font-weight:600;margin-bottom:6px}
+.dg .dr{font-family:var(--disp);font-size:26px;line-height:1}
+.dg.ok .dr{color:var(--green)}.dg.mal .dr{color:var(--red)}.dg.meio .dr{color:var(--yellow)}
+.dg .dd{font-size:12.5px;color:var(--t2);margin-top:5px;line-height:1.4}
+.tabelinha{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px}
+.tabelinha th{text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);padding:7px 10px;border-bottom:1px solid var(--line2)}
+.tabelinha td{padding:8px 10px;border-bottom:1px solid var(--line)}
+.tabelinha td.n{text-align:right;font-family:var(--mono)}
+.caminho{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px;font-family:var(--mono);font-size:12px}
+.caminho span{background:var(--card2);border:1px solid var(--line2);border-radius:7px;padding:7px 12px}
+.caminho span.fim{border-color:var(--orange);color:var(--orange)}
+.caminho i{color:var(--t3);font-style:normal}
+
+.cal{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:14px}
+.dt{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 11px;text-align:center;border-top:3px solid var(--c)}
+.dt .d{font-family:var(--disp);font-size:27px;color:var(--c);line-height:1}
+.dt .n{font-size:12.5px;font-weight:600;margin-top:3px}
+.dt .q{font-family:var(--mono);font-size:9.5px;color:var(--t3);margin-top:2px}
+.linha-t{position:relative;margin:18px 0 10px;padding-left:4px}
+.lt{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;margin-bottom:7px}
+.lt .dd{font-family:var(--disp);font-size:19px;color:var(--orange);text-align:right}
+.lt .bb{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 13px;font-size:13.5px}
+.lt .bb span{display:block;font-family:var(--mono);font-size:10.5px;color:var(--t3)}
+.meta2{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin-top:12px}
+.sep{height:1px;background:var(--line);margin:14px 0}
+</style></head><body>
+<div class="progress" id="prog"></div>
+<div class="brand-corner">EFEITO <b>VENDAS</b></div>
+<div class="deck">
+
+<section class="slide active">
+  <div class="kicker">Aula de hoje · 8 de outubro</div>
+  <h1 class="disp">A conta<br>regressiva do <span class="hl">Q4</span></h1>
+  <p class="lead" style="margin-top:14px">Faltam <b>34 dias</b> para o 11.11 e <b>50 dias</b> para a Black Friday. Hoje você vai calcular quanto estoque precisa, até quando tem que comprar e qual é a sua meta real — com os números da sua loja.</p>
+  <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:20px">
+    <span class="tag">Meta do Q4</span><span class="tag">Estoque necessário</span><span class="tag">Data limite de compra</span><span class="tag">Conversão</span>
+  </div>
+  <p class="lead" style="margin-top:18px;font-size:15px">Abra a Central do Vendedor. Você vai precisar do seu ticket e da sua conversão.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">O Conceito</div>
+  <h2 class="disp">Dezembro não<br>salva ninguém</h2>
+  <p class="lead">Todo mundo repete que o fim do ano é o melhor momento do varejo. Olhando os dados reais de <b>58 lojas</b> que acompanhamos no último Q4, a história é outra:</p>
+  <div class="metric-blocks" style="grid-template-columns:repeat(3,1fr);margin-top:14px">
+    <div class="mblock"><div class="lab">Novembro para dezembro</div><div class="val" style="color:var(--red)">−2%</div><div class="obs">o conjunto das lojas não cresceu</div></div>
+    <div class="mblock g"><div class="lab">Cresceram em dezembro</div><div class="val">28<span style="font-size:15px;color:var(--t3)"> de 58</span></div><div class="obs">menos da metade</div></div>
+    <div class="mblock p"><div class="lab">Mais que dobraram</div><div class="val">8</div><div class="obs">lojas que estavam preparadas</div></div>
+  </div>
+  <div class="sep"></div>
+  <p class="lead">A diferença entre os dois grupos foi brutal: <b>o quartil de baixo caiu 31%</b> enquanto <b>o de cima subiu 51%</b>. Mesmo mês, mesmo mercado, mesma data promocional.</p>
+  <div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange)"><b>O Q4 não levanta ninguém. Ele separa.</b> Quem chega em novembro com estoque, produto definido e página que converte multiplica. Quem chega esperando o calendário resolver, cai.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">A Base</div>
+  <h2 class="disp">Três coisas decidem<br>o seu dezembro</h2>
+  <p class="lead">E nenhuma delas é o orçamento de anúncio.</p>
+  <div class="metric-blocks" style="grid-template-columns:repeat(3,1fr);margin-top:16px">
+    <div class="mblock"><div class="lab">1 · Estoque</div><div class="val" style="font-size:19px;line-height:1.3">Ter o que vender</div><div class="obs">romper estoque no pico é perder a venda e o posicionamento do anúncio</div></div>
+    <div class="mblock p"><div class="lab">2 · Produto certo</div><div class="val" style="font-size:19px;line-height:1.3">Da estação e da data</div><div class="obs">precisa estar maduro antes, não subindo na véspera</div></div>
+    <div class="mblock g"><div class="lab">3 · Conversão</div><div class="val" style="font-size:19px;line-height:1.3">Transformar o tráfego</div><div class="obs">no Q4 a visita vem; quem não converte paga por gente que não compra</div></div>
+  </div>
+  <div class="verdict-strip" style="margin-top:16px">As três se decidem <b>agora</b>, em outubro. Em novembro já não dá tempo de mudar nenhuma — e é por isso que esta aula é hoje.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">A conta regressiva</div>
+  <h2 class="disp">O calendário real</h2>
+  <div class="cal">
+    <div class="dt" style="--c:var(--orange)"><div class="d">2</div><div class="n">10.10</div><div class="q">dias</div></div>
+    <div class="dt" style="--c:var(--purple)"><div class="d">34</div><div class="n">11.11</div><div class="q">dias</div></div>
+    <div class="dt" style="--c:var(--red)"><div class="d">50</div><div class="n">Black Friday</div><div class="q">27 de novembro</div></div>
+    <div class="dt" style="--c:var(--purple)"><div class="d">65</div><div class="n">12.12</div><div class="q">dias</div></div>
+    <div class="dt" style="--c:var(--green)"><div class="d">78</div><div class="n">Natal</div><div class="q">dias</div></div>
+  </div>
+  <p class="lead" style="margin-top:18px">Agora o outro lado da conta — <b>quanto tempo um produto novo leva para estar pronto de verdade</b>:</p>
+  <div class="linha-t">
+    <div class="lt"><span class="dd">15d</span><span class="bb">Pedido ao fornecedor até a mercadoria chegar<span>varia por fornecedor — use o seu prazo real</span></span></div>
+    <div class="lt"><span class="dd">+2d</span><span class="bb">Cadastro, fotos e subir o anúncio<span>se as fotos já estiverem prontas</span></span></div>
+    <div class="lt"><span class="dd">+10d</span><span class="bb">Aprendizado do algoritmo<span>o período em que o anúncio ainda está descobrindo quem compra</span></span></div>
+    <div class="lt"><span class="dd">+20d</span><span class="bb">Até acumular as primeiras 30 vendas<span>antes disso os números não são confiáveis</span></span></div>
+  </div>
+  <div class="verdict-strip" style="background:var(--red-soft);border-color:var(--red)"><b>47 dias</b> da decisão de comprar até o produto estar maduro. Faltam <b>50</b> para a Black Friday. <b>A decisão é esta semana.</b></div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Passo 1 de 4</div>
+  <h2 class="disp">A sua meta de Q4</h2>
+  <p class="lead">Comece pelo que você quer faturar em <b>novembro e dezembro juntos</b>. Depois a conta diz o que precisa acontecer para isso virar realidade.</p>
+  <div class="metric-wrap">
+    <div class="calc">
+      <div class="brl">Os seus números de hoje</div>
+      <div class="field"><label>Faturamento de um mês normal (R$)</label><input type="number" id="i-base" value="50000" step="1000"></div>
+      <div class="field"><label>Seu ticket médio (R$)</label><input type="number" id="i-tk" value="55" step="1"></div>
+      <div class="field"><label>Sua taxa de conversão (%)</label><input type="number" id="i-cv" value="1.5" step="0.1"></div>
+      <div class="field"><label>Quanto quer crescer no Q4 (%)</label><input type="number" id="i-cr" value="50" step="10"></div>
+    </div>
+    <div class="metric-blocks">
+      <div class="mblock"><div class="lab">Meta de novembro + dezembro</div><div class="val" id="o-meta">—</div><div class="obs" id="o-metames"></div></div>
+      <div class="mblock p"><div class="lab">Pedidos nos dois meses</div><div class="val" id="o-ped">—</div><div class="obs" id="o-peddia"></div></div>
+      <div class="mblock g"><div class="lab">Visitas necessárias</div><div class="val" id="o-vis">—</div><div class="obs" id="o-visdia"></div></div>
+    </div>
+  </div>
+  <div class="verdict-strip" id="v1">—</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Passo 2 de 4</div>
+  <h2 class="disp">Quanto estoque<br>você precisa ter</h2>
+  <p class="lead">Estoque não se calcula por intuição. Se calcula pelo ritmo de venda que a sua meta exige, multiplicado pelo tempo que o fornecedor demora para repor.</p>
+  <div class="formula" style="max-width:720px">ESTOQUE = pedidos por dia × (prazo de reposição + estoque de segurança)</div>
+  <div class="metric-wrap" style="margin-top:12px">
+    <div class="calc">
+      <div class="brl">O seu fornecedor</div>
+      <div class="field"><label>Prazo de reposição (dias)</label><input type="number" id="i-lead" value="15" step="1"></div>
+      <div class="field"><label>Estoque de segurança (dias)</label><input type="number" id="i-seg" value="10" step="1"></div>
+      <div class="field"><label>Custo por unidade (R$)</label><input type="number" id="i-custo" value="22" step="1"></div>
+    </div>
+    <div class="metric-blocks">
+      <div class="mblock"><div class="lab">Unidades em estoque</div><div class="val" id="o-un">—</div><div class="obs" id="o-cob"></div></div>
+      <div class="mblock p"><div class="lab">Capital necessário</div><div class="val" id="o-cap">—</div><div class="obs">parado em mercadoria</div></div>
+      <div class="mblock g"><div class="lab">Unidades no Q4 inteiro</div><div class="val" id="o-untot">—</div><div class="obs">o total que você vai vender</div></div>
+    </div>
+  </div>
+  <div class="verdict-strip" id="v2">—</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Passo 3 de 4</div>
+  <h2 class="disp">Até quando dá<br>para comprar</h2>
+  <p class="lead">Cada data promocional tem um prazo-limite diferente, porque o produto precisa chegar, ser cadastrado e passar pelo aprendizado antes de vender bem.</p>
+  <div class="metric-wrap">
+    <div class="calc">
+      <div class="brl">Produto <b>novo</b> — precisa dos 47 dias</div>
+      <div class="out-row"><span>Para o 11.11</span><b id="d-1111">—</b></div>
+      <div class="out-row"><span>Para a Black Friday</span><b id="d-bf">—</b></div>
+      <div class="out-row"><span>Para o 12.12</span><b id="d-1212">—</b></div>
+      <div class="out-row"><span>Para o Natal</span><b id="d-natal">—</b></div>
+    </div>
+    <div class="calc">
+      <div class="brl">Reposição de produto <b>que já vende</b></div>
+      <div class="out-row"><span>Para o 11.11</span><b id="r-1111">—</b></div>
+      <div class="out-row"><span>Para a Black Friday</span><b id="r-bf">—</b></div>
+      <div class="out-row"><span>Para o 12.12</span><b id="r-1212">—</b></div>
+      <div class="out-row"><span>Para o Natal</span><b id="r-natal">—</b></div>
+    </div>
+  </div>
+  <div class="verdict-strip" id="v3">—</div>
+  <p class="lead" style="margin-top:10px;font-size:14px">Produto que já tem histórico só precisa do prazo de reposição: ele já passou pelo aprendizado e a Shopee já sabe para quem mostrar.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Passo 4 de 4</div>
+  <h2 class="disp">Conversão é o<br>multiplicador do Q4</h2>
+  <p class="lead">No fim do ano o tráfego vem — a plataforma inteira empurra gente para as vitrines. A pergunta é o que a sua página faz com essa gente. <b>A média das lojas que acompanhamos é 1,5%.</b></p>
+  <div class="metric-wrap">
+    <div class="metric-blocks">
+      <div class="mblock"><div class="lab">A sua conversão</div><div class="val" id="o-cv">—</div><div class="obs" id="o-cvcomp"></div></div>
+      <div class="mblock p"><div class="lab">Se subir para 2%</div><div class="val" id="o-cv2">—</div><div class="obs">faturamento no Q4 com o mesmo tráfego</div></div>
+      <div class="mblock g"><div class="lab">Diferença</div><div class="val" id="o-cvdif">—</div><div class="obs">sem gastar um real a mais em anúncio</div></div>
+    </div>
+    <div class="calc">
+      <div class="brl">O que mexe na conversão em 30 dias</div>
+      <div class="out-row"><span>Avaliações no produto</span><b>peso alto</b></div>
+      <div class="out-row"><span>Preço dentro da faixa do mercado</span><b>peso alto</b></div>
+      <div class="out-row"><span>Fotos e tabela de medidas</span><b>peso alto</b></div>
+      <div class="out-row"><span>Frete grátis e cupom</span><b>peso médio</b></div>
+      <div class="out-row"><span>Tempo de envio</span><b>peso médio</b></div>
+    </div>
+  </div>
+  <div class="verdict-strip" id="v4">—</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">A Leitura do Número</div>
+  <h2 class="disp">E se não der tempo?</h2>
+  <p class="lead">Se o prazo de compra já passou para alguma data, não adianta forçar. O que funciona é mudar de alavanca.</p>
+  <table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:10px">
+    <thead><tr>
+      <th style="text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--t3);padding:9px 10px;border-bottom:1px solid var(--line2)">Situação</th>
+      <th style="text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--t3);padding:9px 10px;border-bottom:1px solid var(--line2)">O que fazer</th></tr></thead>
+    <tbody>
+      <tr><td style="padding:10px;border-bottom:1px solid var(--line)">Não dá tempo de trazer produto novo</td><td style="padding:10px;border-bottom:1px solid var(--line)">Reforce estoque do que <b>já vende</b> — ele não precisa de aprendizado</td></tr>
+      <tr><td style="padding:10px;border-bottom:1px solid var(--line)">Capital curto para o estoque</td><td style="padding:10px;border-bottom:1px solid var(--line)">Concentre em <b>dois ou três produtos</b> em vez de espalhar</td></tr>
+      <tr><td style="padding:10px;border-bottom:1px solid var(--line)">Estoque ok, mas conversão baixa</td><td style="padding:10px;border-bottom:1px solid var(--line)">Avaliações, fotos e preço — <b>é o que dá para mudar em 30 dias</b></td></tr>
+      <tr><td style="padding:10px;border-bottom:1px solid var(--line)">Tudo pronto</td><td style="padding:10px;border-bottom:1px solid var(--line)">Suba o orçamento <b>gradual</b>, começando duas semanas antes</td></tr>
+    </tbody>
+  </table>
+  <div class="verdict-strip" style="background:var(--green-soft);border-color:var(--green)"><b>Produto que já vende é o seu melhor ativo no Q4.</b> Ele já tem histórico, avaliação e posição. Reforçar estoque dele rende mais do que apostar em novidade sem tempo de maturar.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">A Prova Real</div>
+  <h2 class="disp">O que derruba<br>loja em novembro</h2>
+  <p class="lead">Olhando as lojas que caíram no último Q4, os erros se repetem. Todos são evitáveis — e todos acontecem por ansiedade.</p>
+  <div class="metric-blocks" style="grid-template-columns:repeat(2,1fr);margin-top:12px">
+    <div class="mblock r"><div class="lab">Erro 1</div><div class="val" style="font-size:17px;line-height:1.3">Subir anúncio novo na véspera</div><div class="obs">entra em aprendizado no mês mais caro do ano, gastando sem converter</div></div>
+    <div class="mblock r"><div class="lab">Erro 2</div><div class="val" style="font-size:17px;line-height:1.3">Mexer no produto campeão</div><div class="obs">trocar preço ou foto reinicia o aprendizado de quem já vendia bem</div></div>
+    <div class="mblock r"><div class="lab">Erro 3</div><div class="val" style="font-size:17px;line-height:1.3">Romper estoque no pico</div><div class="obs">perde a venda, perde posição e o anúncio demora a recuperar</div></div>
+    <div class="mblock r"><div class="lab">Erro 4</div><div class="val" style="font-size:17px;line-height:1.3">Dobrar o orçamento de uma vez</div><div class="obs">o algoritmo não acompanha o salto e o retorno despenca</div></div>
+  </div>
+  <div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange)">A regra de novembro: <b>o que está funcionando, não se toca.</b> Ajuste é coisa de outubro.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Prática · Ao Vivo</div>
+  <h2 class="disp">O seu plano de Q4</h2>
+  <p class="lead">Tudo que você preencheu, reunido. <b>Anote estes quatro.</b></p>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px">
+    <div class="bigres"><div class="brl">Meta do Q4</div><div class="brv" id="f-meta">—</div><div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:6px" id="f-metasub">—</div></div>
+    <div class="bigres" style="background:linear-gradient(135deg,var(--purple-soft),transparent);border-color:var(--purple)"><div class="brl">Estoque necessário</div><div class="brv" id="f-est">—</div><div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:6px" id="f-estsub">—</div></div>
+    <div class="bigres" style="background:linear-gradient(135deg,var(--red-soft),transparent);border-color:var(--red)"><div class="brl">Comprar até</div><div class="brv" id="f-data">—</div><div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:6px">para a Black Friday, produto novo</div></div>
+    <div class="bigres" style="background:linear-gradient(135deg,var(--green-soft),transparent);border-color:var(--green)"><div class="brl">Visitas por dia</div><div class="brv" id="f-vis">—</div><div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:6px" id="f-vissub">—</div></div>
+  </div>
+  <div class="verdict-strip" style="margin-top:16px">Se o capital não cobre o estoque que a meta pede, <b>a meta está errada</b> — não o estoque. Melhor baixar a meta e cumprir do que planejar o que não cabe no caixa.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Resumo da Aula</div>
+  <h2 class="disp">O que levar</h2>
+  <div class="metric-blocks" style="grid-template-columns:repeat(2,1fr)">
+    <div class="mblock"><div class="lab">1</div><div class="val" style="font-size:16px;line-height:1.35">Dezembro não salva ninguém</div><div class="obs">28 de 58 lojas cresceram; o resto caiu. O Q4 separa quem preparou</div></div>
+    <div class="mblock"><div class="lab">2</div><div class="val" style="font-size:16px;line-height:1.35">47 dias até um produto maturar</div><div class="obs">reposição + cadastro + aprendizado + primeiras 30 vendas</div></div>
+    <div class="mblock"><div class="lab">3</div><div class="val" style="font-size:16px;line-height:1.35">Estoque sai da meta, não do achismo</div><div class="obs">pedidos por dia × prazo de reposição</div></div>
+    <div class="mblock"><div class="lab">4</div><div class="val" style="font-size:16px;line-height:1.35">Conversão é o multiplicador</div><div class="obs">no Q4 o tráfego vem — o que decide é o que a página faz com ele</div></div>
+    <div class="mblock"><div class="lab">5</div><div class="val" style="font-size:16px;line-height:1.35">Em novembro não se mexe</div><div class="obs">o que está funcionando fica como está</div></div>
+    <div class="mblock"><div class="lab">6</div><div class="val" style="font-size:16px;line-height:1.35">Produto que já vende é o ativo</div><div class="obs">reforçar estoque dele rende mais que apostar em novidade</div></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Sua tarefa de hoje</div>
+  <h2 class="disp">Três decisões<br>até domingo</h2>
+  <div class="metric-blocks" style="grid-template-columns:repeat(3,1fr);margin-top:14px">
+    <div class="mblock"><div class="lab">Decisão 1</div><div class="val" style="font-size:17px;line-height:1.3">Qual produto</div><div class="obs">escolha os dois ou três que vão carregar o seu Q4 — pelos dados, não pelo gosto</div></div>
+    <div class="mblock p"><div class="lab">Decisão 2</div><div class="val" style="font-size:17px;line-height:1.3">Quanto comprar</div><div class="obs">use a conta do Passo 2 e confirme o prazo real com o fornecedor</div></div>
+    <div class="mblock g"><div class="lab">Decisão 3</div><div class="val" style="font-size:17px;line-height:1.3">O que arrumar</div><div class="obs">uma melhoria de conversão por produto: avaliação, foto ou preço</div></div>
+  </div>
+  <div class="verdict-strip" style="margin-top:18px;background:var(--orange-soft);border-color:var(--orange)">Traga as três decisões na próxima aula com os números. Quem decidir esta semana ainda pega a Black Friday inteira. Quem deixar para novembro vai competir com produto que o algoritmo não conhece.</div>
+</section>
+
+</div>
+<div class="nav"><button id="prev">‹</button><div class="dots" id="dots"></div><span class="counter" id="counter">01 / 13</span><button id="next">›</button></div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+const dotsEl=document.getElementById('dots');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' on':'');d.onclick=()=>go(i);dotsEl.appendChild(d);});
+const dots=[...document.querySelectorAll('.dot')],counter=document.getElementById('counter'),prog=document.getElementById('prog');
+function go(i){if(i<0||i>=slides.length)return;slides[cur].classList.remove('active');dots[cur].classList.remove('on');
+ cur=i;slides[cur].classList.add('active');dots[cur].classList.add('on');
+ counter.textContent=String(cur+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+ prog.style.width=((cur+1)/slides.length*100)+'%';}
+document.getElementById('next').onclick=()=>go(cur+1);
+document.getElementById('prev').onclick=()=>go(cur-1);
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
+ if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown')go(cur+1);
+ if(e.key==='ArrowLeft'||e.key==='PageUp')go(cur-1);});
+go(0);
+
+const v=id=>+document.getElementById(id).value||0;
+const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
+const brl0=n=>'R$ '+n.toLocaleString('pt-BR',{maximumFractionDigits:0});
+const nm=n=>n.toLocaleString('pt-BR',{maximumFractionDigits:0});
+const HOJE=new Date(2026,9,8);
+const DATAS={'1111':new Date(2026,10,11),'bf':new Date(2026,10,27),'1212':new Date(2026,11,12),'natal':new Date(2026,11,25)};
+function fmtData(d){return d.getDate()+' de '+['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][d.getMonth()];}
+function menos(d,dias){const x=new Date(d);x.setDate(x.getDate()-dias);return x;}
+
+function calc(){
+  const base=v('i-base'),tk=v('i-tk'),cv=v('i-cv'),cr=v('i-cr');
+  const meta=base*2*(1+cr/100);
+  const ped=tk?meta/tk:0, pedDia=ped/61, vis=cv?ped/(cv/100):0;
+  set('o-meta',brl0(meta)); set('o-metames',brl0(meta/2)+' por mês');
+  set('o-ped',nm(ped)); set('o-peddia',nm(Math.ceil(pedDia))+' por dia, 61 dias seguidos');
+  set('o-vis',nm(vis)); set('o-visdia',nm(Math.ceil(vis/61))+' visitas por dia');
+  const mult=(1+cr/100);
+  document.getElementById('v1').innerHTML = 'Crescer <b>'+cr+'%</b> significa sair de <b>'+nm(Math.ceil(base/tk/30))+'</b> para <b>'+nm(Math.ceil(pedDia))+' pedidos por dia</b> — e sustentar esse ritmo por 61 dias seguidos, não só nas datas promocionais.';
+
+  const lead=v('i-lead'),seg=v('i-seg'),custo=v('i-custo');
+  const un=pedDia*(lead+seg), cap=un*custo;
+  set('o-un',nm(Math.ceil(un))); set('o-cob',(lead+seg)+' dias de cobertura');
+  set('o-cap',brl0(cap)); set('o-untot',nm(Math.ceil(ped)));
+  const vb=document.getElementById('v2');
+  vb.className='verdict-strip';
+  if(cap>meta*0.45){ vb.style.background='var(--red-soft)'; vb.style.borderColor='var(--red)';
+    vb.innerHTML='O estoque exige <b>'+brl0(cap)+'</b> parados — mais de 45% da meta. Com prazo de reposição de '+lead+' dias, o capital fica preso muito tempo. <b>Avalie reduzir a cobertura ou concentrar em menos produtos.</b>'; }
+  else { vb.style.background='var(--green-soft)'; vb.style.borderColor='var(--green)';
+    vb.innerHTML='Você precisa de <b>'+nm(Math.ceil(un))+' unidades</b> em estoque (<b>'+brl0(cap)+'</b>) para sustentar '+nm(Math.ceil(pedDia))+' pedidos por dia com reposição de '+lead+' dias.'; }
+
+  const matur=lead+32;
+  ['1111','bf','1212','natal'].forEach(k=>{
+    const dn=menos(DATAS[k],matur), dr=menos(DATAS[k],lead);
+    const passou=dn<HOJE;
+    const el=document.getElementById('d-'+k);
+    el.textContent = passou ? 'prazo vencido' : fmtData(dn);
+    el.style.color = passou ? 'var(--red)' : 'var(--t1)';
+    const el2=document.getElementById('r-'+k);
+    const passou2=dr<HOJE;
+    el2.textContent = passou2 ? 'prazo vencido' : fmtData(dr);
+    el2.style.color = passou2 ? 'var(--red)' : 'var(--green)';
+  });
+  const dnBF=menos(DATAS['bf'],matur);
+  const diasBF=Math.round((dnBF-HOJE)/86400000);
+  const v3=document.getElementById('v3'); v3.className='verdict-strip';
+  if(diasBF<0){ v3.style.background='var(--red-soft)'; v3.style.borderColor='var(--red)';
+    v3.innerHTML='Com reposição de '+lead+' dias, <b>já passou o prazo</b> de produto novo para a Black Friday. O caminho agora é reforçar estoque do que já vende — esse prazo vai até <b>'+fmtData(menos(DATAS['bf'],lead))+'</b>.'; }
+  else { v3.style.background='var(--orange-soft)'; v3.style.borderColor='var(--orange)';
+    v3.innerHTML='Você tem <b>'+diasBF+' dias</b> para decidir o produto novo da Black Friday. Depois de <b>'+fmtData(dnBF)+'</b>, só dá para reforçar o que já está vendendo.'; }
+
+  const fat2=vis*0.02*tk;
+  set('o-cv',cv.toFixed(2).replace('.',',')+'%');
+  set('o-cvcomp', cv>=1.5 ? 'acima da média das lojas (1,5%)' : 'abaixo da média das lojas (1,5%)');
+  document.getElementById('o-cv').style.color = cv>=2?'var(--green)':cv>=1.5?'var(--yellow)':'var(--red)';
+  set('o-cv2',brl0(fat2));
+  set('o-cvdif', (fat2>meta?'+':'')+brl0(fat2-meta));
+  const v4=document.getElementById('v4'); v4.className='verdict-strip';
+  if(cv<1.5){ v4.style.background='var(--red-soft)'; v4.style.borderColor='var(--red)';
+    v4.innerHTML='Sua conversão está <b>abaixo da média</b>. Levar ela de '+cv.toFixed(2).replace('.',',')+'% para 2% mudaria o Q4 em <b>'+brl0(fat2-meta)+'</b> com o mesmo tráfego. É a alavanca mais barata que existe.'; }
+  else { v4.style.background='var(--green-soft)'; v4.style.borderColor='var(--green)';
+    v4.innerHTML='Sua conversão já está em um bom patamar. Subir para 2% ainda acrescentaria <b>'+brl0(Math.max(0,fat2-meta))+'</b> no Q4 — sem aumentar investimento.'; }
+
+  set('f-meta',brl0(meta)); set('f-metasub',nm(Math.ceil(pedDia))+' pedidos por dia');
+  set('f-est',nm(Math.ceil(un))+' un'); set('f-estsub',brl0(cap)+' em mercadoria');
+  set('f-data', diasBF<0 ? 'prazo vencido' : fmtData(dnBF));
+  set('f-vis',nm(Math.ceil(vis/61))); set('f-vissub','para converter a '+cv.toFixed(2).replace('.',',')+'%');
+}
+['i-base','i-tk','i-cv','i-cr','i-lead','i-seg','i-custo'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+calc();
+</script></body></html>
