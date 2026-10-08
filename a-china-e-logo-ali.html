@@ -467,6 +467,7 @@ calc();
   const pos=e=>({x:e.clientX,y:e.clientY});
   tela.addEventListener('pointerdown',e=>{
     if(!modo && e.pointerType!=='pen') return;
+    // deixa passar o clique quando cair em campo, botão ou link
     pintando=true; tela.setPointerCapture(e.pointerId);
     const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y);
     if(modo==='borracha'){ ctx.globalCompositeOperation='destination-out'; ctx.lineWidth=26; }
@@ -508,7 +509,18 @@ calc();
   });
   const goAntigo=window.go;
   window.go=function(i){ salva(); goAntigo(i); restaura(); };
+  // a tela de desenho se afasta quando o cursor está sobre campo, botão ou link
+  const SELETOR='input,button,a,.dot,.nav,#ferramentas';
+  function ajustaTela(x,y){
+    if(pintando || !modo) return;
+    const antes=tela.style.pointerEvents;
+    tela.style.pointerEvents='none';
+    const alvo=document.elementFromPoint(x,y);
+    tela.style.pointerEvents = (alvo && alvo.closest(SELETOR)) ? 'none' : 'auto';
+  }
+  addEventListener('pointermove',e=>ajustaTela(e.clientX,e.clientY),true);
   addEventListener('resize',dim);
   dim();
+  setModo('lapis');   // já começa com o lápis na mão
 })();
 </script></body></html>
