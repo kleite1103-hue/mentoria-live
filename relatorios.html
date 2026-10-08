@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gerador de Relatórios · Efeito Vendas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--lar:#ff4d1c;--vd:#1a9e52;--am:#d99a00;--vm:#c0392b;--rx:#7B2FFF}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:#0a0c0f;color:#f4f6f9;-webkit-font-smoothing:antialiased}
+
+/* ───── TELA DE ACESSO ───── */
+#acesso{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.cartao{background:#12161c;border:1px solid #222935;border-radius:18px;padding:34px;width:100%;max-width:400px}
+.marca{font-family:'Bebas Neue';font-size:26px;letter-spacing:1.5px;line-height:1}
+.marca b{color:var(--lar);font-weight:400}
+.sub{font-size:12px;color:#8a919c;letter-spacing:2px;text-transform:uppercase;margin:4px 0 24px}
+label{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#8a919c;margin:14px 0 5px}
+input,select{width:100%;background:#0a0c0f;border:1px solid #222935;border-radius:10px;padding:12px 14px;color:#f4f6f9;font-family:'Outfit';font-size:15px;outline:none}
+input:focus,select:focus{border-color:var(--lar)}
+.btn{width:100%;background:var(--lar);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Outfit';font-weight:600;font-size:15px;cursor:pointer;margin-top:20px}
+.btn:hover{background:#ff6a40}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.sec{background:transparent;border:1px solid #2a323d;color:#9aa2b1}
+.erro{color:var(--vm);font-size:13px;margin-top:12px;min-height:18px}
+
+/* ───── PAINEL ───── */
+#painel{display:none;min-height:100vh}
+.topo{display:flex;align-items:center;gap:14px;padding:14px 26px;border-bottom:1px solid #1c222b;position:sticky;top:0;background:#0a0c0f;z-index:10}
+.topo .quem{margin-left:auto;font-size:12.5px;color:#8a919c}
+.topo .quem b{color:#f4f6f9}
+.sair{background:none;border:1px solid #2a323d;color:#8a919c;border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer}
+.corpo{max-width:980px;margin:0 auto;padding:30px 26px 60px}
+h1{font-family:'Bebas Neue';font-size:38px;letter-spacing:1px;line-height:1}
+.desc{color:#9aa2b1;font-size:14px;margin:6px 0 24px;max-width:620px;line-height:1.5}
+.form{background:#12161c;border:1px solid #222935;border-radius:16px;padding:24px}
+.linha{display:grid;grid-template-columns:1fr 200px;gap:16px}
+@media(max-width:700px){.linha{grid-template-columns:1fr}}
+.tipos{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.tipo{border:1px solid #222935;border-radius:12px;padding:14px 16px;cursor:pointer;transition:.15s}
+.tipo:hover{border-color:#39414d}
+.tipo.on{border-color:var(--lar);background:rgba(255,77,28,.07)}
+.tipo b{display:block;font-size:14.5px;margin-bottom:3px}
+.tipo span{font-size:12px;color:#8a919c;line-height:1.4}
+#status{margin-top:16px;font-size:13.5px;color:#9aa2b1;min-height:20px}
+#status.ok{color:var(--vd)} #status.err{color:var(--vm)}
+.barra{height:4px;background:#1c222b;border-radius:2px;overflow:hidden;margin-top:10px;display:none}
+.barra i{display:block;height:100%;background:var(--lar);width:0;transition:width .3s}
+
+/* ───── RELATÓRIO ───── */
+#saida{display:none;background:#2a2e35;padding:20px 0}
+@media print{
+  #acesso,#painel,#acoes{display:none!important}
+  #saida{display:block!important;background:#fff!important;padding:0!important}
+  .pg{margin:0!important;box-shadow:none!important}
+  .capa{height:297mm!important}
+  @page{size:A4;margin:0}
+}
+.rel{background:#fff;color:#1a1d23}
+.pg{width:210mm;height:297mm;padding:16mm 15mm 14mm;position:relative;page-break-after:always;overflow:hidden;margin:0 auto 10px;background:#fff}
+.pg:last-child{page-break-after:auto}
+.capa{background:#07080a;color:#fff;display:flex;flex-direction:column;justify-content:space-between;height:297mm}
+.capa .tag{font-size:9pt;letter-spacing:3px;color:#ff4d1c;text-transform:uppercase;font-weight:700}
+.capa h2,.pg.capa h2{color:#fff!important;font-family:'Bebas Neue';font-size:54pt;line-height:.9;letter-spacing:1px;font-weight:400;margin-top:12mm;color:#fff}
+.capa .s{font-size:12pt;color:#9aa2b1;line-height:1.5;margin-top:7mm;max-width:150mm}
+.capa .r{border-top:1px solid #2a323d;padding-top:5mm;display:flex;justify-content:space-between;font-size:9pt;color:#9aa2b1}
+.capa .r b{color:#fff}
+.olho{font-size:8pt;letter-spacing:2.5px;text-transform:uppercase;color:#ff4d1c;font-weight:700;margin-bottom:3mm}
+.pg h2{font-family:'Bebas Neue';font-size:25pt;line-height:1;font-weight:400;letter-spacing:.5px;margin-bottom:3mm;color:#1a1d23}
+.pg h3{font-size:11pt;font-weight:700;margin:4mm 0 1mm}
+.pg p{font-size:9.8pt;line-height:1.5;color:#3d434d;margin-bottom:2mm}
+.pg p b{color:#1a1d23}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin:4mm 0}
+.kpi{border:1px solid #e6e8ec;border-radius:3mm;padding:4mm;border-top:3px solid var(--c)}
+.kpi .l{font-size:7pt;letter-spacing:1px;text-transform:uppercase;color:#8a919c}
+.kpi .v{font-family:'Bebas Neue';font-size:21pt;line-height:1.05;color:var(--c)}
+.kpi .s{font-size:7.5pt;color:#6b727c}
+.rel table{width:100%;border-collapse:collapse;font-size:9pt;margin:2mm 0}
+.rel th{text-align:left;font-size:7pt;letter-spacing:1px;text-transform:uppercase;color:#8a919c;padding:2mm;border-bottom:1.5px solid #1a1d23}
+.rel td{padding:2mm;border-bottom:1px solid #eceef1}
+.rel td.n{text-align:right;font-variant-numeric:tabular-nums}
+.cx{border-radius:3mm;padding:4mm 5mm;margin:3mm 0;background:#f6f7f9}
+.cx.lar{background:#fff3ef;border-left:3px solid #ff4d1c;border-radius:0 3mm 3mm 0}
+.cx.vd{background:#eefaf2;border-left:3px solid #1a9e52;border-radius:0 3mm 3mm 0}
+.cx.am{background:#fff8e8;border-left:3px solid #d99a00;border-radius:0 3mm 3mm 0}
+.cx .t{font-size:7pt;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:#ff4d1c;margin-bottom:1.5mm}
+.cx.vd .t{color:#1a9e52}.cx.am .t{color:#d99a00}
+.cx p{margin:0;font-size:9.5pt}
+.rodp{position:absolute;bottom:7mm;left:15mm;right:15mm;display:flex;justify-content:space-between;font-size:7pt;color:#b0b5bd}
+.dois{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+.passo{display:flex;gap:4mm;margin-bottom:3.5mm}
+.passo .n{font-family:'Bebas Neue';font-size:19pt;color:#ff4d1c;width:8mm;flex-shrink:0;line-height:1}
+.passo h4{font-size:10.5pt;margin-bottom:.5mm}
+.passo p{margin:0;font-size:9.3pt}
+.leg{display:flex;gap:6mm;font-size:8.5pt;color:#6b727c;margin:1mm 0 2mm}
+.leg i{display:inline-block;width:4mm;height:2.5mm;border-radius:1mm;margin-right:1.5mm;vertical-align:middle}
+.proj{display:grid;grid-template-columns:repeat(5,1fr);gap:2.5mm;margin:3mm 0}
+.proj .c{border:1px solid #e6e8ec;border-radius:2.5mm;padding:3mm;text-align:center}
+.proj .c.hoje{border-color:#ff4d1c;background:#fff3ef}
+.proj .i{font-size:7pt;color:#8a919c;text-transform:uppercase}
+.proj .v{font-family:'Bebas Neue';font-size:15pt;line-height:1.1}
+.proj .f{font-size:8pt;color:#1a9e52;font-weight:600}
+#acoes{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:none;gap:10px;z-index:100}
+#acoes button{background:var(--lar);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-family:'Outfit';font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+#acoes button.sec{background:#222935}
+@media print{#acoes{display:none!important}}
+</style>
+</head>
+<body>
+
+<div id="acesso">
+  <div class="cartao">
+    <div class="marca">EFEITO <b>VENDAS</b></div>
+    <div class="sub">Gerador de Relatórios</div>
+    <label>E-mail</label>
+    <input type="email" id="email" autocomplete="username" placeholder="seu@efeitovendas.com.br">
+    <label>Senha</label>
+    <input type="password" id="senha" autocomplete="current-password">
+    <button class="btn" id="entrar">ENTRAR</button>
+    <div class="erro" id="erro-login"></div>
+  </div>
+</div>
+
+<div id="painel">
+  <div class="topo">
+    <div class="marca" style="font-size:19px">EFEITO <b>VENDAS</b></div>
+    <span class="quem" id="quem"></span>
+    <button class="sair" id="sair">Sair</button>
+  </div>
+  <div class="corpo">
+    <h1>Gerador de Relatórios</h1>
+    <p class="desc">Relatório completo da conta com faturamento, funil, anúncios, produtos e o trabalho executado. Os dados vêm direto do sistema — basta escolher a conta.</p>
+    <div class="form">
+      <div class="linha">
+        <div>
+          <label>Conta</label>
+          <select id="conta"><option>carregando…</option></select>
+        </div>
+        <div>
+          <label>Período</label>
+          <select id="periodo">
+            <option value="12">Últimos 12 meses</option>
+            <option value="6">Últimos 6 meses</option>
+            <option value="3">Últimos 3 meses</option>
+          </select>
+        </div>
+      </div>
+      <label style="margin-top:18px">Tipo de relatório</label>
+      <div class="tipos">
+        <div class="tipo on" data-tipo="completo"><b>Completo</b><span>Visão geral, diagnóstico do funil, anúncios, produtos, trabalho executado e conclusão</span></div>
+        <div class="tipo" data-tipo="midia"><b>Análise de mídia</b><span>Foco em Ads: retorno, custo por venda, concentração, correlação com faturamento e projeção</span></div>
+      </div>
+      <button class="btn" id="gerar">GERAR RELATÓRIO</button>
+      <div class="barra" id="barra"><i></i></div>
+      <div id="status"></div>
+    </div>
+  </div>
+</div>
+
+<div id="saida"><div class="rel" id="rel"></div></div>
+<div id="acoes">
+  <button id="imprimir">Salvar como PDF</button>
+  <button class="sec" id="voltar">Voltar</button>
+</div>
+
+<script>
+const SB='https://tglzziptzshwhtovoike.supabase.co';
+const SK='sb_publishable_BE3sdf2BU14g-gdBxBLYlg_sRId5nOv';
+const CARGOS_LIBERADOS=['gerente_conta','gerente_ads'];
+let token=null, eu=null, contas=[], tipo='completo';
+
+const $=id=>document.getElementById(id);
+const api=async(p,t)=>{
+  const r=await fetch(SB+'/rest/v1/'+p,{headers:{apikey:SK,Authorization:'Bearer '+(t||token)}});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+};
+const f=v=>(v===null||v===undefined||v==='')?0:(+v||0);
+const br=(v,d=0)=>v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const rs=v=>'R$ '+br(v,0), rs2=v=>'R$ '+br(v,2), k=v=>'R$'+br(v/1000,0)+'k';
+const xx=v=>br(v,1)+'×', pc=(v,d=2)=>br(v,d)+'%', nn=v=>br(v,0);
+const MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const rot=m=>MES[+m.slice(5)-1]+'/'+m.slice(2,4);
+
+/* ───── LOGIN ───── */
+$('entrar').onclick=async()=>{
+  const e=$('email').value.trim(), s=$('senha').value;
+  $('erro-login').textContent=''; $('entrar').disabled=true;
+  try{
+    const r=await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',
+      headers:{apikey:SK,'Content-Type':'application/json'},body:JSON.stringify({email:e,password:s})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.msg||d.error_description||'E-mail ou senha incorretos');
+    token=d.access_token;
+    const c=await api('consultores?user_id=eq.'+d.user.id+'&select=id,nome,cargo,is_admin,ativo');
+    if(!c.length) throw new Error('Seu login não está vinculado a um cadastro no sistema.');
+    eu=c[0];
+    const liberado = eu.is_admin===true || CARGOS_LIBERADOS.includes(eu.cargo);
+    if(!liberado) throw new Error('Esta ferramenta é restrita a gestores e administradores.');
+    sessionStorage.setItem('ev_tok',token);
+    abrirPainel();
+  }catch(err){ $('erro-login').textContent=err.message; }
+  $('entrar').disabled=false;
+};
+$('senha').addEventListener('keydown',e=>{if(e.key==='Enter')$('entrar').click()});
+$('sair').onclick=()=>{sessionStorage.removeItem('ev_tok');location.reload()};
+
+async function abrirPainel(){
+  $('acesso').style.display='none'; $('painel').style.display='block';
+  $('quem').innerHTML='<b>'+eu.nome+'</b> · '+(eu.is_admin?'administrador':eu.cargo.replace('_',' '));
+  contas=await api('contas?ativa=eq.true&select=id,nome&order=nome');
+  $('conta').innerHTML=contas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+}
+document.querySelectorAll('.tipo').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tipo').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on'); tipo=t.dataset.tipo;
+});
+
+/* ───── GRÁFICOS ───── */
+function eixo(w,h,L,T,R,B,fmt,ym){
+  const ph=h-T-B,o=[];
+  for(let t=0;t<5;t++){const v=ym*t/4,y=T+ph-v/ym*ph;
+    o.push(`<line x1="${L}" y1="${y.toFixed(1)}" x2="${w-R}" y2="${y.toFixed(1)}" stroke="#e9ebee"/><text x="${L-7}" y="${(y+3.5).toFixed(1)}" text-anchor="end" font-size="9" fill="#9aa0a8">${fmt(v)}</text>`);}
+  return o;
+}
+function gLinha(vals,rots,fmt,cor='#ff4d1c',w=760,h=200){
+  const L=60,T=18,R=16,B=30,pw=w-L-R,ph=h-T-B,ym=(Math.max(...vals)||1)*1.2;
+  const x=i=>L+pw*i/Math.max(1,vals.length-1), y=v=>T+ph-v/ym*ph;
+  const o=eixo(w,h,L,T,R,B,fmt,ym);
+  o.push(`<polyline points="${vals.map((v,i)=>x(i).toFixed(1)+','+y(v).toFixed(1)).join(' ')}" fill="none" stroke="${cor}" stroke-width="2.8" stroke-linejoin="round"/>`);
+  vals.forEach((v,i)=>{o.push(`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3.3" fill="${cor}"/><text x="${x(i).toFixed(1)}" y="${(y(v)-8).toFixed(1)}" text-anchor="middle" font-size="8.4" font-weight="700" fill="${cor}">${fmt(v)}</text>`);
+    o.push(`<text x="${x(i).toFixed(1)}" y="${h-10}" text-anchor="middle" font-size="8.4" fill="#6b727c">${rots[i]}</text>`);});
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+function gBarras(vals,rots,fmt,cores,w=760,h=200){
+  const L=60,T=18,R=16,B=30,pw=w-L-R,ph=h-T-B,ym=(Math.max(...vals)||1)*1.18,bw=pw/vals.length*0.6;
+  const o=eixo(w,h,L,T,R,B,fmt,ym);
+  vals.forEach((v,i)=>{const cx=L+pw*(i+0.5)/vals.length,hh=v/ym*ph,c=cores?cores[i]:'#ff4d1c';
+    o.push(`<rect x="${(cx-bw/2).toFixed(1)}" y="${(T+ph-hh).toFixed(1)}" width="${bw.toFixed(1)}" height="${hh.toFixed(1)}" fill="${c}" rx="3"/>`);
+    o.push(`<text x="${cx.toFixed(1)}" y="${(T+ph-hh-6).toFixed(1)}" text-anchor="middle" font-size="8.4" font-weight="700" fill="${c}">${fmt(v)}</text>`);
+    o.push(`<text x="${cx.toFixed(1)}" y="${h-10}" text-anchor="middle" font-size="8.4" fill="#6b727c">${rots[i]}</text>`);});
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+function gDuplo(fat,inv,rots,w=760,h=225){
+  const L=60,T=20,R=60,B=30,pw=w-L-R,ph=h-T-B;
+  const ymf=(Math.max(...fat)||1)*1.15, ymi=(Math.max(...inv)||1)*1.3;
+  const x=i=>L+pw*i/Math.max(1,fat.length-1), yi=v=>T+ph-v/ymi*ph;
+  const o=[];
+  for(let t=0;t<5;t++){const v=ymf*t/4,y=T+ph-v/ymf*ph;
+    o.push(`<line x1="${L}" y1="${y.toFixed(1)}" x2="${w-R}" y2="${y.toFixed(1)}" stroke="#eceef1"/>`);
+    o.push(`<text x="${L-7}" y="${(y+3.5).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#1a1d23">${k(v)}</text>`);
+    o.push(`<text x="${w-R+7}" y="${(y+3.5).toFixed(1)}" font-size="8.5" fill="#ff4d1c">${rs(ymi*t/4)}</text>`);}
+  const bw=pw/fat.length*0.46;
+  fat.forEach((v,i)=>{const cx=x(i),hh=v/ymf*ph;
+    o.push(`<rect x="${(cx-bw/2).toFixed(1)}" y="${(T+ph-hh).toFixed(1)}" width="${bw.toFixed(1)}" height="${hh.toFixed(1)}" fill="#d8dce1" rx="2"/>`);
+    o.push(`<text x="${cx.toFixed(1)}" y="${(T+ph-hh-5).toFixed(1)}" text-anchor="middle" font-size="8" fill="#6b727c">${br(v/1000,0)}k</text>`);});
+  o.push(`<polyline points="${inv.map((v,i)=>x(i).toFixed(1)+','+yi(v).toFixed(1)).join(' ')}" fill="none" stroke="#ff4d1c" stroke-width="2.8"/>`);
+  inv.forEach((v,i)=>{o.push(`<circle cx="${x(i).toFixed(1)}" cy="${yi(v).toFixed(1)}" r="3.4" fill="#ff4d1c"/><text x="${x(i).toFixed(1)}" y="${(yi(v)-8).toFixed(1)}" text-anchor="middle" font-size="8.2" font-weight="700" fill="#ff4d1c">${br(v/1000,0)}k</text>`);});
+  fat.forEach((_,i)=>o.push(`<text x="${x(i).toFixed(1)}" y="${h-10}" text-anchor="middle" font-size="8.4" fill="#6b727c">${rots[i]}</text>`));
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+
+/* ───── GERAR ───── */
+$('gerar').onclick=async()=>{
+  const cid=$('conta').value, meses=+$('periodo').value;
+  const nome=contas.find(c=>c.id==cid).nome;
+  $('gerar').disabled=true; $('barra').style.display='block';
+  const prog=p=>{$('barra').querySelector('i').style.width=p+'%'};
+  const st=(t,c='')=>{$('status').textContent=t;$('status').className=c};
+  try{
+    st('Buscando dados da conta…'); prog(10);
+    const hoje=new Date(); const ini=new Date(hoje.getFullYear(),hoje.getMonth()-meses+1,1);
+    const di=ini.toISOString().slice(0,10);
+    const [diarias,ads,adsProd,produtos,shop,check]=await Promise.all([
+      api(`metricas_diarias?conta_id=eq.${cid}&data=gte.${di}&select=data,faturamento,pedidos,visitantes&order=data&limit=1000`),
+      api(`metricas_ads?conta_id=eq.${cid}&select=*&order=mes_referencia&limit=100`),
+      api(`metricas_ads_produtos?conta_id=eq.${cid}&select=*&order=mes_referencia&limit=1000`),
+      api(`metricas_produtos?conta_id=eq.${cid}&select=*&order=mes_referencia&limit=1000`),
+      api(`metricas_shop_stats?conta_id=eq.${cid}&select=*&order=mes_referencia&limit=100`),
+      api(`checklist_execucoes?conta_id=eq.${cid}&select=acao,executado_por,executado_em,anexo_url&order=executado_em&limit=2000`)
+    ]);
+    prog(55);
+    if(!diarias.length){ st('Esta conta não tem dados no período escolhido.','err'); $('gerar').disabled=false; $('barra').style.display='none'; return; }
+    st('Montando o relatório…'); prog(75);
+    const html = montar({nome,diarias,ads,adsProd,produtos,shop,check,tipo});
+    $('rel').innerHTML=html; prog(100);
+    st('Relatório pronto.','ok');
+    $('painel').style.display='none'; $('saida').style.display='block'; $('acoes').style.display='flex';
+    window.scrollTo(0,0);
+  }catch(err){ st('Não foi possível gerar: '+err.message,'err'); }
+  $('gerar').disabled=false; setTimeout(()=>{$('barra').style.display='none';prog(0)},600);
+};
+$('imprimir').onclick=()=>window.print();
+$('voltar').onclick=()=>{$('saida').style.display='none';$('acoes').style.display='none';$('painel').style.display='block';$('status').textContent=''};
+
+/* ───── MONTAGEM DO RELATÓRIO ───── */
+function montar(D){
+  const M={};
+  const put=(m,kk,v)=>{M[m]=M[m]||{};M[m][kk]=(M[m][kk]||0)+v};
+  D.diarias.forEach(x=>{const m=x.data.slice(0,7);
+    put(m,'fat',f(x.faturamento));put(m,'ped',f(x.pedidos));put(m,'vis',f(x.visitantes));put(m,'dias',1)});
+  D.ads.forEach(a=>{const m=a.mes_referencia; if(!M[m])return;
+    M[m].inv=f(a.despesas_total);M[m].gmv=f(a.gmv_total);M[m].imp=f(a.impressoes_total);
+    M[m].clk=f(a.cliques_total);M[m].cvs=f(a.conversoes_total)});
+  const hojeM=new Date().toISOString().slice(0,7);
+  const MS=Object.keys(M).sort().filter(m=>m<hojeM);
+  if(!MS.length) return '<div class="pg"><p>Sem meses fechados no período.</p></div>';
+  const rots=MS.map(rot);
+  const g=(m,kk)=>f(M[m][kk]);
+  const fat=MS.map(m=>g(m,'fat')), ped=MS.map(m=>g(m,'ped')), vis=MS.map(m=>g(m,'vis'));
+  const inv=MS.map(m=>g(m,'inv')), gmv=MS.map(m=>g(m,'gmv'));
+  const conv=MS.map(m=>g(m,'vis')?g(m,'ped')/g(m,'vis')*100:0);
+  const tk=MS.map(m=>g(m,'ped')?g(m,'fat')/g(m,'ped'):0);
+  const roas=MS.map((m,i)=>inv[i]?gmv[i]/inv[i]:0);
+  const ctr=MS.map(m=>g(m,'imp')?g(m,'clk')/g(m,'imp')*100:0);
+  const cpm=MS.map(m=>g(m,'imp')?g(m,'inv')/g(m,'imp')*1000:0);
+  const cpa=MS.map(m=>g(m,'cvs')?g(m,'inv')/g(m,'cvs'):0);
+  const cpc=MS.map(m=>g(m,'clk')?g(m,'inv')/g(m,'clk'):0);
+  const cvads=MS.map(m=>g(m,'clk')?g(m,'cvs')/g(m,'clk')*100:0);
+  const tacos=MS.map((m,i)=>fat[i]?inv[i]/fat[i]*100:0);
+  const share=MS.map((m,i)=>fat[i]?gmv[i]/fat[i]*100:0);
+  const tf=fat.reduce((a,b)=>a+b,0), tp=ped.reduce((a,b)=>a+b,0);
+  const ti=inv.reduce((a,b)=>a+b,0), tg=gmv.reduce((a,b)=>a+b,0);
+  // correlação e reta
+  const n=MS.length, mi=ti/n, mf=tf/n;
+  const cov=inv.reduce((s,a,i)=>s+(a-mi)*(fat[i]-mf),0)/n;
+  const si=Math.sqrt(inv.reduce((s,a)=>s+(a-mi)**2,0)/n), sf=Math.sqrt(fat.reduce((s,b)=>s+(b-mf)**2,0)/n);
+  const r=(si&&sf)?cov/(si*sf):0, b1=si?cov/si**2:0, b0=mf-b1*mi;
+  const invAtual=inv[inv.length-1]||0;
+  // melhor e último mês
+  const iMax=fat.indexOf(Math.max(...fat)), iUlt=MS.length-1;
+  const varia=(a,b)=>a?((b/a-1)*100):0;
+  const cor=v=>v>=0?'#1a9e52':'#c0392b', sin=v=>(v>=0?'+':'')+br(v,0)+'%';
+  const hoje=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const per=rot(MS[0])+' a '+rot(MS[iUlt]);
+  const rod=p=>`<div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>${p}</span></div>`;
+  // trabalho
+  const ex={},dias={};
+  D.check.forEach(x=>{const d=(x.executado_em||'').slice(0,7); if(!d)return;
+    ex[d]=ex[d]||{}; ex[d][x.executado_por||'?']=(ex[d][x.executado_por||'?']||0)+1;
+    dias[d]=dias[d]||new Set(); dias[d].add(x.executado_em.slice(0,10))});
+  const trt=Object.keys(ex).sort().map(m=>{
+    const t=Object.values(ex[m]).reduce((a,b)=>a+b,0);
+    const pe=Object.entries(ex[m]).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([p,q])=>p+' ('+q+')').join(', ');
+    return `<tr><td><b>${rot(m)}</b></td><td class="n">${t}</td><td class="n">${dias[m].size}</td><td style="font-size:9pt">${pe}</td></tr>`}).join('');
+  const ac={}; D.check.forEach(x=>ac[x.acao]=(ac[x.acao]||0)+1);
+  const tra=Object.entries(ac).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([a,q])=>`<tr><td>${a}</td><td class="n">${q}</td></tr>`).join('');
+  const comPrint=D.check.filter(x=>x.anexo_url).length;
+  // produtos e anúncios do último mês fechado
+  const ultM=MS[iUlt];
+  const prods=D.produtos.filter(p=>p.mes_referencia===ultM).sort((a,b)=>f(b.gmv)-f(a.gmv));
+  const trp=prods.slice(0,6).map(p=>`<tr><td>${String(p.nome||'').slice(0,54)}</td><td class="n">${k(f(p.gmv))}</td><td class="n">${pc(f(p.pct_gmv),1)}</td><td class="n">${pc(f(p.conv))}</td></tr>`).join('');
+  const top2=prods.slice(0,2).reduce((s,p)=>s+f(p.pct_gmv),0);
+  const anun=D.adsProd.filter(p=>p.mes_referencia===ultM).sort((a,b)=>f(b.despesas)-f(a.despesas));
+  const totI=anun.reduce((s,p)=>s+f(p.despesas),0)||1; let acu=0;
+  const tra2=anun.slice(0,8).map(p=>{const d=f(p.despesas),gg=f(p.gmv);acu+=d;
+    return `<tr><td>${String(p.nome_anuncio||'').slice(0,46)}</td><td class="n">${rs(d)}</td><td class="n">${pc(d/totI*100,1)}</td><td class="n">${k(gg)}</td><td class="n">${xx(d?gg/d:0)}</td><td class="n">${br(acu/totI*100,0)}%</td></tr>`}).join('');
+  const conc2=anun.slice(0,2).reduce((s,p)=>s+f(p.despesas),0)/totI*100;
+  const metodos={}; anun.forEach(p=>metodos[p.metodo_lance||'?']=(metodos[p.metodo_lance||'?']||0)+1);
+  const metTxt=Object.entries(metodos).map(([m,q])=>q+' em '+m).join(' · ');
+  const trs=MS.map((m,i)=>`<tr><td><b>${rots[i]}</b></td><td class="n">${k(fat[i])}</td><td class="n">${nn(ped[i])}</td><td class="n">${rs(tk[i])}</td><td class="n">${nn(vis[i])}</td><td class="n">${pc(conv[i])}</td><td class="n">${rs(inv[i])}</td><td class="n">${xx(roas[i])}</td><td class="n">${br(tacos[i],1)}%</td></tr>`).join('');
+  const trsA=MS.map((m,i)=>`<tr><td><b>${rots[i]}</b></td><td class="n">${rs(inv[i])}</td><td class="n">${k(gmv[i])}</td><td class="n">${xx(roas[i])}</td><td class="n">${k(fat[i])}</td><td class="n">${br(share[i],0)}%</td><td class="n">${br(tacos[i],1)}%</td><td class="n">${rs2(cpa[i])}</td><td class="n">${rs2(cpc[i])}</td><td class="n">${pc(ctr[i])}</td></tr>`).join('');
+  const varTab=MS.slice(1).map((m,idx)=>{const i=idx+1;
+    const di=inv[i-1]?varia(inv[i-1],inv[i]):0, df=varia(fat[i-1],fat[i]);
+    return `<tr><td>${rots[i-1]} → ${rots[i]}</td><td class="n" style="color:${cor(di)}">${sin(di)}</td><td class="n" style="color:${cor(df)}">${sin(df)}</td></tr>`}).join('');
+  let subiu=[],caiu=[];
+  for(let i=1;i<MS.length;i++){const di=inv[i-1]?inv[i]/inv[i-1]-1:0, df=fat[i-1]?fat[i]/fat[i-1]-1:0;
+    if(di>0.05)subiu.push(df); else if(di<-0.05)caiu.push(df);}
+  const mediaSubiu=subiu.length?subiu.reduce((a,b)=>a+b,0)/subiu.length*100:0;
+  const mediaCaiu=caiu.length?caiu.reduce((a,b)=>a+b,0)/caiu.length*100:0;
+
+  const capa=(sub)=>`<div class="pg capa"><div><div class="tag">Efeito Vendas · ${tipo==='midia'?'Análise de mídia':'Relatório de conta'}</div>
+    <h2>${D.nome}</h2><p class="s">${sub}</p></div>
+    <div class="r"><span>Período: <b>${per}</b></span><span>${hoje.charAt(0).toUpperCase()+hoje.slice(1)}</span></div></div>`;
+
+  const pgTrabalho=D.check.length?`<div class="pg"><div class="olho">O trabalho executado</div><h2>O que foi feito na conta</h2>
+    <p>Todo atendimento é registrado no sistema da Efeito Vendas, com data, responsável e evidência. No período com registro ativo foram <b>${D.check.length} execuções</b>, sendo <b>${comPrint}</b> com print de comprovação anexado.</p>
+    <table style="max-width:162mm"><thead><tr><th>Mês</th><th class="n">Execuções</th><th class="n">Dias com atendimento</th><th>Equipe</th></tr></thead><tbody>${trt}</tbody></table>
+    <h3>As ações mais executadas</h3>
+    <table style="max-width:152mm"><thead><tr><th>Ação</th><th class="n">Vezes</th></tr></thead><tbody>${tra}</tbody></table>
+    ${rod('')}</div>`:'';
+
+  if(tipo==='midia'){
+    const proj=[20000,invAtual,35000,45000,55000];
+    const cards=proj.map((x,i)=>`<div class="c ${i===1?'hoje':''}"><div class="i">${i===1?'hoje':'investindo'}</div><div class="v">${rs(x)}</div><div class="i" style="margin-top:2mm">faturamento</div><div class="f">${k(b0+b1*x)}</div></div>`).join('');
+    return capa('Como o investimento em Shopee Ads acompanhou o faturamento: retorno, custo de aquisição, concentração e projeção.')+
+    `<div class="pg"><div class="olho">O essencial</div><h2>${MS.length} meses de mídia</h2>
+    <div class="kpis">
+      <div class="kpi" style="--c:#ff4d1c"><div class="l">Investido</div><div class="v">${k(ti)}</div><div class="s">${br(tf?ti/tf*100:0,1)}% do faturamento</div></div>
+      <div class="kpi" style="--c:#1a9e52"><div class="l">Gerado pelos anúncios</div><div class="v">${k(tg)}</div><div class="s">${br(tf?tg/tf*100:0,0)}% do faturamento</div></div>
+      <div class="kpi" style="--c:#1a1d23"><div class="l">ROAS acumulado</div><div class="v">${xx(ti?tg/ti:0)}</div><div class="s">cada R$1 devolveu ${rs2(ti?tg/ti:0)}</div></div>
+      <div class="kpi" style="--c:#7B2FFF"><div class="l">Custo por venda</div><div class="v">${rs(cpa.reduce((a,b)=>a+b,0)/cpa.length)}</div><div class="s">média do período</div></div></div>
+    <p>Foram investidos <b>${rs(ti)}</b> em anúncios, que geraram <b>${rs(tg)}</b> em vendas atribuídas. Para cada real investido voltaram <b>${rs2(ti?tg/ti:0)}</b>.</p>
+    <table><thead><tr><th>Mês</th><th class="n">Investido</th><th class="n">Gerado</th><th class="n">ROAS</th><th class="n">Faturam.</th><th class="n">% via Ads</th><th class="n">Invest/fat</th><th class="n">Custo/venda</th><th class="n">Custo/clique</th><th class="n">CTR</th></tr></thead><tbody>${trsA}</tbody></table>
+    <div class="cx lar"><div class="t">Leitura rápida</div><p>Os anúncios respondem por <b>${br(Math.min(...share),0)}% a ${br(Math.max(...share),0)}%</b> do faturamento mensal.</p></div>
+    ${rod(2)}</div>
+
+    <div class="pg"><div class="olho">A relação central</div><h2>O faturamento acompanha<br>o investimento</h2>
+    <div class="leg"><span><i style="background:#d8dce1"></i>Faturamento da loja</span><span><i style="background:#ff4d1c"></i>Investimento em Ads</span></div>
+    ${gDuplo(fat,inv,rots)}
+    <h3>O que a conta mostra</h3>
+    <p>A correlação entre investimento e faturamento é de <b>${br(r,2)}</b>${r>=0.7?' — forte':r>=0.4?' — moderada':' — fraca'}. ${br(r*r*100,0)}% da variação do faturamento acompanha a variação do investimento.</p>
+    <div class="dois">
+      <div class="cx"><div class="t">A régua do período</div><p>A cada <b>R$ 1.000</b> a mais investidos por mês, o faturamento acompanhou em cerca de <b>${rs(b1*1000)}</b>.</p></div>
+      <div class="cx vd"><div class="t">A base que não depende de Ads</div><p>Mesmo sem investimento, a tendência aponta <b>${rs(Math.max(0,b0))}</b> por mês, vindo de orgânico, afiliados e recompra.</p></div>
+    </div>
+    <h3>Quando subiu e quando cortou</h3>
+    <div class="dois">
+      <div><table><thead><tr><th>Período</th><th class="n">Investimento</th><th class="n">Faturamento</th></tr></thead><tbody>${varTab}</tbody></table></div>
+      <div>
+        ${subiu.length?`<div class="cx vd"><div class="t">Quando o investimento subiu</div><p>Nas <b>${subiu.length} vezes</b> em que aumentou, o faturamento variou em média <b>${sin(mediaSubiu)}</b>.</p></div>`:''}
+        ${caiu.length?`<div class="cx am"><div class="t">Quando o investimento caiu</div><p>Nas <b>${caiu.length} vezes</b> em que foi reduzido, o faturamento variou em média <b>${sin(mediaCaiu)}</b>.</p></div>`:''}
+      </div>
+    </div>
+    ${rod(3)}</div>
+
+    <div class="pg"><div class="olho">Eficiência</div><h2>A qualidade da mídia</h2>
+    <div class="dois">
+      <div><h3>ROAS — retorno por real investido</h3>${gLinha(roas,rots,xx,'#1a9e52',366,180)}</div>
+      <div><h3>CTR — cliques por aparição</h3>${gLinha(ctr,rots,v=>pc(v),'#ff4d1c',366,180)}</div></div>
+    <div class="dois">
+      <div><h3>Custo por venda</h3>${gLinha(cpa,rots,rs2,'#7B2FFF',366,180)}</div>
+      <div><h3>Custo por mil aparições</h3>${gLinha(cpm,rots,rs2,'#c0392b',366,180)}</div></div>
+    <div class="cx ${roas[iUlt]>=roas[0]?'vd':'am'}"><div class="t">O que mudou no período</div><p>O custo por mil aparições saiu de <b>${rs2(cpm[0])}</b> para <b>${rs2(cpm[iUlt])}</b> e o ROAS, de <b>${xx(roas[0])}</b> para <b>${xx(roas[iUlt])}</b>. O custo por venda foi de <b>${rs2(cpa[0])}</b> para <b>${rs2(cpa[iUlt])}</b>.</p></div>
+    ${rod(4)}</div>
+
+    <div class="pg"><div class="olho">Concentração</div><h2>Onde o dinheiro<br>está sendo aplicado</h2>
+    <p>Distribuição do investimento entre os anúncios ativos em ${rot(ultM)}:</p>
+    <table><thead><tr><th>Anúncio</th><th class="n">Investido</th><th class="n">% do total</th><th class="n">Gerado</th><th class="n">ROAS</th><th class="n">Acumulado</th></tr></thead><tbody>${tra2}</tbody></table>
+    <div class="cx ${conc2>60?'am':''}"><div class="t">Concentração</div><p>Os dois primeiros anúncios concentram <b>${br(conc2,0)}%</b> do investimento do mês.${conc2>60?' Isso significa que o resultado da conta depende de poucos anúncios.':''}</p></div>
+    <div class="cx"><div class="t">Métodos de lance em uso</div><p>${metTxt||'sem dados de método no período'}.</p></div>
+    ${rod(5)}</div>
+
+    <div class="pg"><div class="olho">Projeção</div><h2>O que esperar de<br>cada nível de investimento</h2>
+    <p>Com base no comportamento do período, a expectativa de faturamento para diferentes níveis de investimento mensal:</p>
+    <div class="proj">${cards}</div>
+    <p style="font-size:8.5pt;color:#6b727c">Projeção baseada na relação histórica desta conta. Depende de estoque disponível, concorrência no período e manutenção do ROAS atual.</p>
+    <div class="cx lar"><div class="t">O teto a observar</div><p>O maior investimento do período foi <b>${rs(Math.max(...inv))}</b>. Subir acima desse patamar é território não testado nesta conta — o caminho seguro é aumentar <b>em etapas de 20%</b>, confirmando o ROAS antes do passo seguinte.</p></div>
+    <div class="cx vd"><div class="t">A condição que precisa estar de pé</div><p>Aumentar investimento só funciona com <b>estoque garantido</b>. Romper estoque durante um aumento de verba desperdiça o investimento e derruba o posicionamento dos anúncios.</p></div>
+    ${rod(6)}</div>
+
+    ${pgTrabalho}
+
+    <div class="pg"><div class="olho">Conclusão</div><h2>O que os números<br>recomendam</h2>
+    <div class="passo"><div class="n">1</div><div><h4>${tf&&ti/tf*100<10?'Há espaço para investir mais':'Investimento em patamar alto'}</h4><p>O ROAS de ${xx(ti?tg/ti:0)} no acumulado e o investimento em ${br(tf?ti/tf*100:0,1)}% do faturamento ${tf&&ti/tf*100<10?'indicam folga — a referência de mercado para operações saudáveis vai até 10% a 15%':'já estão na faixa alta; o ganho agora vem de eficiência, não de verba'}.</p></div></div>
+    <div class="passo"><div class="n">2</div><div><h4>Aumentar em etapas, não de uma vez</h4><p>Passos de 20% a cada duas semanas, acompanhando o ROAS. Saltos grandes forçam o algoritmo a reaprender e derrubam o retorno.</p></div></div>
+    <div class="passo"><div class="n">3</div><div><h4>${conc2>60?'Preparar mais um campeão':'Manter a distribuição atual'}</h4><p>${conc2>60?'Com '+br(conc2,0)+'% do orçamento em dois anúncios, qualquer oscilação neles afeta a conta inteira. Desenvolver mais um produto ao mesmo patamar dilui o risco.':'O investimento está distribuído entre vários anúncios, o que reduz o risco de dependência.'}</p></div></div>
+    <div class="passo"><div class="n">4</div><div><h4>Conversão é o multiplicador</h4><p>A conversão dos anúncios está em ${pc(cvads[iUlt])}. No melhor mês do período foi ${pc(Math.max(...cvads))}. Recuperar esse patamar aumenta o retorno sem exigir um real a mais.</p></div></div>
+    ${rod(7)}</div>`;
+  }
+
+  /* ───── RELATÓRIO COMPLETO ───── */
+  return capa('Análise completa do período: faturamento, funil de vendas, anúncios, produtos e o trabalho executado na conta.')+
+  `<div class="pg"><div class="olho">Visão geral</div><h2>Os ${MS.length} meses em números</h2>
+  <div class="kpis">
+    <div class="kpi" style="--c:#1a1d23"><div class="l">Faturamento</div><div class="v">${k(tf)}</div><div class="s">${per}</div></div>
+    <div class="kpi" style="--c:#1a1d23"><div class="l">Pedidos</div><div class="v">${nn(tp)}</div><div class="s">ticket médio ${rs(tp?tf/tp:0)}</div></div>
+    <div class="kpi" style="--c:#ff4d1c"><div class="l">Investido em Ads</div><div class="v">${k(ti)}</div><div class="s">${br(tf?ti/tf*100:0,1)}% do faturamento</div></div>
+    <div class="kpi" style="--c:#1a9e52"><div class="l">Retorno dos Ads</div><div class="v">${xx(ti?tg/ti:0)}</div><div class="s">${k(tg)} gerados</div></div></div>
+  <p>Cada R$ 1,00 investido em anúncio devolveu <b>${xx(ti?tg/ti:0)}</b> em vendas no período.</p>
+  <h3>Faturamento mês a mês</h3>${gBarras(fat,rots,k)}
+  <table><thead><tr><th>Mês</th><th class="n">Faturamento</th><th class="n">Pedidos</th><th class="n">Ticket</th><th class="n">Visitas</th><th class="n">Conversão</th><th class="n">Ads</th><th class="n">ROAS</th><th class="n">% Ads</th></tr></thead><tbody>${trs}</tbody></table>
+  ${rod(2)}</div>
+
+  <div class="pg"><div class="olho">O diagnóstico</div><h2>O que explica a variação</h2>
+  <p>Faturamento é o resultado de três variáveis multiplicadas: <b>quantas pessoas visitam</b> a loja, <b>quantas delas compram</b> e <b>quanto vale cada compra</b>. Comparando o melhor mês do período com o mês fechado mais recente:</p>
+  <table style="max-width:150mm"><thead><tr><th>Variável</th><th class="n">${rots[iMax]}</th><th class="n">${rots[iUlt]}</th><th class="n">Variação</th></tr></thead><tbody>
+    <tr><td>Visitas na loja</td><td class="n">${nn(vis[iMax])}</td><td class="n">${nn(vis[iUlt])}</td><td class="n" style="color:${cor(varia(vis[iMax],vis[iUlt]))}"><b>${sin(varia(vis[iMax],vis[iUlt]))}</b></td></tr>
+    <tr><td>Taxa de conversão</td><td class="n">${pc(conv[iMax])}</td><td class="n">${pc(conv[iUlt])}</td><td class="n" style="color:${cor(varia(conv[iMax],conv[iUlt]))}"><b>${sin(varia(conv[iMax],conv[iUlt]))}</b></td></tr>
+    <tr><td>Ticket médio</td><td class="n">${rs(tk[iMax])}</td><td class="n">${rs(tk[iUlt])}</td><td class="n" style="color:${cor(varia(tk[iMax],tk[iUlt]))}"><b>${sin(varia(tk[iMax],tk[iUlt]))}</b></td></tr>
+    <tr><td><b>Faturamento</b></td><td class="n"><b>${k(fat[iMax])}</b></td><td class="n"><b>${k(fat[iUlt])}</b></td><td class="n" style="color:${cor(varia(fat[iMax],fat[iUlt]))}"><b>${sin(varia(fat[iMax],fat[iUlt]))}</b></td></tr>
+  </tbody></table>
+  <div class="cx lar"><div class="t">A leitura</div><p>${roas[iUlt]>=roas[iMax]?'O retorno dos anúncios <b>não piorou</b> no período — o ROAS em '+rots[iUlt]+' ('+xx(roas[iUlt])+') está igual ou acima do mês de pico. A variação do faturamento vem do volume de visitas e da conversão.':'O retorno dos anúncios também recuou no período. Vale olhar tanto o funil quanto a estrutura de campanhas.'}</p></div>
+  <div class="dois">
+    <div><h3>Visitas na loja</h3>${gLinha(vis,rots,v=>nn(v/1000)+'k','#7B2FFF',366,180)}</div>
+    <div><h3>Taxa de conversão</h3>${gLinha(conv,rots,v=>pc(v),'#c0392b',366,180)}</div></div>
+  <div class="dois">
+    <div><h3>Ticket médio</h3>${gLinha(tk,rots,rs,'#1a9e52',366,180)}</div>
+    <div><h3>Pedidos</h3>${gLinha(ped,rots,nn,'#1a1d23',366,180)}</div></div>
+  ${rod(3)}</div>
+
+  <div class="pg"><div class="olho">Anúncios</div><h2>O que os Ads entregaram</h2>
+  <p>Desempenho da mídia no período. O CTR mostra quantas pessoas clicam ao ver o anúncio; o ROAS, quanto cada real investido devolveu.</p>
+  <div class="dois">
+    <div><h3>ROAS</h3>${gLinha(roas,rots,xx,'#1a9e52',366,180)}</div>
+    <div><h3>CTR</h3>${gLinha(ctr,rots,v=>pc(v),'#ff4d1c',366,180)}</div></div>
+  <h3>Percentual do faturamento investido em anúncio</h3>
+  ${gBarras(tacos,rots,v=>br(v,0)+'%',tacos.map(t=>t<10?'#1a9e52':t<14?'#d99a00':'#c0392b'),760,175)}
+  <p>O investimento saiu de <b>${br(tacos[0],1)}%</b> do faturamento para <b>${br(tacos[iUlt],1)}%</b>.</p>
+  <h3>Anúncios ativos — ${rot(ultM)}</h3>
+  <table><thead><tr><th>Anúncio</th><th class="n">Investido</th><th class="n">% do total</th><th class="n">Gerado</th><th class="n">ROAS</th><th class="n">Acumulado</th></tr></thead><tbody>${tra2}</tbody></table>
+  ${rod(4)}</div>
+
+  ${prods.length?`<div class="pg"><div class="olho">Produtos</div><h2>De onde vem o faturamento</h2>
+  <h3>Principais produtos — ${rot(ultM)}</h3>
+  <table><thead><tr><th>Produto</th><th class="n">Faturamento</th><th class="n">% do mês</th><th class="n">Conversão</th></tr></thead><tbody>${trp}</tbody></table>
+  <div class="cx ${top2>50?'am':''}"><div class="t">Concentração</div><p>Os dois primeiros produtos somam <b>${br(top2,0)}%</b> do faturamento do mês.${top2>50?' É uma força — estão maduros e com histórico —, mas também um risco: qualquer problema em um deles afeta boa parte da operação.':''}</p></div>
+  <div class="cx"><div class="t">A oportunidade mais clara</div><p>A conversão dos produtos principais está entre <b>${pc(Math.min(...prods.slice(0,5).map(p=>f(p.conv))))}</b> e <b>${pc(Math.max(...prods.slice(0,5).map(p=>f(p.conv))))}</b>. Fotos, descrição, avaliações e preço são as alavancas que mexem nesse número — sem custo de mídia.</p></div>
+  ${rod(5)}</div>`:''}
+
+  ${pgTrabalho}
+
+  <div class="pg"><div class="olho">Conclusão</div><h2>Onde focar agora</h2>
+  <div class="passo"><div class="n">1</div><div><h4>Conversão dos produtos principais</h4><p>É a alavanca de maior retorno e a única que não exige aumentar investimento. Fotos, tabela de medidas, avaliações e preço nos produtos que mais faturam.</p></div></div>
+  <div class="passo"><div class="n">2</div><div><h4>${varia(vis[iMax],vis[iUlt])<-15?'Recuperar o volume de visitas':'Sustentar o volume de visitas'}</h4><p>${varia(vis[iMax],vis[iUlt])<-15?'As visitas caíram '+br(Math.abs(varia(vis[iMax],vis[iUlt])),0)+'% desde o melhor mês. Revisão de títulos e palavras-chave devolve alcance sem aumentar orçamento.':'O tráfego está estável. Manter títulos e palavras-chave revisados preserva o alcance conquistado.'}</p></div></div>
+  <div class="passo"><div class="n">3</div><div><h4>${tf&&ti/tf*100<10?'Espaço para escalar a mídia':'Eficiência antes de verba'}</h4><p>${tf&&ti/tf*100<10?'Com ROAS de '+xx(ti?tg/ti:0)+' e apenas '+br(tf?ti/tf*100:0,1)+'% do faturamento em mídia, há margem para aumentar em etapas de 20%, sempre com estoque garantido.':'O investimento já representa '+br(tf?ti/tf*100:0,1)+'% do faturamento. O próximo ganho vem de melhorar conversão e ticket, não de aumentar verba.'}</p></div></div>
+  <div class="passo"><div class="n">4</div><div><h4>Aproveitar a sazonalidade</h4><p>O melhor mês do período foi ${rots[iMax]}, com ${k(fat[iMax])}. Planejar estoque e campanhas para repetir esse pico é a forma mais direta de crescer.</p></div></div>
+  <div class="cx lar"><div class="t">Em resumo</div><p>${roas[iUlt]>=8?'A operação de mídia está saudável, com retorno de '+xx(roas[iUlt])+' no último mês. ':''}O ganho dos próximos meses vem de <b>conversão</b> e de <b>produto certo na hora certa</b> — frentes que dependem de catálogo, não de orçamento.</p></div>
+  ${rod('')}</div>`;
+}
+
+/* sessão salva */
+(async()=>{
+  const t=sessionStorage.getItem('ev_tok');
+  if(!t) return;
+  try{
+    const r=await fetch(SB+'/auth/v1/user',{headers:{apikey:SK,Authorization:'Bearer '+t}});
+    if(!r.ok) return sessionStorage.removeItem('ev_tok');
+    const u=await r.json(); token=t;
+    const c=await api('consultores?user_id=eq.'+u.id+'&select=id,nome,cargo,is_admin');
+    if(c.length && (c[0].is_admin===true || CARGOS_LIBERADOS.includes(c[0].cargo))){ eu=c[0]; abrirPainel(); }
+    else sessionStorage.removeItem('ev_tok');
+  }catch(e){ sessionStorage.removeItem('ev_tok'); }
+})();
+</script>
+</body>
+</html>
