@@ -182,7 +182,7 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .oferta{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
 .of{border-radius:14px;padding:18px 20px;border:1px solid}
 .of.a{border-color:var(--purple);background:linear-gradient(135deg,var(--purple-soft),transparent)}
-.of.b{border-color:var(--orange);background:linear-gradient(135deg,var(--orange-soft),transparent)}
+.of.b{border-color:var(--line2);background:transparent;padding:15px 17px}
 .of .ot{font-family:var(--mono);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--t3)}
 .of .on{font-family:var(--disp);font-size:26px;letter-spacing:1px;margin:3px 0 2px}
 .of.a .on{color:var(--purple)} .of.b .on{color:var(--orange)}
@@ -193,6 +193,20 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .of .cta{display:block;margin-top:11px;background:var(--c);color:#fff;text-align:center;padding:10px;border-radius:9px;font-weight:600;font-size:13px;text-decoration:none}
 .dor{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}
 .dr2{background:var(--card);border-left:3px solid var(--red);border-radius:0 10px 10px 0;padding:11px 14px;font-size:13.5px}
+
+#tela{position:fixed;inset:0;z-index:50;pointer-events:none;touch-action:none}
+body.desenhando #tela{pointer-events:auto;cursor:crosshair}
+body.apagando #tela{pointer-events:auto;cursor:cell}
+#ferramentas{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:60;display:flex;flex-direction:column;gap:7px;
+ background:rgba(14,17,22,.92);backdrop-filter:blur(12px);border:1px solid var(--line2);border-radius:13px;padding:9px}
+.fb{width:36px;height:36px;border-radius:9px;border:1px solid var(--line2);background:transparent;color:var(--t2);cursor:pointer;
+ display:flex;align-items:center;justify-content:center;transition:.15s}
+.fb:hover{border-color:var(--t3);color:var(--t1)}
+.fb.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.fcores{display:flex;flex-direction:column;gap:5px;padding-top:6px;margin-top:2px;border-top:1px solid var(--line2)}
+.fcores b{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;margin:0 auto;display:block}
+.fcores b.on{border-color:#fff;transform:scale(1.12)}
+@media print{#ferramentas{display:none}}
 </style></head><body>
 <div class="progress" id="prog"></div>
 <div class="brand-corner">EFEITO <b>VENDAS</b></div>
@@ -323,7 +337,7 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
   <div class="kicker">A saída</div>
   <h2 class="disp">Dois caminhos</h2>
   <p class="lead">Decidir certo toda semana exige <b>dado organizado</b> e <b>tempo</b>. Existem duas formas de ter isso.</p>
-  <div class="oferta">
+  <div class="oferta" style="grid-template-columns:1.6fr 1fr;align-items:start">
     <div class="of a" style="--c:var(--purple)">
       <div class="ot">para quem faz sozinho</div>
       <div class="on">SELLER.IA CLUB</div>
@@ -340,17 +354,12 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
     </div>
     <div class="of b" style="--c:var(--orange)">
       <div class="ot">para quem quer o time fazendo</div>
-      <div class="on">GESTÃO DE CONTAS</div>
-      <div class="op" style="color:var(--orange)">sob consulta</div>
+      <div class="on" style="font-size:21px">GESTÃO DE CONTAS</div>
       <ul>
-        <li>Consultor de conta dedicado à sua loja</li>
-        <li>Analista de Ads cuidando das campanhas</li>
-        <li>Assistente de operação na rotina diária</li>
-        <li>Relatório mensal com o que foi feito e o resultado</li>
+        <li>Time cuidando da conta: consultor, Ads e operação</li>
         <li>O mesmo método que move mais de R$ 200 milhões por ano</li>
       </ul>
-      <p style="font-size:11.5px;color:var(--t3);margin-top:8px">Vagas limitadas por mês</p>
-      <a class="cta" style="background:var(--orange)" href="https://wa.me/">Falar com o time</a>
+      <p style="font-size:11.5px;color:var(--t3);margin-top:8px">Vagas limitadas · fale com o time</p>
     </div>
   </div>
 </section>
@@ -379,6 +388,18 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
   <div class="verdict-strip" style="margin-top:18px;background:var(--orange-soft);border-color:var(--orange)">Se o terceiro número for maior que zero, você já sabe onde está o dinheiro que está escapando. <b>E já sabe o que fazer na segunda-feira.</b></div>
 </section>
 
+</div>
+<canvas id="tela"></canvas>
+<div id="ferramentas">
+  <button class="fb" id="f-lapis" title="Lápis (D)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></button>
+  <button class="fb" id="f-borracha" title="Borracha (E)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 20H9l-5-5a2 2 0 0 1 0-3l8-8a2 2 0 0 1 3 0l6 6a2 2 0 0 1 0 3l-7 7"/><path d="M6 11l7 7"/></svg></button>
+  <button class="fb" id="f-limpa" title="Limpar tudo (L)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+  <div class="fcores">
+    <b data-c="#ff4d1c" class="on" style="background:#ff4d1c"></b>
+    <b data-c="#ffffff" style="background:#fff"></b>
+    <b data-c="#1fd47a" style="background:#1fd47a"></b>
+    <b data-c="#7B2FFF" style="background:#7B2FFF"></b>
+  </div>
 </div>
 <div class="nav"><button id="prev">‹</button><div class="dots" id="dots"></div><span class="counter" id="counter">01 / 11</span><button id="next">›</button></div>
 <script>
@@ -423,4 +444,71 @@ function calc(){
 }
 ['i-preco','i-custo','i-frete','i-vis','i-cv','i-cv2'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 calc();
+
+/* ── LÁPIS E BORRACHA ── */
+(function(){
+  const tela=document.getElementById('tela'), ctx=tela.getContext('2d');
+  let modo=null, pintando=false, cor='#ff4d1c';
+  const desenhos={};
+  function dim(){
+    const r=devicePixelRatio||1;
+    const atual=tela.toDataURL();
+    tela.width=innerWidth*r; tela.height=innerHeight*r;
+    tela.style.width=innerWidth+'px'; tela.style.height=innerHeight+'px';
+    ctx.setTransform(r,0,0,r,0,0); ctx.lineCap='round'; ctx.lineJoin='round';
+    restaura();
+  }
+  function restaura(){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    const d=desenhos[cur];
+    if(d){ const i=new Image(); i.onload=()=>ctx.drawImage(i,0,0,innerWidth,innerHeight); i.src=d; }
+  }
+  function salva(){ desenhos[cur]=tela.toDataURL(); }
+  const pos=e=>({x:e.clientX,y:e.clientY});
+  tela.addEventListener('pointerdown',e=>{
+    if(!modo && e.pointerType!=='pen') return;
+    pintando=true; tela.setPointerCapture(e.pointerId);
+    const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y);
+    if(modo==='borracha'){ ctx.globalCompositeOperation='destination-out'; ctx.lineWidth=26; }
+    else { ctx.globalCompositeOperation='source-over'; ctx.strokeStyle=cor;
+           ctx.lineWidth = e.pointerType==='pen' ? Math.max(1.8,(e.pressure||.5)*7) : 3.2; }
+  });
+  tela.addEventListener('pointermove',e=>{
+    if(!pintando) return;
+    const p=pos(e);
+    if(modo!=='borracha' && e.pointerType==='pen') ctx.lineWidth=Math.max(1.8,(e.pressure||.5)*7);
+    ctx.lineTo(p.x,p.y); ctx.stroke();
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>tela.addEventListener(ev,()=>{
+    if(pintando){ pintando=false; ctx.globalCompositeOperation='source-over'; salva(); }
+  }));
+  const bl=document.getElementById('f-lapis'), bb=document.getElementById('f-borracha');
+  function setModo(m){
+    modo = (modo===m) ? null : m;
+    document.body.classList.toggle('desenhando', modo==='lapis');
+    document.body.classList.toggle('apagando', modo==='borracha');
+    bl.classList.toggle('on', modo==='lapis');
+    bb.classList.toggle('on', modo==='borracha');
+  }
+  bl.onclick=()=>setModo('lapis');
+  bb.onclick=()=>setModo('borracha');
+  document.getElementById('f-limpa').onclick=()=>{ ctx.clearRect(0,0,innerWidth,innerHeight); delete desenhos[cur]; };
+  document.querySelectorAll('.fcores b').forEach(b=>b.onclick=()=>{
+    cor=b.dataset.c;
+    document.querySelectorAll('.fcores b').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    if(modo!=='lapis') setModo('lapis');
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT') return;
+    const k=e.key.toLowerCase();
+    if(k==='d') setModo('lapis');
+    else if(k==='e') setModo('borracha');
+    else if(k==='l') document.getElementById('f-limpa').click();
+  });
+  const goAntigo=window.go;
+  window.go=function(i){ salva(); goAntigo(i); restaura(); };
+  addEventListener('resize',dim);
+  dim();
+})();
 </script></body></html>
