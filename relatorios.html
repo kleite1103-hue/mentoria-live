@@ -408,6 +408,7 @@ function montar(D){
     M[m].aclk=f(a.cliques_total);M[m].cvs=f(a.conversoes_total)});
   D.shop.forEach(s=>{const m=s.mes_referencia; if(!M[m])return;
     M[m].pot=f(s.compradores_potenciais);M[m].pedf=f(s.pedidos_feitos);
+    M[m].shopOk = f(s.compradores_potenciais)>0 && f(s.pedidos_feitos)>0;
     M[m].rec=f(s.recomendacao_pct);M[m].pes=f(s.pesquisa_pct);
     M[m].afc=f(s.afil_ctr);M[m].afv=f(s.afil_conv);M[m].afp=f(s.afil_pedidos);
     M[m].canais=s.canais_json});
@@ -426,7 +427,14 @@ function montar(D){
   const cpc=MS.map(m=>g(m,'aclk')?g(m,'inv')/g(m,'aclk'):0);
   const cvads=MS.map(m=>g(m,'aclk')?g(m,'cvs')/g(m,'aclk')*100:0);
   const tacos=MS.map((m,i)=>fat[i]?inv[i]/fat[i]*100:0);
-  const pot=MS.map(m=>g(m,'pot')), convCar=MS.map(m=>g(m,'pot')?g(m,'ped')/g(m,'pot')*100:0);
+  const pot=MS.map(m=>g(m,'pot'));
+  // conversão do carrinho usa pedidos da MESMA fonte (relatório da loja), senão mês parcial distorce
+  const convCar=MS.map(m=>(M[m].shopOk)?g(m,'pedf')/g(m,'pot')*100:null);
+  const idxCar=MS.map((m,i)=>i).filter(i=>convCar[i]!==null);
+  const convCarV=idxCar.map(i=>convCar[i]), rotsCar=idxCar.map(i=>rots[i]);
+  const abandono=convCarV.map(v=>100-v);
+  const iCarU=idxCar.length?idxCar[idxCar.length-1]:-1;
+  const iCarBest=idxCar.length?idxCar[convCarV.indexOf(Math.max(...convCarV))]:-1;
   const canc=MS.map(m=>g(m,'ped')?g(m,'canc')/(g(m,'ped')+g(m,'canc'))*100:0);
   const novos=MS.map(m=>g(m,'novos')), volta=MS.map(m=>g(m,'volta'));
   const recomp=MS.map((m,i)=>(novos[i]+volta[i])?volta[i]/(novos[i]+volta[i])*100:0);
@@ -441,7 +449,9 @@ function montar(D){
   const cov=inv.reduce((s,a,i)=>s+(a-mi)*(fat[i]-mf),0)/n;
   const si=Math.sqrt(inv.reduce((s,a)=>s+(a-mi)**2,0)/n),sf=Math.sqrt(fat.reduce((s,b)=>s+(b-mf)**2,0)/n);
   const r=(si&&sf)?cov/(si*sf):0,b1=si?cov/si**2:0,b0=mf-b1*mi;
-  const iMax=fat.indexOf(Math.max(...fat)),iUlt=MS.length-1,ultM=MS[iUlt],bestM=MS[iMax];
+  const iMax=fat.indexOf(Math.max(...fat)),iUlt=MS.length-1,ultM=MS[iUlt];
+  const mesesComProd=[...new Set(D.produtos.map(p=>p.mes_referencia))].filter(m=>MS.includes(m));
+  const bestM=mesesComProd.length?mesesComProd.reduce((a,b)=>fat[MS.indexOf(b)]>fat[MS.indexOf(a)]?b:a):MS[iMax];
   const varia=(a,b)=>a?((b/a-1)*100):0, cor=v=>v>=0?'#1a9e52':'#c0392b', sin=v=>(v>=0?'+':'')+br(v,0)+'%';
   const hoje=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   const per=rots[0]+' a '+rots[iUlt];
@@ -515,6 +525,43 @@ function montar(D){
   <table><thead><tr><th>Mês</th><th class="n">Faturamento</th><th class="n">Pedidos</th><th class="n">Ticket</th><th class="n">Visitas</th><th class="n">Conversão</th><th class="n">Ads</th><th class="n">ROAS</th><th class="n">% Ads</th></tr></thead><tbody>${trs}</tbody></table>
   ${rod()}</div>
 
+  ${(()=>{
+    const d=D.diarias.slice().sort((a,b)=>a.data<b.data?-1:1);
+    if(d.length<14) return '';
+    const u7=d.slice(-7), a7=d.slice(-14,-7);
+    const som=(arr,c)=>arr.reduce((s,x)=>s+f(x[c]),0);
+    const fU=som(u7,'faturamento'),fA=som(a7,'faturamento');
+    const pU=som(u7,'pedidos'),pA=som(a7,'pedidos');
+    const vU=som(u7,'visitantes'),vA=som(a7,'visitantes');
+    const cU=vU?pU/vU*100:0,cA=vA?pA/vA*100:0;
+    const tU=pU?fU/pU:0,tA=pA?fA/pA:0;
+    const aU=som(u7,'vendas_ads'),oU=som(u7,'vendas_organico'),afU=som(u7,'vendas_afiliado');
+    const dia=x=>{const p=x.data.slice(5).split('-');return p[1]+'/'+p[0]};
+    const serieF=u7.map(x=>f(x.faturamento)), serieP=u7.map(x=>f(x.pedidos));
+    const rotsD=u7.map(dia);
+    const vv=(a,b)=>a?((b/a-1)*100):0;
+    const seta=v=>v>=0?'▲':'▼', corv=v=>v>=0?'#1a9e52':'#c0392b';
+    const melhor=u7.reduce((m,x)=>f(x.faturamento)>f(m.faturamento)?x:m,u7[0]);
+    const pior=u7.reduce((m,x)=>f(x.faturamento)<f(m.faturamento)?x:m,u7[0]);
+    return `<div class="pg"><div class="olho">Os últimos 7 dias</div><h2>Como está a loja<br>esta semana</h2>
+    <p>Fotografia dos últimos 7 dias com registro, comparada com os 7 dias anteriores. É o termômetro de curto prazo — o que o relatório mensal não pega a tempo.</p>
+    <div class="kpis">
+      <div class="kpi" style="--c:#1a1d23"><div class="l">Faturamento</div><div class="v">${k(fU)}</div><div class="s" style="color:${corv(vv(fA,fU))}">${seta(vv(fA,fU))} ${br(Math.abs(vv(fA,fU)),0)}% vs semana anterior</div></div>
+      <div class="kpi" style="--c:#7B2FFF"><div class="l">Pedidos</div><div class="v">${nn(pU)}</div><div class="s" style="color:${corv(vv(pA,pU))}">${seta(vv(pA,pU))} ${br(Math.abs(vv(pA,pU)),0)}% · ${br(pU/7,0)} por dia</div></div>
+      <div class="kpi" style="--c:#2d7ff9"><div class="l">Visitas</div><div class="v">${nn(vU)}</div><div class="s" style="color:${corv(vv(vA,vU))}">${seta(vv(vA,vU))} ${br(Math.abs(vv(vA,vU)),0)}% · ${nn(vU/7)} por dia</div></div>
+      <div class="kpi" style="--c:#1a9e52"><div class="l">Conversão</div><div class="v">${pc(cU)}</div><div class="s" style="color:${corv(vv(cA,cU))}">${seta(vv(cA,cU))} ${br(Math.abs(vv(cA,cU)),0)}% vs ${pc(cA)}</div></div>
+    </div>
+    <h3>Faturamento por dia</h3>
+    ${gLinha([{v:serieF,c:PAL.lar}],rotsD,k,760,180)}
+    <div class="dois">
+      <div><h3>Pedidos por dia</h3>${gLinha([{v:serieP,c:PAL.rx}],rotsD,nn,366,165)}</div>
+      <div><h3>De onde vieram as vendas da semana</h3>${gRosca([{n:'Ads',v:aU,c:PAL.lar},{n:'Orgânico',v:oU,c:PAL.vd},{n:'Afiliados',v:afU,c:PAL.rx}],340,190)}
+      ${legenda([{n:'Ads',c:PAL.lar},{n:'Orgânico',c:PAL.vd},{n:'Afiliados',c:PAL.rx}])}</div>
+    </div>
+    <div class="cx ${vv(fA,fU)>=0?'vd':'am'}"><div class="t">Leitura da semana</div><p>Melhor dia: <b>${dia(melhor)}</b> com ${k(f(melhor.faturamento))}. Dia mais fraco: <b>${dia(pior)}</b> com ${k(f(pior.faturamento))}. O ticket médio da semana foi <b>${rs(tU)}</b>${tA?' contra '+rs(tA)+' na semana anterior':''}. ${vv(fA,fU)<-15?'A queda vem principalmente de '+(Math.abs(vv(vA,vU))>Math.abs(vv(cA,cU))?'<b>menos visitas</b> — vale olhar orçamento de anúncio e posicionamento':'<b>queda na conversão</b> — vale olhar preço, estoque e concorrência direta')+'.':vv(fA,fU)>15?'A semana cresceu puxada por '+(vv(vA,vU)>vv(cA,cU)?'<b>mais tráfego</b>':'<b>melhor conversão</b>')+'.':'A semana ficou estável em relação à anterior.'}</p></div>
+    ${rod()}</div>`;
+  })()}
+
   <div class="pg"><div class="olho">O funil da loja</div><h2>Do primeiro clique<br>até a compra</h2>
   <p>Toda venda passa por três etapas. Entender onde as pessoas param é o que mostra o que precisa ser arrumado — e esse diagnóstico não custa nada em mídia.</p>
   ${temCar?gFunil([
@@ -523,11 +570,29 @@ function montar(D){
     {n:'Compraram',v:ped[iUlt],t:nn(ped[iUlt]),c:'#1a9e52'}
   ]):gFunil([{n:'Visitas na loja',v:vis[iUlt],t:nn(vis[iUlt]),c:'#7B2FFF'},{n:'Compraram',v:ped[iUlt],t:nn(ped[iUlt]),c:'#1a9e52'}])}
   <p style="font-size:8.6pt;color:#6b727c">Dados de ${rots[iUlt]}. "Chegaram ao carrinho" são os compradores potenciais registrados pela plataforma.</p>
-  ${temCar?`<div class="dois" style="margin-top:3mm">
-    <div><h3>Conversão do carrinho — quem chegou e comprou</h3>${gLinha([{v:convCar,c:'#2d7ff9'}],rots,v=>pc(v),366,180)}</div>
-    <div><h3>Conversão da loja — quem visitou e comprou</h3>${gLinha([{v:conv,c:'#c0392b'}],rots,v=>pc(v),366,180)}</div></div>
-  <div class="cx ${convCar[iUlt]<Math.max(...convCar)*0.8?'am':'vd'}"><div class="t">O que esse número diz</div><p>De cada 100 pessoas que chegaram ao carrinho em ${rots[iUlt]}, <b>${br(convCar[iUlt],1)} compraram</b>. No melhor mês do período foram <b>${br(Math.max(...convCar),1)}</b>. ${convCar[iUlt]<Math.max(...convCar)*0.8?'Recuperar esse patamar significa vender mais sem trazer um visitante a mais — mexendo em frete, cupom, prazo de envio e formas de pagamento.':'O patamar está próximo do melhor do período.'}</p></div>`:''}
+  <div class="dois" style="margin-top:3mm">
+    <div><h3>Conversão da loja — quem visitou e comprou</h3>${gLinha([{v:conv,c:'#c0392b'}],rots,v=>pc(v),366,175)}</div>
+    <div><h3>Ticket médio</h3>${gLinha([{v:tk,c:PAL.vd}],rots,rs,366,175)}</div></div>
   ${rod()}</div>`;
+
+  if(iCarU>=0){
+    const abAt=100-convCar[iCarU], perdidos=pot[iCarU]-g(ultM,'pedf');
+    const ganhoCar=(convCar[iCarBest]-convCar[iCarU])/100*pot[iCarU]*tk[iUlt];
+    H+=`<div class="pg"><div class="olho">Carrinho abandonado</div><h2>Quem quase comprou<br>e desistiu</h2>
+    <p>O carrinho é a etapa mais perto da venda: a pessoa escolheu o produto, calculou frete e parou. <b>É o público mais barato de recuperar</b>, porque ele já quis comprar.</p>
+    <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi" style="--c:#2d7ff9"><div class="l">Chegaram ao carrinho</div><div class="v">${nn(pot[iCarU])}</div><div class="s">em ${rots[iCarU]}</div></div>
+      <div class="kpi" style="--c:#c0392b"><div class="l">Abandonaram</div><div class="v">${br(abAt,1)}%</div><div class="s">${nn(perdidos)} pessoas</div></div>
+      <div class="kpi" style="--c:#1a9e52"><div class="l">Concluíram a compra</div><div class="v">${br(convCar[iCarU],1)}%</div><div class="s">${nn(g(ultM,'pedf'))} pedidos</div></div>
+    </div>
+    <h3>Dos que chegaram ao carrinho, quantos compraram</h3>
+    ${gLinha([{v:convCarV,c:'#1a9e52'}],rotsCar,v=>pc(v,1),760,185)}
+    <h3 style="margin-top:4mm">E quantos desistiram</h3>
+    ${gArea([{n:'Abandonaram',v:abandono,c:'#f3c9c2'},{n:'Compraram',v:convCarV,c:'#1a9e52'}],rotsCar,v=>br(v,0)+'%',760,165)}
+    <div class="cx ${convCar[iCarU]<convCar[iCarBest]*0.85?'am':'vd'}"><div class="t">O que dá para fazer</div><p>A melhor taxa do período foi <b>${br(convCar[iCarBest],1)}%</b> em ${rots[iCarBest]}; hoje está em <b>${br(convCar[iCarU],1)}%</b>. ${convCar[iCarU]<convCar[iCarBest]*0.85?'Voltar a esse patamar, com o mesmo tráfego, valeria cerca de <b>'+k(ganhoCar)+' por mês</b>. As alavancas são frete grátis a partir de um valor, cupom de primeira compra, prazo de envio e parcelamento — nenhuma delas custa mídia.':'A taxa está próxima do melhor do período. Manter cupom, frete e prazo de envio competitivos sustenta esse patamar.'}</p></div>
+    <div class="cx"><div class="t">Por que as pessoas abandonam</div><p>Frete alto ou prazo longo · falta de cupom na hora de fechar · poucas formas de pagamento · dúvida sobre medida ou cor que a página não respondeu · valor total acima do esperado.</p></div>
+    ${rod()}</div>`;
+  }
 
   if(temCanal){
     const cores={ads:PAL.lar,org:PAL.vd,afi:PAL.rx,vid:PAL.az,liv:PAL.am};
@@ -648,11 +713,18 @@ function montar(D){
 
   const temVid=temVideo;
   H+=`<div class="pg"><div class="olho">Conclusão</div><h2>Onde focar agora</h2>
-  <div class="passo"><div class="n">1</div><div><h4>${temCar&&convCar[iUlt]<Math.max(...convCar)*0.85?'Recuperar a conversão do carrinho':'Conversão dos produtos principais'}</h4><p>${temCar&&convCar[iUlt]<Math.max(...convCar)*0.85?'A conversão do carrinho está em '+br(convCar[iUlt],1)+'% contra '+br(Math.max(...convCar),1)+'% no melhor mês. Frete, cupom, prazo de envio e formas de pagamento são as alavancas — e nenhuma custa mídia.':'Fotos, descrição, tabela de medidas e avaliações nos produtos que mais faturam. É a alavanca de maior retorno sem aumentar investimento.'}</p></div></div>
-  <div class="passo"><div class="n">2</div><div><h4>${varia(vis[iMax],vis[iUlt])<-15?'Recuperar o volume de visitas':'Sustentar o tráfego conquistado'}</h4><p>${varia(vis[iMax],vis[iUlt])<-15?'As visitas caíram '+br(Math.abs(varia(vis[iMax],vis[iUlt])),0)+'% desde o melhor mês. Revisão de títulos e palavras-chave devolve alcance sem aumentar orçamento.':'O tráfego está estável. Manter títulos e palavras-chave revisados preserva o alcance.'}</p></div></div>
-  <div class="passo"><div class="n">3</div><div><h4>${tf&&ti/tf*100<10?'Espaço para escalar a mídia':'Eficiência antes de verba'}</h4><p>${tf&&ti/tf*100<10?'Com ROAS de '+xx(ti?tg/ti:0)+' e apenas '+br(tf?ti/tf*100:0,1)+'% do faturamento em mídia, há margem para crescer em etapas de 20% — sempre com estoque garantido.':'O investimento já é '+br(tf?ti/tf*100:0,1)+'% do faturamento. O próximo ganho vem de conversão e ticket, não de verba.'}</p></div></div>
-  <div class="passo"><div class="n">4</div><div><h4>${temVid?'Ampliar vídeo e live':'Ativar vídeo e live'}</h4><p>${temVid?'Os canais de vídeo e live já trazem resultado e têm espaço para crescer — entregam alcance sem leilão de anúncio.':'Shopee Vídeo e Live estão sem uso nesta conta. São canais com alcance gratuito que a plataforma privilegia hoje.'}</p></div></div>
-  <div class="cx lar"><div class="t">Em resumo</div><p>${roas[iUlt]>=8?'A mídia está saudável, com retorno de '+xx(roas[iUlt])+' no último mês. ':''}O crescimento dos próximos meses vem de <b>conversão</b> e de <b>diversificar os canais</b> — frentes que dependem de operação, não de orçamento.</p></div>
+  <p>Seis frentes, em ordem de retorno. As três primeiras não exigem aumentar investimento.</p>
+  ${[
+    (iCarU>=0 && convCar[iCarU]<convCar[iCarBest]*0.85) ? {t:'Recuperar o carrinho',d:'A conversão do carrinho está em '+br(convCar[iCarU],1)+'% contra '+br(convCar[iCarBest],1)+'% no melhor mês. Frete grátis por faixa de valor, cupom na finalização e prazo de envio são as alavancas — custo zero de mídia.'} : null,
+    (prodsU.length && prodsB.length) ? {t:'Conversão dos produtos que mais faturam',d:'Os principais convertem entre '+pc(Math.min(...prodsU.slice(0,5).map(p=>f(p.conv))))+' e '+pc(Math.max(...prodsU.slice(0,5).map(p=>f(p.conv))))+'. Fotos, tabela de medidas, avaliações e descrição mexem nesse número em semanas.'} : null,
+    (varia(vis[iMax],vis[iUlt])<-15) ? {t:'Recuperar o volume de visitas',d:'As visitas caíram '+br(Math.abs(varia(vis[iMax],vis[iUlt])),0)+'% desde o melhor mês. Revisar títulos e palavras-chave dos principais devolve alcance sem gastar mais.'} : {t:'Sustentar o tráfego conquistado',d:'O volume de visitas está estável. Manter títulos e palavras-chave revisados preserva o alcance já conquistado.'},
+    (tf && ti/tf*100<10) ? {t:'Escalar a mídia em etapas',d:'Com ROAS de '+xx(ti?tg/ti:0)+' e só '+br(tf?ti/tf*100:0,1)+'% do faturamento em anúncio, há espaço. Subir 20% a cada duas semanas, confirmando o ROAS, sempre com estoque garantido.'} : {t:'Eficiência antes de verba',d:'O investimento já é '+br(tf?ti/tf*100:0,1)+'% do faturamento. O próximo ganho vem de conversão e ticket, não de orçamento.'},
+    (conc2>60) ? {t:'Preparar mais um campeão',d:'Dois anúncios levam '+br(conc2,0)+'% do orçamento. Desenvolver um terceiro produto ao mesmo patamar dilui o risco e abre espaço para crescer.'} : {t:'Manter a distribuição entre anúncios',d:'O investimento está bem distribuído, o que reduz a dependência de poucos produtos.'},
+    temVideo ? {t:'Ampliar vídeo e live',d:'Os canais já trazem resultado e têm espaço para crescer — entregam alcance sem leilão de anúncio.'} : {t:'Ativar vídeo e live',d:'Shopee Vídeo e Live estão sem uso na conta. São canais com alcance gratuito que a plataforma privilegia hoje.'},
+    (recomp[iUlt]<10) ? {t:'Trabalhar a recompra',d:'Só '+br(recomp[iUlt],1)+'% das compras vêm de quem já comprou. Cupom de retorno e contato pós-venda transformam cliente novo em recorrente.'} : null,
+    (canc[iUlt]>3) ? {t:'Reduzir cancelamentos',d:br(canc[iUlt],1)+'% dos pedidos foram cancelados no último mês. Cada cancelamento custa a venda e afeta a reputação da loja na plataforma.'} : null
+  ].filter(Boolean).slice(0,6).map((x,i)=>`<div class="passo"><div class="n">${i+1}</div><div><h4>${x.t}</h4><p>${x.d}</p></div></div>`).join('')}
+  <div class="cx lar"><div class="t">Em resumo</div><p>${roas[iUlt]>=8?'A mídia está saudável, com retorno de '+xx(roas[iUlt])+' no último mês. ':''}O crescimento dos próximos meses vem de <b>converter melhor quem já chega</b> e de <b>diversificar os canais</b> — frentes que dependem de operação, não de orçamento.</p></div>
   ${rod()}</div>`;
   return H;
 }
