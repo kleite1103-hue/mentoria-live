@@ -146,8 +146,10 @@ h1{font-family:'Bebas Neue';font-size:38px;letter-spacing:1px;line-height:1}
           </select>
         </div>
       </div>
-      <div class="tipos" style="grid-template-columns:1fr;margin-top:18px">
-        <div class="tipo on" style="cursor:default"><b>Relatório completo da conta</b><span>Faturamento · funil e carrinho · canais (Ads, orgânico, afiliado, vídeo, live) · origem do tráfego · anúncios em profundidade · produtos · trabalho executado · conclusão</span></div>
+      <label style="margin-top:18px">Tipo</label>
+      <div class="tipos">
+        <div class="tipo on" data-tipo="completo"><b>Completo</b><span>15 páginas · faturamento, funil, carrinho, canais, afiliados, anúncios, produtos, trabalho e conclusão. Para reunião e fechamento de mês.</span></div>
+        <div class="tipo" data-tipo="semanal"><b>Rápido · 7 dias</b><span>3 páginas · a semana comparada com a anterior e com a mesma semana do mês passado. Para mandar toda segunda.</span></div>
       </div>
       <button class="btn" id="gerar">GERAR RELATÓRIO</button>
       <div class="barra" id="barra"><i></i></div>
@@ -166,7 +168,7 @@ h1{font-family:'Bebas Neue';font-size:38px;letter-spacing:1px;line-height:1}
 const SB='https://tglzziptzshwhtovoike.supabase.co';
 const SK='sb_publishable_BE3sdf2BU14g-gdBxBLYlg_sRId5nOv';
 const CARGOS_LIBERADOS=['gerente_conta','gerente_ads'];
-let token=null, eu=null, contas=[];
+let token=null, eu=null, contas=[], tipo='completo';
 
 const $=id=>document.getElementById(id);
 const api=async(p,t)=>{
@@ -202,6 +204,10 @@ $('entrar').onclick=async()=>{
   $('entrar').disabled=false;
 };
 $('senha').addEventListener('keydown',e=>{if(e.key==='Enter')$('entrar').click()});
+document.querySelectorAll('.tipo').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tipo').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on'); tipo=t.dataset.tipo;
+});
 $('sair').onclick=()=>{sessionStorage.removeItem('ev_tok');location.reload()};
 
 async function abrirPainel(){
@@ -382,7 +388,7 @@ $('gerar').onclick=async()=>{
     prog(55);
     if(!diarias.length){ st('Esta conta não tem dados no período escolhido.','err'); $('gerar').disabled=false; $('barra').style.display='none'; return; }
     st('Montando o relatório…'); prog(75);
-    const html = montar({nome,diarias,ads,adsProd,produtos,shop,check});
+    const html = (tipo==='semanal') ? montarSemana({nome,diarias,ads}) : montar({nome,diarias,ads,adsProd,produtos,shop,check});
     $('rel').innerHTML=html; prog(100);
     st('Relatório pronto.','ok');
     $('painel').style.display='none'; $('saida').style.display='block'; $('acoes').style.display='flex';
@@ -727,6 +733,84 @@ function montar(D){
   <div class="cx lar"><div class="t">Em resumo</div><p>${roas[iUlt]>=8?'A mídia está saudável, com retorno de '+xx(roas[iUlt])+' no último mês. ':''}O crescimento dos próximos meses vem de <b>converter melhor quem já chega</b> e de <b>diversificar os canais</b> — frentes que dependem de operação, não de orçamento.</p></div>
   ${rod()}</div>`;
   return H;
+}
+
+
+/* ───── RELATÓRIO RÁPIDO · 7 DIAS ───── */
+function montarSemana(D){
+  const d=D.diarias.slice().sort((a,b)=>a.data<b.data?-1:1);
+  if(d.length<14) return '<div class="pg"><p>Esta conta não tem 14 dias de dados para comparar.</p></div>';
+  const som=(arr,c)=>arr.reduce((s,x)=>s+f(x[c]),0);
+  const u7=d.slice(-7), a7=d.slice(-14,-7), m7=d.length>=35?d.slice(-35,-28):null;
+  const bloco=arr=>{const fa=som(arr,'faturamento'),pe=som(arr,'pedidos'),vi=som(arr,'visitantes');
+    return {fat:fa,ped:pe,vis:vi,conv:vi?pe/vi*100:0,tk:pe?fa/pe:0,
+      ads:som(arr,'vendas_ads'),org:som(arr,'vendas_organico'),afi:som(arr,'vendas_afiliado'),
+      vid:som(arr,'vendas_videos'),liv:som(arr,'vendas_lives'),
+      canc:som(arr,'pedidos_cancelados'),novos:som(arr,'compradores_novos'),volta:som(arr,'compradores_existentes'),
+      ini:arr[0].data,fim:arr[arr.length-1].data};};
+  const A=bloco(u7), B=bloco(a7), C=m7?bloco(m7):null;
+  const dia=s=>{const p=s.slice(5).split('-');return p[1]+'/'+p[0]};
+  const vv=(x,y)=>x?((y/x-1)*100):0, seta=v=>v>=0?'▲':'▼', cv=v=>v>=0?'#1a9e52':'#c0392b';
+  const sinal=v=>(v>=0?'+':'')+br(v,0)+'%';
+  const rotsD=u7.map(x=>dia(x.data));
+  const serieF=u7.map(x=>f(x.faturamento)), serieA=a7.map(x=>f(x.faturamento));
+  const serieP=u7.map(x=>f(x.pedidos)), serieV=u7.map(x=>f(x.visitantes));
+  const melhor=u7.reduce((m,x)=>f(x.faturamento)>f(m.faturamento)?x:m,u7[0]);
+  const pior=u7.reduce((m,x)=>f(x.faturamento)<f(m.faturamento)?x:m,u7[0]);
+  const totCan=A.ads+A.org+A.afi+A.vid+A.liv||1;
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  const linha=(nome,a,b,c,fmt,inv)=>{
+    const v1=vv(b,a), v2=c?vv(c,a):null;
+    const c1=inv?(v1<=0?'#1a9e52':'#c0392b'):cv(v1), c2=v2===null?'':(inv?(v2<=0?'#1a9e52':'#c0392b'):cv(v2));
+    return `<tr><td><b>${nome}</b></td><td class="n">${fmt(a)}</td><td class="n">${fmt(b)}</td><td class="n" style="color:${c1}">${seta(v1)} ${sinal(v1)}</td>${c?`<td class="n">${fmt(c)}</td><td class="n" style="color:${c2}">${seta(v2)} ${sinal(v2)}</td>`:''}</tr>`;};
+  const diaria=u7.map((x,i)=>{const fa=f(x.faturamento),pe=f(x.pedidos),vi=f(x.visitantes);
+    return `<tr><td><b>${dia(x.data)}</b></td><td class="n">${rs(fa)}</td><td class="n">${nn(pe)}</td><td class="n">${nn(vi)}</td><td class="n">${pc(vi?pe/vi*100:0)}</td><td class="n">${rs(pe?fa/pe:0)}</td></tr>`}).join('');
+  let alertas=[];
+  if(vv(B.fat,A.fat)<-20) alertas.push({c:'am',t:'Queda na semana',p:'O faturamento caiu <b>'+br(Math.abs(vv(B.fat,A.fat)),0)+'%</b> contra a semana anterior. '+(Math.abs(vv(B.vis,A.vis))>Math.abs(vv(B.conv,A.conv))?'A origem é <b>menos visitas</b> — olhar orçamento de anúncio e posicionamento.':'A origem é <b>queda de conversão</b> — olhar preço, estoque e concorrência direta.')});
+  if(vv(B.fat,A.fat)>20) alertas.push({c:'vd',t:'Semana em alta',p:'O faturamento subiu <b>'+br(vv(B.fat,A.fat),0)+'%</b> contra a semana anterior, puxado por '+(vv(B.vis,A.vis)>vv(B.conv,A.conv)?'<b>mais tráfego</b>':'<b>melhor conversão</b>')+'. Vale sustentar o que foi feito.'});
+  if(A.canc>0 && A.ped && A.canc/(A.ped+A.canc)>0.05) alertas.push({c:'am',t:'Cancelamentos',p:'<b>'+nn(A.canc)+' pedidos cancelados</b> na semana, '+br(A.canc/(A.ped+A.canc)*100,1)+'% do total. Cada cancelamento custa a venda e afeta a reputação da loja.'});
+  if(A.ads/totCan>0.8) alertas.push({c:'am',t:'Dependência de anúncio',p:'<b>'+br(A.ads/totCan*100,0)+'%</b> das vendas da semana vieram de Ads. Qualquer pausa no investimento aparece no mesmo dia.'});
+  if((A.novos+A.volta)&&A.volta/(A.novos+A.volta)<0.08) alertas.push({c:'',t:'Recompra baixa',p:'Só <b>'+br(A.volta/(A.novos+A.volta)*100,1)+'%</b> das compras foram de clientes que já tinham comprado.'});
+  if(!alertas.length) alertas.push({c:'vd',t:'Semana estável',p:'Sem variações relevantes contra a semana anterior. A operação seguiu o padrão.'});
+  return `<div class="pg capa"><div><div class="tag">Efeito Vendas · Resumo semanal</div>
+  <h2>${D.nome}</h2><p class="s">Os últimos 7 dias comparados com a semana anterior${C?' e com a mesma semana do mês passado':''}.</p></div>
+  <div class="r"><span>Período: <b>${dia(A.ini)} a ${dia(A.fim)}</b></span><span>Gerado em ${hoje}</span></div></div>
+
+  <div class="pg"><div class="olho">A semana</div><h2>Como foi de<br>${dia(A.ini)} a ${dia(A.fim)}</h2>
+  <div class="kpis">
+    <div class="kpi" style="--c:#1a1d23"><div class="l">Faturamento</div><div class="v">${k(A.fat)}</div><div class="s" style="color:${cv(vv(B.fat,A.fat))}">${seta(vv(B.fat,A.fat))} ${br(Math.abs(vv(B.fat,A.fat)),0)}% vs semana anterior</div></div>
+    <div class="kpi" style="--c:#7B2FFF"><div class="l">Pedidos</div><div class="v">${nn(A.ped)}</div><div class="s" style="color:${cv(vv(B.ped,A.ped))}">${seta(vv(B.ped,A.ped))} ${br(Math.abs(vv(B.ped,A.ped)),0)}% · ${br(A.ped/7,0)}/dia</div></div>
+    <div class="kpi" style="--c:#2d7ff9"><div class="l">Visitas</div><div class="v">${nn(A.vis)}</div><div class="s" style="color:${cv(vv(B.vis,A.vis))}">${seta(vv(B.vis,A.vis))} ${br(Math.abs(vv(B.vis,A.vis)),0)}% · ${nn(A.vis/7)}/dia</div></div>
+    <div class="kpi" style="--c:#1a9e52"><div class="l">Conversão</div><div class="v">${pc(A.conv)}</div><div class="s" style="color:${cv(vv(B.conv,A.conv))}">${seta(vv(B.conv,A.conv))} ${br(Math.abs(vv(B.conv,A.conv)),0)}% vs ${pc(B.conv)}</div></div>
+  </div>
+  <h3>Faturamento dia a dia</h3>
+  ${legenda([{n:'Esta semana',c:PAL.lar},{n:'Semana anterior',c:'#c9ced6'}])}
+  ${gLinha([{v:serieA,c:'#c9ced6'},{v:serieF,c:PAL.lar}],rotsD,k,760,190)}
+  <table style="margin-top:3mm"><thead><tr><th>Indicador</th><th class="n">Esta semana</th><th class="n">Anterior</th><th class="n">Variação</th>${C?'<th class="n">Mês passado</th><th class="n">Variação</th>':''}</tr></thead><tbody>
+  ${linha('Faturamento',A.fat,B.fat,C&&C.fat,k)}
+  ${linha('Pedidos',A.ped,B.ped,C&&C.ped,nn)}
+  ${linha('Visitas',A.vis,B.vis,C&&C.vis,nn)}
+  ${linha('Conversão',A.conv,B.conv,C&&C.conv,v=>pc(v))}
+  ${linha('Ticket médio',A.tk,B.tk,C&&C.tk,rs)}
+  ${linha('Cancelados',A.canc,B.canc,C&&C.canc,nn,true)}
+  </tbody></table>
+  <div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>2</span></div></div>
+
+  <div class="pg"><div class="olho">Detalhe e leitura</div><h2>O que aconteceu<br>em cada dia</h2>
+  <table><thead><tr><th>Dia</th><th class="n">Faturamento</th><th class="n">Pedidos</th><th class="n">Visitas</th><th class="n">Conversão</th><th class="n">Ticket</th></tr></thead><tbody>${diaria}</tbody></table>
+  <div class="dois" style="margin-top:4mm">
+    <div><h3>De onde vieram as vendas</h3>
+      ${gRosca([{n:'Ads',v:A.ads,c:PAL.lar},{n:'Orgânico',v:A.org,c:PAL.vd},{n:'Afiliados',v:A.afi,c:PAL.rx}].filter(x=>x.v>0),320,200)}
+      ${legenda([{n:'Ads · '+k(A.ads),c:PAL.lar},{n:'Orgânico · '+k(A.org),c:PAL.vd},{n:'Afiliados · '+k(A.afi),c:PAL.rx}])}
+    </div>
+    <div><h3>Destaques</h3>
+      <div class="cx"><div class="t">Melhor dia</div><p><b>${dia(melhor.data)}</b> com ${k(f(melhor.faturamento))} e ${nn(f(melhor.pedidos))} pedidos.</p></div>
+      <div class="cx"><div class="t">Dia mais fraco</div><p><b>${dia(pior.data)}</b> com ${k(f(pior.faturamento))} e ${nn(f(pior.pedidos))} pedidos.</p></div>
+      <div class="cx"><div class="t">Clientes</div><p><b>${nn(A.novos)}</b> novos e <b>${nn(A.volta)}</b> recorrentes na semana.</p></div>
+    </div>
+  </div>
+  ${alertas.slice(0,3).map(a=>`<div class="cx ${a.c}"><div class="t">${a.t}</div><p>${a.p}</p></div>`).join('')}
+  <div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>3</span></div></div>`;
 }
 
 /* sessão salva */
