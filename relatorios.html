@@ -174,7 +174,7 @@ h1{font-family:'Bebas Neue';font-size:38px;letter-spacing:1px;line-height:1}
 <script>
 const SB='https://tglzziptzshwhtovoike.supabase.co';
 const SK='sb_publishable_BE3sdf2BU14g-gdBxBLYlg_sRId5nOv';
-const CARGOS_LIBERADOS=['gerente_conta','gerente_ads'];
+
 let token=null, eu=null, contas=[], tipo='completo';
 
 const $=id=>document.getElementById(id);
@@ -203,8 +203,6 @@ $('entrar').onclick=async()=>{
     const c=await api('consultores?user_id=eq.'+d.user.id+'&select=id,nome,cargo,is_admin,ativo');
     if(!c.length) throw new Error('Seu login não está vinculado a um cadastro no sistema.');
     eu=c[0];
-    const liberado = eu.is_admin===true || CARGOS_LIBERADOS.includes(eu.cargo);
-    if(!liberado) throw new Error('Esta ferramenta é restrita a gestores e administradores.');
     sessionStorage.setItem('ev_tok',token);
     abrirPainel();
   }catch(err){ $('erro-login').textContent=err.message; }
@@ -228,8 +226,18 @@ $('sair').onclick=()=>{sessionStorage.removeItem('ev_tok');location.reload()};
 async function abrirPainel(){
   $('acesso').style.display='none'; $('painel').style.display='block';
   $('quem').innerHTML='<b>'+eu.nome+'</b> · '+(eu.is_admin?'administrador':eu.cargo.replace('_',' '));
-  contas=await api('contas?ativa=eq.true&select=id,nome&order=nome');
+  const todas=await api('contas?ativa=eq.true&select=id,nome,consultor_id,analista_ads_id,assistente_id&order=nome');
+  const vêTudo = eu.is_admin===true || ['gerente_conta','gerente_ads'].includes(eu.cargo);
+  contas = vêTudo ? todas : todas.filter(c=>c.consultor_id===eu.id||c.analista_ads_id===eu.id||c.assistente_id===eu.id);
+  if(!contas.length){
+    $('conta').innerHTML='<option>nenhuma conta atribuída a você</option>';
+    $('gerar').disabled=true;
+    $('status').textContent='Você ainda não tem contas atribuídas. Fale com a sua liderança.';
+    $('status').className='err';
+    return;
+  }
   $('conta').innerHTML=contas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+  if(!vêTudo) $('quem').innerHTML+=' · <span style="color:#8a919c">'+contas.length+' contas</span>';
 }
 
 
@@ -972,7 +980,7 @@ function montarSemana(D){
     if(!r.ok) return sessionStorage.removeItem('ev_tok');
     const u=await r.json(); token=t;
     const c=await api('consultores?user_id=eq.'+u.id+'&select=id,nome,cargo,is_admin');
-    if(c.length && (c[0].is_admin===true || CARGOS_LIBERADOS.includes(c[0].cargo))){ eu=c[0]; abrirPainel(); }
+    if(c.length){ eu=c[0]; abrirPainel(); }
     else sessionStorage.removeItem('ev_tok');
   }catch(e){ sessionStorage.removeItem('ev_tok'); }
 })();
