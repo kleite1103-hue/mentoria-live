@@ -146,10 +146,8 @@ h1{font-family:'Bebas Neue';font-size:38px;letter-spacing:1px;line-height:1}
           </select>
         </div>
       </div>
-      <label style="margin-top:18px">Tipo de relatório</label>
-      <div class="tipos">
-        <div class="tipo on" data-tipo="completo"><b>Completo</b><span>Visão geral, diagnóstico do funil, anúncios, produtos, trabalho executado e conclusão</span></div>
-        <div class="tipo" data-tipo="midia"><b>Análise de mídia</b><span>Foco em Ads: retorno, custo por venda, concentração, correlação com faturamento e projeção</span></div>
+      <div class="tipos" style="grid-template-columns:1fr;margin-top:18px">
+        <div class="tipo on" style="cursor:default"><b>Relatório completo da conta</b><span>Faturamento · funil e carrinho · canais (Ads, orgânico, afiliado, vídeo, live) · origem do tráfego · anúncios em profundidade · produtos · trabalho executado · conclusão</span></div>
       </div>
       <button class="btn" id="gerar">GERAR RELATÓRIO</button>
       <div class="barra" id="barra"><i></i></div>
@@ -168,7 +166,7 @@ h1{font-family:'Bebas Neue';font-size:38px;letter-spacing:1px;line-height:1}
 const SB='https://tglzziptzshwhtovoike.supabase.co';
 const SK='sb_publishable_BE3sdf2BU14g-gdBxBLYlg_sRId5nOv';
 const CARGOS_LIBERADOS=['gerente_conta','gerente_ads'];
-let token=null, eu=null, contas=[], tipo='completo';
+let token=null, eu=null, contas=[];
 
 const $=id=>document.getElementById(id);
 const api=async(p,t)=>{
@@ -212,34 +210,120 @@ async function abrirPainel(){
   contas=await api('contas?ativa=eq.true&select=id,nome&order=nome');
   $('conta').innerHTML=contas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
 }
-document.querySelectorAll('.tipo').forEach(t=>t.onclick=()=>{
-  document.querySelectorAll('.tipo').forEach(x=>x.classList.remove('on'));
-  t.classList.add('on'); tipo=t.dataset.tipo;
-});
+
 
 /* ───── GRÁFICOS ───── */
-function eixo(w,h,L,T,R,B,fmt,ym){
+const PAL={lar:'#ff4d1c',vd:'#1a9e52',rx:'#7B2FFF',az:'#2d7ff9',am:'#d99a00',vm:'#c0392b',cz:'#9aa0a8'};
+function eixo(w,h,L,T,R,B,fmt,ym,ymin=0){
   const ph=h-T-B,o=[];
-  for(let t=0;t<5;t++){const v=ym*t/4,y=T+ph-v/ym*ph;
-    o.push(`<line x1="${L}" y1="${y.toFixed(1)}" x2="${w-R}" y2="${y.toFixed(1)}" stroke="#e9ebee"/><text x="${L-7}" y="${(y+3.5).toFixed(1)}" text-anchor="end" font-size="9" fill="#9aa0a8">${fmt(v)}</text>`);}
+  for(let t=0;t<5;t++){const v=ymin+(ym-ymin)*t/4,y=T+ph-(v-ymin)/(ym-ymin)*ph;
+    o.push(`<line x1="${L}" y1="${y.toFixed(1)}" x2="${w-R}" y2="${y.toFixed(1)}" stroke="#e9ebee"/><text x="${L-7}" y="${(y+3.5).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#9aa0a8">${fmt(v)}</text>`);}
   return o;
 }
-function gLinha(vals,rots,fmt,cor='#ff4d1c',w=760,h=200){
-  const L=60,T=18,R=16,B=30,pw=w-L-R,ph=h-T-B,ym=(Math.max(...vals)||1)*1.2;
-  const x=i=>L+pw*i/Math.max(1,vals.length-1), y=v=>T+ph-v/ym*ph;
+function gLinha(series,rots,fmt,w=760,h=200,rotLabel=true){
+  const L=60,T=20,R=16,B=rotLabel?30:14,pw=w-L-R,ph=h-T-B;
+  const todos=series.flatMap(s=>s.v), ym=(Math.max(...todos)||1)*1.2;
+  const x=i=>L+pw*i/Math.max(1,rots.length-1), y=v=>T+ph-v/ym*ph;
   const o=eixo(w,h,L,T,R,B,fmt,ym);
-  o.push(`<polyline points="${vals.map((v,i)=>x(i).toFixed(1)+','+y(v).toFixed(1)).join(' ')}" fill="none" stroke="${cor}" stroke-width="2.8" stroke-linejoin="round"/>`);
-  vals.forEach((v,i)=>{o.push(`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3.3" fill="${cor}"/><text x="${x(i).toFixed(1)}" y="${(y(v)-8).toFixed(1)}" text-anchor="middle" font-size="8.4" font-weight="700" fill="${cor}">${fmt(v)}</text>`);
-    o.push(`<text x="${x(i).toFixed(1)}" y="${h-10}" text-anchor="middle" font-size="8.4" fill="#6b727c">${rots[i]}</text>`);});
+  series.forEach(s=>{
+    o.push(`<polyline points="${s.v.map((v,i)=>x(i).toFixed(1)+','+y(v).toFixed(1)).join(' ')}" fill="none" stroke="${s.c}" stroke-width="2.6" stroke-linejoin="round"/>`);
+    s.v.forEach((v,i)=>{o.push(`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3.1" fill="${s.c}"/>`);
+      if(series.length===1) o.push(`<text x="${x(i).toFixed(1)}" y="${(y(v)-8).toFixed(1)}" text-anchor="middle" font-size="8.2" font-weight="700" fill="${s.c}">${fmt(v)}</text>`);});
+  });
+  if(rotLabel) rots.forEach((m,i)=>o.push(`<text x="${x(i).toFixed(1)}" y="${h-10}" text-anchor="middle" font-size="8.2" fill="#6b727c">${m}</text>`));
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
 }
-function gBarras(vals,rots,fmt,cores,w=760,h=200){
-  const L=60,T=18,R=16,B=30,pw=w-L-R,ph=h-T-B,ym=(Math.max(...vals)||1)*1.18,bw=pw/vals.length*0.6;
+function gArea(series,rots,fmt,w=760,h=215){
+  const L=60,T=18,R=16,B=30,pw=w-L-R,ph=h-T-B;
+  const tot=rots.map((_,i)=>series.reduce((s,x)=>s+x.v[i],0));
+  const ym=(Math.max(...tot)||1)*1.12;
+  const x=i=>L+pw*i/Math.max(1,rots.length-1), y=v=>T+ph-v/ym*ph;
   const o=eixo(w,h,L,T,R,B,fmt,ym);
-  vals.forEach((v,i)=>{const cx=L+pw*(i+0.5)/vals.length,hh=v/ym*ph,c=cores?cores[i]:'#ff4d1c';
-    o.push(`<rect x="${(cx-bw/2).toFixed(1)}" y="${(T+ph-hh).toFixed(1)}" width="${bw.toFixed(1)}" height="${hh.toFixed(1)}" fill="${c}" rx="3"/>`);
-    o.push(`<text x="${cx.toFixed(1)}" y="${(T+ph-hh-6).toFixed(1)}" text-anchor="middle" font-size="8.4" font-weight="700" fill="${c}">${fmt(v)}</text>`);
-    o.push(`<text x="${cx.toFixed(1)}" y="${h-10}" text-anchor="middle" font-size="8.4" fill="#6b727c">${rots[i]}</text>`);});
+  const acum=rots.map(()=>0);
+  series.forEach(s=>{
+    const base=acum.slice(); s.v.forEach((v,i)=>acum[i]+=v);
+    const cima=acum.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const baixo=base.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).reverse().join(' ');
+    o.push(`<polygon points="${cima} ${baixo}" fill="${s.c}" opacity=".82"/>`);
+  });
+  rots.forEach((m,i)=>o.push(`<text x="${x(i).toFixed(1)}" y="${h-10}" text-anchor="middle" font-size="8.2" fill="#6b727c">${m}</text>`));
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+function gRosca(itens,w=300,h=250){
+  const cx=w/2,cy=h/2-6,ro=88,ri=54;
+  const tot=itens.reduce((s,i)=>s+i.v,0)||1; let ang=-Math.PI/2; const o=[];
+  itens.forEach(it=>{
+    const a=it.v/tot*Math.PI*2, fim=ang+a, grande=a>Math.PI?1:0;
+    const x1=cx+ro*Math.cos(ang), y1=cy+ro*Math.sin(ang), x2=cx+ro*Math.cos(fim), y2=cy+ro*Math.sin(fim);
+    const x3=cx+ri*Math.cos(fim), y3=cy+ri*Math.sin(fim), x4=cx+ri*Math.cos(ang), y4=cy+ri*Math.sin(ang);
+    o.push(`<path d="M${x1.toFixed(1)},${y1.toFixed(1)} A${ro},${ro} 0 ${grande},1 ${x2.toFixed(1)},${y2.toFixed(1)} L${x3.toFixed(1)},${y3.toFixed(1)} A${ri},${ri} 0 ${grande},0 ${x4.toFixed(1)},${y4.toFixed(1)} Z" fill="${it.c}"/>`);
+    if(it.v/tot>0.07){const mid=ang+a/2, rr=(ro+ri)/2;
+      o.push(`<text x="${(cx+rr*Math.cos(mid)).toFixed(1)}" y="${(cy+rr*Math.sin(mid)+3).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">${Math.round(it.v/tot*100)}%</text>`);}
+    ang=fim;
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+function gFunil(etapas,w=760,h=230){
+  const L=150,T=16,R=130,pw=w-L-R,alt=(h-T-20)/etapas.length-8;
+  const max=etapas[0].v||1; const o=[];
+  etapas.forEach((e,i)=>{
+    const lw=Math.max(14,pw*e.v/max), y=T+i*(alt+8);
+    o.push(`<rect x="${L}" y="${y}" width="${lw.toFixed(1)}" height="${alt.toFixed(1)}" fill="${e.c}" rx="4"/>`);
+    o.push(`<text x="${L-10}" y="${(y+alt/2+4).toFixed(1)}" text-anchor="end" font-size="10.5" font-weight="600" fill="#1a1d23">${e.n}</text>`);
+    o.push(`<text x="${(L+lw+9).toFixed(1)}" y="${(y+alt/2+4).toFixed(1)}" font-size="11" font-weight="700" fill="${e.c}">${e.t}</text>`);
+    if(i<etapas.length-1){const prox=etapas[i+1];
+      o.push(`<text x="${(L+lw+9).toFixed(1)}" y="${(y+alt+10).toFixed(1)}" font-size="8" fill="#9aa0a8">↓ ${(prox.v/e.v*100).toFixed(2).replace('.',',')}% seguem</text>`);}
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+function gBarrasH(itens,fmt,w=760,h=null){
+  const L=210,R=70,T=8,alt=20,gap=7; h=h||T+itens.length*(alt+gap)+6;
+  const pw=w-L-R, max=Math.max(...itens.map(i=>i.v))||1; const o=[];
+  itens.forEach((it,i)=>{
+    const y=T+i*(alt+gap), lw=pw*it.v/max;
+    o.push(`<rect x="${L}" y="${y}" width="${lw.toFixed(1)}" height="${alt}" fill="${it.c||'#ff4d1c'}" rx="3"/>`);
+    o.push(`<text x="${L-8}" y="${y+alt/2+4}" text-anchor="end" font-size="9" fill="#3d434d">${it.n}</text>`);
+    o.push(`<text x="${(L+lw+7).toFixed(1)}" y="${y+alt/2+4}" font-size="9.5" font-weight="700" fill="${it.c||'#ff4d1c'}">${fmt(it.v)}</text>`);
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+function gBolhas(pontos,w=760,h=250,xlab='',ylab=''){
+  const L=60,T=18,R=20,B=34,pw=w-L-R,ph=h-T-B;
+  const xm=(Math.max(...pontos.map(p=>p.x))||1)*1.18, ym=(Math.max(...pontos.map(p=>p.y))||1)*1.2;
+  const rm=Math.max(...pontos.map(p=>p.r))||1;
+  const X=v=>L+v/xm*pw, Y=v=>T+ph-v/ym*ph;
+  const o=[];
+  for(let t=0;t<5;t++){const v=ym*t/4,y=T+ph-v/ym*ph;
+    o.push(`<line x1="${L}" y1="${y.toFixed(1)}" x2="${w-R}" y2="${y.toFixed(1)}" stroke="#eceef1"/><text x="${L-7}" y="${(y+3.5).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#9aa0a8">${v.toFixed(2).replace('.',',')}%</text>`);}
+  for(let t=0;t<=4;t++){const v=xm*t/4;
+    o.push(`<text x="${X(v).toFixed(1)}" y="${h-12}" text-anchor="middle" font-size="8.5" fill="#9aa0a8">${br(v/1000,0)}k</text>`);}
+  pontos.forEach(p=>{
+    const rr=6+Math.sqrt(p.r/rm)*16;
+    o.push(`<circle cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="${rr.toFixed(1)}" fill="${p.c}" opacity=".55"/>`);
+    o.push(`<circle cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="2.5" fill="${p.c}"/>`);
+    o.push(`<text x="${X(p.x).toFixed(1)}" y="${(Y(p.y)-rr-4).toFixed(1)}" text-anchor="middle" font-size="7.8" fill="#3d434d">${p.n}</text>`);
+  });
+  o.push(`<text x="${w/2}" y="${h-1}" text-anchor="middle" font-size="8" fill="#6b727c">${xlab}</text>`);
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+function gCalor(linhas,cols,w=760){
+  const L=200,T=22,cw=(w-L-10)/cols.length,ch=22,h=T+linhas.length*(ch+3)+8;
+  const todos=linhas.flatMap(l=>l.v.filter(v=>v!==null));
+  const mx=Math.max(...todos)||1, mn=Math.min(...todos)||0;
+  const cor=v=>{if(v===null)return '#f2f4f6';
+    const t=(v-mn)/((mx-mn)||1);
+    const r=Math.round(255-(255-26)*t), g=Math.round(243-(243-158)*t), b=Math.round(239-(239-82)*t);
+    return `rgb(${r},${g},${b})`;};
+  const o=[];
+  cols.forEach((c,j)=>o.push(`<text x="${(L+cw*(j+0.5)).toFixed(1)}" y="${T-8}" text-anchor="middle" font-size="8" fill="#6b727c">${c}</text>`));
+  linhas.forEach((l,i)=>{
+    const y=T+i*(ch+3);
+    o.push(`<text x="${L-8}" y="${y+ch/2+3.5}" text-anchor="end" font-size="8.5" fill="#3d434d">${l.n}</text>`);
+    l.v.forEach((v,j)=>{
+      o.push(`<rect x="${(L+cw*j).toFixed(1)}" y="${y}" width="${(cw-2).toFixed(1)}" height="${ch}" fill="${cor(v)}" rx="2"/>`);
+      if(v!==null) o.push(`<text x="${(L+cw*j+cw/2-1).toFixed(1)}" y="${y+ch/2+3.5}" text-anchor="middle" font-size="7.6" font-weight="600" fill="${v>(mn+mx)/1.8?'#fff':'#3d434d'}">${v.toFixed(2).replace('.',',')}</text>`);
+    });
+  });
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
 }
 function gDuplo(fat,inv,rots,w=760,h=225){
@@ -254,11 +338,26 @@ function gDuplo(fat,inv,rots,w=760,h=225){
   const bw=pw/fat.length*0.46;
   fat.forEach((v,i)=>{const cx=x(i),hh=v/ymf*ph;
     o.push(`<rect x="${(cx-bw/2).toFixed(1)}" y="${(T+ph-hh).toFixed(1)}" width="${bw.toFixed(1)}" height="${hh.toFixed(1)}" fill="#d8dce1" rx="2"/>`);
-    o.push(`<text x="${cx.toFixed(1)}" y="${(T+ph-hh-5).toFixed(1)}" text-anchor="middle" font-size="8" fill="#6b727c">${br(v/1000,0)}k</text>`);});
+    o.push(`<text x="${cx.toFixed(1)}" y="${(T+ph-hh-5).toFixed(1)}" text-anchor="middle" font-size="7.8" fill="#6b727c">${br(v/1000,0)}k</text>`);});
   o.push(`<polyline points="${inv.map((v,i)=>x(i).toFixed(1)+','+yi(v).toFixed(1)).join(' ')}" fill="none" stroke="#ff4d1c" stroke-width="2.8"/>`);
-  inv.forEach((v,i)=>{o.push(`<circle cx="${x(i).toFixed(1)}" cy="${yi(v).toFixed(1)}" r="3.4" fill="#ff4d1c"/><text x="${x(i).toFixed(1)}" y="${(yi(v)-8).toFixed(1)}" text-anchor="middle" font-size="8.2" font-weight="700" fill="#ff4d1c">${br(v/1000,0)}k</text>`);});
-  fat.forEach((_,i)=>o.push(`<text x="${x(i).toFixed(1)}" y="${h-10}" text-anchor="middle" font-size="8.4" fill="#6b727c">${rots[i]}</text>`));
+  inv.forEach((v,i)=>o.push(`<circle cx="${x(i).toFixed(1)}" cy="${yi(v).toFixed(1)}" r="3.4" fill="#ff4d1c"/><text x="${x(i).toFixed(1)}" y="${(yi(v)-8).toFixed(1)}" text-anchor="middle" font-size="8" font-weight="700" fill="#ff4d1c">${br(v/1000,0)}k</text>`));
+  fat.forEach((_,i)=>o.push(`<text x="${x(i).toFixed(1)}" y="${h-10}" text-anchor="middle" font-size="8.2" fill="#6b727c">${rots[i]}</text>`));
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+function gDisp(xs,ys,rots,b0,b1,w=360,h=240){
+  const L=54,T=16,R=14,B=30,pw=w-L-R,ph=h-T-B;
+  const xm=(Math.max(...xs)||1)*1.15, ym=(Math.max(...ys)||1)*1.15;
+  const X=v=>L+v/xm*pw, Y=v=>T+ph-v/ym*ph; const o=[];
+  for(let t=0;t<5;t++){const v=ym*t/4,y=T+ph-v/ym*ph;
+    o.push(`<line x1="${L}" y1="${y.toFixed(1)}" x2="${w-R}" y2="${y.toFixed(1)}" stroke="#eceef1"/><text x="${L-6}" y="${(y+3.5).toFixed(1)}" text-anchor="end" font-size="8" fill="#9aa0a8">${k(v)}</text>`);}
+  o.push(`<line x1="${X(0).toFixed(1)}" y1="${Y(b0).toFixed(1)}" x2="${X(xm).toFixed(1)}" y2="${Y(b0+b1*xm).toFixed(1)}" stroke="#1a9e52" stroke-width="2" stroke-dasharray="5 3"/>`);
+  xs.forEach((a,i)=>{o.push(`<circle cx="${X(a).toFixed(1)}" cy="${Y(ys[i]).toFixed(1)}" r="5" fill="#ff4d1c" opacity=".85"/>`);
+    o.push(`<text x="${X(a).toFixed(1)}" y="${(Y(ys[i])-9).toFixed(1)}" text-anchor="middle" font-size="7.5" fill="#6b727c">${rots[i].slice(0,3)}</text>`);});
+  for(let t=0;t<4;t++){const v=xm*t/3; o.push(`<text x="${X(v).toFixed(1)}" y="${h-10}" text-anchor="middle" font-size="8" fill="#6b727c">${rs(v/1000)}k</text>`);}
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+function legenda(itens){
+  return '<div class="leg">'+itens.map(i=>`<span><i style="background:${i.c}"></i>${i.n}</span>`).join('')+'</div>';
 }
 
 /* ───── GERAR ───── */
@@ -273,7 +372,7 @@ $('gerar').onclick=async()=>{
     const hoje=new Date(); const ini=new Date(hoje.getFullYear(),hoje.getMonth()-meses+1,1);
     const di=ini.toISOString().slice(0,10);
     const [diarias,ads,adsProd,produtos,shop,check]=await Promise.all([
-      api(`metricas_diarias?conta_id=eq.${cid}&data=gte.${di}&select=data,faturamento,pedidos,visitantes&order=data&limit=1000`),
+      api(`metricas_diarias?conta_id=eq.${cid}&data=gte.${di}&select=*&order=data&limit=1200`),
       api(`metricas_ads?conta_id=eq.${cid}&select=*&order=mes_referencia&limit=100`),
       api(`metricas_ads_produtos?conta_id=eq.${cid}&select=*&order=mes_referencia&limit=1000`),
       api(`metricas_produtos?conta_id=eq.${cid}&select=*&order=mes_referencia&limit=1000`),
@@ -283,7 +382,7 @@ $('gerar').onclick=async()=>{
     prog(55);
     if(!diarias.length){ st('Esta conta não tem dados no período escolhido.','err'); $('gerar').disabled=false; $('barra').style.display='none'; return; }
     st('Montando o relatório…'); prog(75);
-    const html = montar({nome,diarias,ads,adsProd,produtos,shop,check,tipo});
+    const html = montar({nome,diarias,ads,adsProd,produtos,shop,check});
     $('rel').innerHTML=html; prog(100);
     st('Relatório pronto.','ok');
     $('painel').style.display='none'; $('saida').style.display='block'; $('acoes').style.display='flex';
@@ -297,217 +396,265 @@ $('voltar').onclick=()=>{$('saida').style.display='none';$('acoes').style.displa
 /* ───── MONTAGEM DO RELATÓRIO ───── */
 function montar(D){
   const M={};
-  const put=(m,kk,v)=>{M[m]=M[m]||{};M[m][kk]=(M[m][kk]||0)+v};
+  const add=(m,kk,v)=>{M[m]=M[m]||{};M[m][kk]=(M[m][kk]||0)+v};
   D.diarias.forEach(x=>{const m=x.data.slice(0,7);
-    put(m,'fat',f(x.faturamento));put(m,'ped',f(x.pedidos));put(m,'vis',f(x.visitantes));put(m,'dias',1)});
+    add(m,'fat',f(x.faturamento));add(m,'ped',f(x.pedidos));add(m,'vis',f(x.visitantes));add(m,'clk',f(x.cliques));
+    add(m,'canc',f(x.pedidos_cancelados));add(m,'vcanc',f(x.vendas_canceladas));
+    add(m,'novos',f(x.compradores_novos));add(m,'volta',f(x.compradores_existentes));
+    add(m,'v_ads',f(x.vendas_ads));add(m,'v_afi',f(x.vendas_afiliado));add(m,'v_org',f(x.vendas_organico));
+    add(m,'v_liv',f(x.vendas_lives));add(m,'v_vid',f(x.vendas_videos));add(m,'dias',1)});
   D.ads.forEach(a=>{const m=a.mes_referencia; if(!M[m])return;
     M[m].inv=f(a.despesas_total);M[m].gmv=f(a.gmv_total);M[m].imp=f(a.impressoes_total);
-    M[m].clk=f(a.cliques_total);M[m].cvs=f(a.conversoes_total)});
+    M[m].aclk=f(a.cliques_total);M[m].cvs=f(a.conversoes_total)});
+  D.shop.forEach(s=>{const m=s.mes_referencia; if(!M[m])return;
+    M[m].pot=f(s.compradores_potenciais);M[m].pedf=f(s.pedidos_feitos);
+    M[m].rec=f(s.recomendacao_pct);M[m].pes=f(s.pesquisa_pct);
+    M[m].afc=f(s.afil_ctr);M[m].afv=f(s.afil_conv);M[m].afp=f(s.afil_pedidos);
+    M[m].canais=s.canais_json});
   const hojeM=new Date().toISOString().slice(0,7);
-  const MS=Object.keys(M).sort().filter(m=>m<hojeM);
-  if(!MS.length) return '<div class="pg"><p>Sem meses fechados no período.</p></div>';
-  const rots=MS.map(rot);
-  const g=(m,kk)=>f(M[m][kk]);
-  const fat=MS.map(m=>g(m,'fat')), ped=MS.map(m=>g(m,'ped')), vis=MS.map(m=>g(m,'vis'));
-  const inv=MS.map(m=>g(m,'inv')), gmv=MS.map(m=>g(m,'gmv'));
+  const MS=Object.keys(M).sort().filter(m=>m<hojeM && M[m].dias>=20);
+  if(!MS.length) return '<div class="pg"><p>Sem meses fechados suficientes no período.</p></div>';
+  const rots=MS.map(rot), g=(m,kk)=>f(M[m][kk]);
+  const fat=MS.map(m=>g(m,'fat')),ped=MS.map(m=>g(m,'ped')),vis=MS.map(m=>g(m,'vis'));
+  const inv=MS.map(m=>g(m,'inv')),gmv=MS.map(m=>g(m,'gmv'));
   const conv=MS.map(m=>g(m,'vis')?g(m,'ped')/g(m,'vis')*100:0);
   const tk=MS.map(m=>g(m,'ped')?g(m,'fat')/g(m,'ped'):0);
   const roas=MS.map((m,i)=>inv[i]?gmv[i]/inv[i]:0);
-  const ctr=MS.map(m=>g(m,'imp')?g(m,'clk')/g(m,'imp')*100:0);
+  const ctr=MS.map(m=>g(m,'imp')?g(m,'aclk')/g(m,'imp')*100:0);
   const cpm=MS.map(m=>g(m,'imp')?g(m,'inv')/g(m,'imp')*1000:0);
   const cpa=MS.map(m=>g(m,'cvs')?g(m,'inv')/g(m,'cvs'):0);
-  const cpc=MS.map(m=>g(m,'clk')?g(m,'inv')/g(m,'clk'):0);
-  const cvads=MS.map(m=>g(m,'clk')?g(m,'cvs')/g(m,'clk')*100:0);
+  const cpc=MS.map(m=>g(m,'aclk')?g(m,'inv')/g(m,'aclk'):0);
+  const cvads=MS.map(m=>g(m,'aclk')?g(m,'cvs')/g(m,'aclk')*100:0);
   const tacos=MS.map((m,i)=>fat[i]?inv[i]/fat[i]*100:0);
-  const share=MS.map((m,i)=>fat[i]?gmv[i]/fat[i]*100:0);
-  const tf=fat.reduce((a,b)=>a+b,0), tp=ped.reduce((a,b)=>a+b,0);
-  const ti=inv.reduce((a,b)=>a+b,0), tg=gmv.reduce((a,b)=>a+b,0);
-  // correlação e reta
-  const n=MS.length, mi=ti/n, mf=tf/n;
+  const pot=MS.map(m=>g(m,'pot')), convCar=MS.map(m=>g(m,'pot')?g(m,'ped')/g(m,'pot')*100:0);
+  const canc=MS.map(m=>g(m,'ped')?g(m,'canc')/(g(m,'ped')+g(m,'canc'))*100:0);
+  const novos=MS.map(m=>g(m,'novos')), volta=MS.map(m=>g(m,'volta'));
+  const recomp=MS.map((m,i)=>(novos[i]+volta[i])?volta[i]/(novos[i]+volta[i])*100:0);
+  const vAds=MS.map(m=>g(m,'v_ads')),vAfi=MS.map(m=>g(m,'v_afi')),vOrg=MS.map(m=>g(m,'v_org')),
+        vLiv=MS.map(m=>g(m,'v_liv')),vVid=MS.map(m=>g(m,'v_vid'));
+  const temCanal=vAds.some(v=>v>0)||vOrg.some(v=>v>0)||vAfi.some(v=>v>0);
+  const temVideo=vVid.some(v=>v>0)||vLiv.some(v=>v>0);
+  const temCar=pot.some(v=>v>0);
+  const tf=fat.reduce((a,b)=>a+b,0),tp=ped.reduce((a,b)=>a+b,0);
+  const ti=inv.reduce((a,b)=>a+b,0),tg=gmv.reduce((a,b)=>a+b,0);
+  const n=MS.length,mi=ti/n,mf=tf/n;
   const cov=inv.reduce((s,a,i)=>s+(a-mi)*(fat[i]-mf),0)/n;
-  const si=Math.sqrt(inv.reduce((s,a)=>s+(a-mi)**2,0)/n), sf=Math.sqrt(fat.reduce((s,b)=>s+(b-mf)**2,0)/n);
-  const r=(si&&sf)?cov/(si*sf):0, b1=si?cov/si**2:0, b0=mf-b1*mi;
-  const invAtual=inv[inv.length-1]||0;
-  // melhor e último mês
-  const iMax=fat.indexOf(Math.max(...fat)), iUlt=MS.length-1;
-  const varia=(a,b)=>a?((b/a-1)*100):0;
-  const cor=v=>v>=0?'#1a9e52':'#c0392b', sin=v=>(v>=0?'+':'')+br(v,0)+'%';
+  const si=Math.sqrt(inv.reduce((s,a)=>s+(a-mi)**2,0)/n),sf=Math.sqrt(fat.reduce((s,b)=>s+(b-mf)**2,0)/n);
+  const r=(si&&sf)?cov/(si*sf):0,b1=si?cov/si**2:0,b0=mf-b1*mi;
+  const iMax=fat.indexOf(Math.max(...fat)),iUlt=MS.length-1,ultM=MS[iUlt],bestM=MS[iMax];
+  const varia=(a,b)=>a?((b/a-1)*100):0, cor=v=>v>=0?'#1a9e52':'#c0392b', sin=v=>(v>=0?'+':'')+br(v,0)+'%';
   const hoje=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-  const per=rot(MS[0])+' a '+rot(MS[iUlt]);
-  const rod=p=>`<div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>${p}</span></div>`;
-  // trabalho
+  const per=rots[0]+' a '+rots[iUlt];
+  let np=1; const rod=()=>{np++;return `<div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>${np}</span></div>`};
+  /* trabalho */
   const ex={},dias={};
   D.check.forEach(x=>{const d=(x.executado_em||'').slice(0,7); if(!d)return;
-    ex[d]=ex[d]||{}; ex[d][x.executado_por||'?']=(ex[d][x.executado_por||'?']||0)+1;
-    dias[d]=dias[d]||new Set(); dias[d].add(x.executado_em.slice(0,10))});
-  const trt=Object.keys(ex).sort().map(m=>{
-    const t=Object.values(ex[m]).reduce((a,b)=>a+b,0);
+    ex[d]=ex[d]||{};ex[d][x.executado_por||'?']=(ex[d][x.executado_por||'?']||0)+1;
+    dias[d]=dias[d]||new Set();dias[d].add(x.executado_em.slice(0,10))});
+  const trt=Object.keys(ex).sort().map(m=>{const t=Object.values(ex[m]).reduce((a,b)=>a+b,0);
     const pe=Object.entries(ex[m]).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([p,q])=>p+' ('+q+')').join(', ');
     return `<tr><td><b>${rot(m)}</b></td><td class="n">${t}</td><td class="n">${dias[m].size}</td><td style="font-size:9pt">${pe}</td></tr>`}).join('');
-  const ac={}; D.check.forEach(x=>ac[x.acao]=(ac[x.acao]||0)+1);
-  const tra=Object.entries(ac).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([a,q])=>`<tr><td>${a}</td><td class="n">${q}</td></tr>`).join('');
+  const ac={};D.check.forEach(x=>ac[x.acao]=(ac[x.acao]||0)+1);
+  const tra=Object.entries(ac).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([a,q])=>`<tr><td>${a}</td><td class="n">${q}</td></tr>`).join('');
   const comPrint=D.check.filter(x=>x.anexo_url).length;
-  // produtos e anúncios do último mês fechado
-  const ultM=MS[iUlt];
-  const prods=D.produtos.filter(p=>p.mes_referencia===ultM).sort((a,b)=>f(b.gmv)-f(a.gmv));
-  const trp=prods.slice(0,6).map(p=>`<tr><td>${String(p.nome||'').slice(0,54)}</td><td class="n">${k(f(p.gmv))}</td><td class="n">${pc(f(p.pct_gmv),1)}</td><td class="n">${pc(f(p.conv))}</td></tr>`).join('');
-  const top2=prods.slice(0,2).reduce((s,p)=>s+f(p.pct_gmv),0);
+  /* produtos */
+  const pMes={};D.produtos.forEach(p=>{(pMes[p.mes_referencia]=pMes[p.mes_referencia]||[]).push(p)});
+  const prodsU=(pMes[ultM]||[]).sort((a,b)=>f(b.gmv)-f(a.gmv));
+  const prodsB=(pMes[bestM]||[]).sort((a,b)=>f(b.gmv)-f(a.gmv));
+  const recor={};D.produtos.forEach(p=>{(recor[p.nome]=recor[p.nome]||{})[p.mes_referencia]=f(p.conv)});
+  const topRec=Object.entries(recor).filter(([,v])=>Object.keys(v).length>=4)
+    .sort((a,b)=>Object.keys(b[1]).length-Object.keys(a[1]).length).slice(0,6);
+  const mesesCalor=MS.slice(-8);
+  const calor=topRec.map(([nm,v])=>({n:nm.slice(0,30),v:mesesCalor.map(m=>v[m]!==undefined?v[m]:null)}));
+  const bolhas=prodsU.slice(0,6).map((p,i)=>({x:f(p.gmv),y:f(p.conv),r:f(p.gmv),n:String(p.nome).slice(0,16),
+    c:[PAL.lar,PAL.rx,PAL.vd,PAL.az,PAL.am,PAL.cz][i]}));
+  const trp=prodsU.slice(0,6).map(p=>`<tr><td>${String(p.nome||'').slice(0,46)}</td><td class="n">${k(f(p.gmv))}</td><td class="n">${pc(f(p.pct_gmv),1)}</td><td class="n">${pc(f(p.conv))}</td><td class="n">${rs(f(p.ticket))}</td></tr>`).join('');
+  const comp=prodsB.slice(0,5).map(p=>{const at=(prodsU.find(x=>x.nome===p.nome)||{});
+    const c1=f(p.conv),c2=f(at.conv),g1=f(p.gmv),g2=f(at.gmv);
+    return `<tr><td>${String(p.nome).slice(0,40)}</td><td class="n">${pc(c1)}</td><td class="n">${c2?pc(c2):'—'}</td><td class="n" style="color:${c2?cor(varia(c1,c2)):'#9aa0a8'}">${c2?sin(varia(c1,c2)):'saiu do top'}</td><td class="n">${k(g1)}</td><td class="n">${g2?k(g2):'—'}</td></tr>`}).join('');
+  /* anúncios */
   const anun=D.adsProd.filter(p=>p.mes_referencia===ultM).sort((a,b)=>f(b.despesas)-f(a.despesas));
-  const totI=anun.reduce((s,p)=>s+f(p.despesas),0)||1; let acu=0;
+  const totI=anun.reduce((s,p)=>s+f(p.despesas),0)||1;let acu=0;
   const tra2=anun.slice(0,8).map(p=>{const d=f(p.despesas),gg=f(p.gmv);acu+=d;
-    return `<tr><td>${String(p.nome_anuncio||'').slice(0,46)}</td><td class="n">${rs(d)}</td><td class="n">${pc(d/totI*100,1)}</td><td class="n">${k(gg)}</td><td class="n">${xx(d?gg/d:0)}</td><td class="n">${br(acu/totI*100,0)}%</td></tr>`}).join('');
+    return `<tr><td>${String(p.nome_anuncio||'').slice(0,44)}</td><td class="n">${rs(d)}</td><td class="n">${pc(d/totI*100,1)}</td><td class="n">${k(gg)}</td><td class="n">${xx(d?gg/d:0)}</td><td class="n">${br(acu/totI*100,0)}%</td></tr>`}).join('');
   const conc2=anun.slice(0,2).reduce((s,p)=>s+f(p.despesas),0)/totI*100;
-  const metodos={}; anun.forEach(p=>metodos[p.metodo_lance||'?']=(metodos[p.metodo_lance||'?']||0)+1);
-  const metTxt=Object.entries(metodos).map(([m,q])=>q+' em '+m).join(' · ');
+  const met={};anun.forEach(p=>met[p.metodo_lance||'?']=(met[p.metodo_lance||'?']||0)+1);
+  const metTxt=Object.entries(met).map(([m,q])=>q+' em '+m).join(' · ');
+  const barrasAnun=anun.slice(0,6).map((p,i)=>({n:String(p.nome_anuncio||'').slice(0,28),v:f(p.despesas),c:[PAL.lar,PAL.rx,PAL.vd,PAL.az,PAL.am,PAL.cz][i]}));
+  /* origem do tráfego */
+  const cj=(M[ultM]&&M[ultM].canais)||null;
+  let origem=[];
+  if(cj){const prod=cj.filter(c=>['Pesquisar','Recomendação','Carrinho de Compras','Loja','Minha Compra','Promoção','Chat','Outros'].includes(c.nome));
+    const cores=[PAL.lar,PAL.rx,PAL.vd,PAL.az,PAL.am,'#e07a5f','#6b727c',PAL.cz];
+    origem=prod.map((c,i)=>({n:c.nome,v:f(c.gmv),c:cores[i%cores.length]}));}
   const trs=MS.map((m,i)=>`<tr><td><b>${rots[i]}</b></td><td class="n">${k(fat[i])}</td><td class="n">${nn(ped[i])}</td><td class="n">${rs(tk[i])}</td><td class="n">${nn(vis[i])}</td><td class="n">${pc(conv[i])}</td><td class="n">${rs(inv[i])}</td><td class="n">${xx(roas[i])}</td><td class="n">${br(tacos[i],1)}%</td></tr>`).join('');
-  const trsA=MS.map((m,i)=>`<tr><td><b>${rots[i]}</b></td><td class="n">${rs(inv[i])}</td><td class="n">${k(gmv[i])}</td><td class="n">${xx(roas[i])}</td><td class="n">${k(fat[i])}</td><td class="n">${br(share[i],0)}%</td><td class="n">${br(tacos[i],1)}%</td><td class="n">${rs2(cpa[i])}</td><td class="n">${rs2(cpc[i])}</td><td class="n">${pc(ctr[i])}</td></tr>`).join('');
+  const trsA=MS.map((m,i)=>`<tr><td><b>${rots[i]}</b></td><td class="n">${rs(inv[i])}</td><td class="n">${k(gmv[i])}</td><td class="n">${xx(roas[i])}</td><td class="n">${br(tacos[i],1)}%</td><td class="n">${rs2(cpa[i])}</td><td class="n">${rs2(cpc[i])}</td><td class="n">${rs2(cpm[i])}</td><td class="n">${pc(ctr[i])}</td><td class="n">${pc(cvads[i])}</td></tr>`).join('');
   const varTab=MS.slice(1).map((m,idx)=>{const i=idx+1;
-    const di=inv[i-1]?varia(inv[i-1],inv[i]):0, df=varia(fat[i-1],fat[i]);
+    const di=inv[i-1]?varia(inv[i-1],inv[i]):0,df=varia(fat[i-1],fat[i]);
     return `<tr><td>${rots[i-1]} → ${rots[i]}</td><td class="n" style="color:${cor(di)}">${sin(di)}</td><td class="n" style="color:${cor(df)}">${sin(df)}</td></tr>`}).join('');
   let subiu=[],caiu=[];
-  for(let i=1;i<MS.length;i++){const di=inv[i-1]?inv[i]/inv[i-1]-1:0, df=fat[i-1]?fat[i]/fat[i-1]-1:0;
-    if(di>0.05)subiu.push(df); else if(di<-0.05)caiu.push(df);}
-  const mediaSubiu=subiu.length?subiu.reduce((a,b)=>a+b,0)/subiu.length*100:0;
-  const mediaCaiu=caiu.length?caiu.reduce((a,b)=>a+b,0)/caiu.length*100:0;
+  for(let i=1;i<MS.length;i++){const di=inv[i-1]?inv[i]/inv[i-1]-1:0,df=fat[i-1]?fat[i]/fat[i-1]-1:0;
+    if(di>0.05)subiu.push(df);else if(di<-0.05)caiu.push(df);}
+  const mS=subiu.length?subiu.reduce((a,b)=>a+b,0)/subiu.length*100:0;
+  const mC=caiu.length?caiu.reduce((a,b)=>a+b,0)/caiu.length*100:0;
+  const invA=inv[iUlt]||0;
+  const proj=[Math.round(invA*0.7/1000)*1000,invA,Math.round(invA*1.3/1000)*1000,Math.round(invA*1.7/1000)*1000,Math.round(invA*2.2/1000)*1000];
 
-  const capa=(sub)=>`<div class="pg capa"><div><div class="tag">Efeito Vendas · ${tipo==='midia'?'Análise de mídia':'Relatório de conta'}</div>
-    <h2>${D.nome}</h2><p class="s">${sub}</p></div>
-    <div class="r"><span>Período: <b>${per}</b></span><span>${hoje.charAt(0).toUpperCase()+hoje.slice(1)}</span></div></div>`;
+  let H=`<div class="pg capa"><div><div class="tag">Efeito Vendas · Relatório de conta</div>
+  <h2>${D.nome}</h2><p class="s">Análise completa do período: faturamento, funil de vendas, canais, anúncios, produtos e o trabalho executado na conta.</p></div>
+  <div class="r"><span>Período: <b>${per}</b></span><span>${hoje.charAt(0).toUpperCase()+hoje.slice(1)}</span></div></div>
 
-  const pgTrabalho=D.check.length?`<div class="pg"><div class="olho">O trabalho executado</div><h2>O que foi feito na conta</h2>
-    <p>Todo atendimento é registrado no sistema da Efeito Vendas, com data, responsável e evidência. No período com registro ativo foram <b>${D.check.length} execuções</b>, sendo <b>${comPrint}</b> com print de comprovação anexado.</p>
-    <table style="max-width:162mm"><thead><tr><th>Mês</th><th class="n">Execuções</th><th class="n">Dias com atendimento</th><th>Equipe</th></tr></thead><tbody>${trt}</tbody></table>
-    <h3>As ações mais executadas</h3>
-    <table style="max-width:152mm"><thead><tr><th>Ação</th><th class="n">Vezes</th></tr></thead><tbody>${tra}</tbody></table>
-    ${rod('')}</div>`:'';
-
-  if(tipo==='midia'){
-    const proj=[20000,invAtual,35000,45000,55000];
-    const cards=proj.map((x,i)=>`<div class="c ${i===1?'hoje':''}"><div class="i">${i===1?'hoje':'investindo'}</div><div class="v">${rs(x)}</div><div class="i" style="margin-top:2mm">faturamento</div><div class="f">${k(b0+b1*x)}</div></div>`).join('');
-    return capa('Como o investimento em Shopee Ads acompanhou o faturamento: retorno, custo de aquisição, concentração e projeção.')+
-    `<div class="pg"><div class="olho">O essencial</div><h2>${MS.length} meses de mídia</h2>
-    <div class="kpis">
-      <div class="kpi" style="--c:#ff4d1c"><div class="l">Investido</div><div class="v">${k(ti)}</div><div class="s">${br(tf?ti/tf*100:0,1)}% do faturamento</div></div>
-      <div class="kpi" style="--c:#1a9e52"><div class="l">Gerado pelos anúncios</div><div class="v">${k(tg)}</div><div class="s">${br(tf?tg/tf*100:0,0)}% do faturamento</div></div>
-      <div class="kpi" style="--c:#1a1d23"><div class="l">ROAS acumulado</div><div class="v">${xx(ti?tg/ti:0)}</div><div class="s">cada R$1 devolveu ${rs2(ti?tg/ti:0)}</div></div>
-      <div class="kpi" style="--c:#7B2FFF"><div class="l">Custo por venda</div><div class="v">${rs(cpa.reduce((a,b)=>a+b,0)/cpa.length)}</div><div class="s">média do período</div></div></div>
-    <p>Foram investidos <b>${rs(ti)}</b> em anúncios, que geraram <b>${rs(tg)}</b> em vendas atribuídas. Para cada real investido voltaram <b>${rs2(ti?tg/ti:0)}</b>.</p>
-    <table><thead><tr><th>Mês</th><th class="n">Investido</th><th class="n">Gerado</th><th class="n">ROAS</th><th class="n">Faturam.</th><th class="n">% via Ads</th><th class="n">Invest/fat</th><th class="n">Custo/venda</th><th class="n">Custo/clique</th><th class="n">CTR</th></tr></thead><tbody>${trsA}</tbody></table>
-    <div class="cx lar"><div class="t">Leitura rápida</div><p>Os anúncios respondem por <b>${br(Math.min(...share),0)}% a ${br(Math.max(...share),0)}%</b> do faturamento mensal.</p></div>
-    ${rod(2)}</div>
-
-    <div class="pg"><div class="olho">A relação central</div><h2>O faturamento acompanha<br>o investimento</h2>
-    <div class="leg"><span><i style="background:#d8dce1"></i>Faturamento da loja</span><span><i style="background:#ff4d1c"></i>Investimento em Ads</span></div>
-    ${gDuplo(fat,inv,rots)}
-    <h3>O que a conta mostra</h3>
-    <p>A correlação entre investimento e faturamento é de <b>${br(r,2)}</b>${r>=0.7?' — forte':r>=0.4?' — moderada':' — fraca'}. ${br(r*r*100,0)}% da variação do faturamento acompanha a variação do investimento.</p>
-    <div class="dois">
-      <div class="cx"><div class="t">A régua do período</div><p>A cada <b>R$ 1.000</b> a mais investidos por mês, o faturamento acompanhou em cerca de <b>${rs(b1*1000)}</b>.</p></div>
-      <div class="cx vd"><div class="t">A base que não depende de Ads</div><p>Mesmo sem investimento, a tendência aponta <b>${rs(Math.max(0,b0))}</b> por mês, vindo de orgânico, afiliados e recompra.</p></div>
-    </div>
-    <h3>Quando subiu e quando cortou</h3>
-    <div class="dois">
-      <div><table><thead><tr><th>Período</th><th class="n">Investimento</th><th class="n">Faturamento</th></tr></thead><tbody>${varTab}</tbody></table></div>
-      <div>
-        ${subiu.length?`<div class="cx vd"><div class="t">Quando o investimento subiu</div><p>Nas <b>${subiu.length} vezes</b> em que aumentou, o faturamento variou em média <b>${sin(mediaSubiu)}</b>.</p></div>`:''}
-        ${caiu.length?`<div class="cx am"><div class="t">Quando o investimento caiu</div><p>Nas <b>${caiu.length} vezes</b> em que foi reduzido, o faturamento variou em média <b>${sin(mediaCaiu)}</b>.</p></div>`:''}
-      </div>
-    </div>
-    ${rod(3)}</div>
-
-    <div class="pg"><div class="olho">Eficiência</div><h2>A qualidade da mídia</h2>
-    <div class="dois">
-      <div><h3>ROAS — retorno por real investido</h3>${gLinha(roas,rots,xx,'#1a9e52',366,180)}</div>
-      <div><h3>CTR — cliques por aparição</h3>${gLinha(ctr,rots,v=>pc(v),'#ff4d1c',366,180)}</div></div>
-    <div class="dois">
-      <div><h3>Custo por venda</h3>${gLinha(cpa,rots,rs2,'#7B2FFF',366,180)}</div>
-      <div><h3>Custo por mil aparições</h3>${gLinha(cpm,rots,rs2,'#c0392b',366,180)}</div></div>
-    <div class="cx ${roas[iUlt]>=roas[0]?'vd':'am'}"><div class="t">O que mudou no período</div><p>O custo por mil aparições saiu de <b>${rs2(cpm[0])}</b> para <b>${rs2(cpm[iUlt])}</b> e o ROAS, de <b>${xx(roas[0])}</b> para <b>${xx(roas[iUlt])}</b>. O custo por venda foi de <b>${rs2(cpa[0])}</b> para <b>${rs2(cpa[iUlt])}</b>.</p></div>
-    ${rod(4)}</div>
-
-    <div class="pg"><div class="olho">Concentração</div><h2>Onde o dinheiro<br>está sendo aplicado</h2>
-    <p>Distribuição do investimento entre os anúncios ativos em ${rot(ultM)}:</p>
-    <table><thead><tr><th>Anúncio</th><th class="n">Investido</th><th class="n">% do total</th><th class="n">Gerado</th><th class="n">ROAS</th><th class="n">Acumulado</th></tr></thead><tbody>${tra2}</tbody></table>
-    <div class="cx ${conc2>60?'am':''}"><div class="t">Concentração</div><p>Os dois primeiros anúncios concentram <b>${br(conc2,0)}%</b> do investimento do mês.${conc2>60?' Isso significa que o resultado da conta depende de poucos anúncios.':''}</p></div>
-    <div class="cx"><div class="t">Métodos de lance em uso</div><p>${metTxt||'sem dados de método no período'}.</p></div>
-    ${rod(5)}</div>
-
-    <div class="pg"><div class="olho">Projeção</div><h2>O que esperar de<br>cada nível de investimento</h2>
-    <p>Com base no comportamento do período, a expectativa de faturamento para diferentes níveis de investimento mensal:</p>
-    <div class="proj">${cards}</div>
-    <p style="font-size:8.5pt;color:#6b727c">Projeção baseada na relação histórica desta conta. Depende de estoque disponível, concorrência no período e manutenção do ROAS atual.</p>
-    <div class="cx lar"><div class="t">O teto a observar</div><p>O maior investimento do período foi <b>${rs(Math.max(...inv))}</b>. Subir acima desse patamar é território não testado nesta conta — o caminho seguro é aumentar <b>em etapas de 20%</b>, confirmando o ROAS antes do passo seguinte.</p></div>
-    <div class="cx vd"><div class="t">A condição que precisa estar de pé</div><p>Aumentar investimento só funciona com <b>estoque garantido</b>. Romper estoque durante um aumento de verba desperdiça o investimento e derruba o posicionamento dos anúncios.</p></div>
-    ${rod(6)}</div>
-
-    ${pgTrabalho}
-
-    <div class="pg"><div class="olho">Conclusão</div><h2>O que os números<br>recomendam</h2>
-    <div class="passo"><div class="n">1</div><div><h4>${tf&&ti/tf*100<10?'Há espaço para investir mais':'Investimento em patamar alto'}</h4><p>O ROAS de ${xx(ti?tg/ti:0)} no acumulado e o investimento em ${br(tf?ti/tf*100:0,1)}% do faturamento ${tf&&ti/tf*100<10?'indicam folga — a referência de mercado para operações saudáveis vai até 10% a 15%':'já estão na faixa alta; o ganho agora vem de eficiência, não de verba'}.</p></div></div>
-    <div class="passo"><div class="n">2</div><div><h4>Aumentar em etapas, não de uma vez</h4><p>Passos de 20% a cada duas semanas, acompanhando o ROAS. Saltos grandes forçam o algoritmo a reaprender e derrubam o retorno.</p></div></div>
-    <div class="passo"><div class="n">3</div><div><h4>${conc2>60?'Preparar mais um campeão':'Manter a distribuição atual'}</h4><p>${conc2>60?'Com '+br(conc2,0)+'% do orçamento em dois anúncios, qualquer oscilação neles afeta a conta inteira. Desenvolver mais um produto ao mesmo patamar dilui o risco.':'O investimento está distribuído entre vários anúncios, o que reduz o risco de dependência.'}</p></div></div>
-    <div class="passo"><div class="n">4</div><div><h4>Conversão é o multiplicador</h4><p>A conversão dos anúncios está em ${pc(cvads[iUlt])}. No melhor mês do período foi ${pc(Math.max(...cvads))}. Recuperar esse patamar aumenta o retorno sem exigir um real a mais.</p></div></div>
-    ${rod(7)}</div>`;
-  }
-
-  /* ───── RELATÓRIO COMPLETO ───── */
-  return capa('Análise completa do período: faturamento, funil de vendas, anúncios, produtos e o trabalho executado na conta.')+
-  `<div class="pg"><div class="olho">Visão geral</div><h2>Os ${MS.length} meses em números</h2>
+  <div class="pg"><div class="olho">Visão geral</div><h2>Os ${MS.length} meses em números</h2>
   <div class="kpis">
     <div class="kpi" style="--c:#1a1d23"><div class="l">Faturamento</div><div class="v">${k(tf)}</div><div class="s">${per}</div></div>
     <div class="kpi" style="--c:#1a1d23"><div class="l">Pedidos</div><div class="v">${nn(tp)}</div><div class="s">ticket médio ${rs(tp?tf/tp:0)}</div></div>
     <div class="kpi" style="--c:#ff4d1c"><div class="l">Investido em Ads</div><div class="v">${k(ti)}</div><div class="s">${br(tf?ti/tf*100:0,1)}% do faturamento</div></div>
     <div class="kpi" style="--c:#1a9e52"><div class="l">Retorno dos Ads</div><div class="v">${xx(ti?tg/ti:0)}</div><div class="s">${k(tg)} gerados</div></div></div>
-  <p>Cada R$ 1,00 investido em anúncio devolveu <b>${xx(ti?tg/ti:0)}</b> em vendas no período.</p>
-  <h3>Faturamento mês a mês</h3>${gBarras(fat,rots,k)}
+  <p>As barras mostram o faturamento de cada mês e a linha laranja, quanto foi investido em anúncio no mesmo período.</p>
+  ${gDuplo(fat,inv,rots)}
   <table><thead><tr><th>Mês</th><th class="n">Faturamento</th><th class="n">Pedidos</th><th class="n">Ticket</th><th class="n">Visitas</th><th class="n">Conversão</th><th class="n">Ads</th><th class="n">ROAS</th><th class="n">% Ads</th></tr></thead><tbody>${trs}</tbody></table>
-  ${rod(2)}</div>
+  ${rod()}</div>
 
-  <div class="pg"><div class="olho">O diagnóstico</div><h2>O que explica a variação</h2>
-  <p>Faturamento é o resultado de três variáveis multiplicadas: <b>quantas pessoas visitam</b> a loja, <b>quantas delas compram</b> e <b>quanto vale cada compra</b>. Comparando o melhor mês do período com o mês fechado mais recente:</p>
-  <table style="max-width:150mm"><thead><tr><th>Variável</th><th class="n">${rots[iMax]}</th><th class="n">${rots[iUlt]}</th><th class="n">Variação</th></tr></thead><tbody>
-    <tr><td>Visitas na loja</td><td class="n">${nn(vis[iMax])}</td><td class="n">${nn(vis[iUlt])}</td><td class="n" style="color:${cor(varia(vis[iMax],vis[iUlt]))}"><b>${sin(varia(vis[iMax],vis[iUlt]))}</b></td></tr>
-    <tr><td>Taxa de conversão</td><td class="n">${pc(conv[iMax])}</td><td class="n">${pc(conv[iUlt])}</td><td class="n" style="color:${cor(varia(conv[iMax],conv[iUlt]))}"><b>${sin(varia(conv[iMax],conv[iUlt]))}</b></td></tr>
-    <tr><td>Ticket médio</td><td class="n">${rs(tk[iMax])}</td><td class="n">${rs(tk[iUlt])}</td><td class="n" style="color:${cor(varia(tk[iMax],tk[iUlt]))}"><b>${sin(varia(tk[iMax],tk[iUlt]))}</b></td></tr>
-    <tr><td><b>Faturamento</b></td><td class="n"><b>${k(fat[iMax])}</b></td><td class="n"><b>${k(fat[iUlt])}</b></td><td class="n" style="color:${cor(varia(fat[iMax],fat[iUlt]))}"><b>${sin(varia(fat[iMax],fat[iUlt]))}</b></td></tr>
-  </tbody></table>
-  <div class="cx lar"><div class="t">A leitura</div><p>${roas[iUlt]>=roas[iMax]?'O retorno dos anúncios <b>não piorou</b> no período — o ROAS em '+rots[iUlt]+' ('+xx(roas[iUlt])+') está igual ou acima do mês de pico. A variação do faturamento vem do volume de visitas e da conversão.':'O retorno dos anúncios também recuou no período. Vale olhar tanto o funil quanto a estrutura de campanhas.'}</p></div>
+  <div class="pg"><div class="olho">O funil da loja</div><h2>Do primeiro clique<br>até a compra</h2>
+  <p>Toda venda passa por três etapas. Entender onde as pessoas param é o que mostra o que precisa ser arrumado — e esse diagnóstico não custa nada em mídia.</p>
+  ${temCar?gFunil([
+    {n:'Visitas na loja',v:vis[iUlt],t:nn(vis[iUlt]),c:'#7B2FFF'},
+    {n:'Chegaram ao carrinho',v:pot[iUlt],t:nn(pot[iUlt]),c:'#2d7ff9'},
+    {n:'Compraram',v:ped[iUlt],t:nn(ped[iUlt]),c:'#1a9e52'}
+  ]):gFunil([{n:'Visitas na loja',v:vis[iUlt],t:nn(vis[iUlt]),c:'#7B2FFF'},{n:'Compraram',v:ped[iUlt],t:nn(ped[iUlt]),c:'#1a9e52'}])}
+  <p style="font-size:8.6pt;color:#6b727c">Dados de ${rots[iUlt]}. "Chegaram ao carrinho" são os compradores potenciais registrados pela plataforma.</p>
+  ${temCar?`<div class="dois" style="margin-top:3mm">
+    <div><h3>Conversão do carrinho — quem chegou e comprou</h3>${gLinha([{v:convCar,c:'#2d7ff9'}],rots,v=>pc(v),366,180)}</div>
+    <div><h3>Conversão da loja — quem visitou e comprou</h3>${gLinha([{v:conv,c:'#c0392b'}],rots,v=>pc(v),366,180)}</div></div>
+  <div class="cx ${convCar[iUlt]<Math.max(...convCar)*0.8?'am':'vd'}"><div class="t">O que esse número diz</div><p>De cada 100 pessoas que chegaram ao carrinho em ${rots[iUlt]}, <b>${br(convCar[iUlt],1)} compraram</b>. No melhor mês do período foram <b>${br(Math.max(...convCar),1)}</b>. ${convCar[iUlt]<Math.max(...convCar)*0.8?'Recuperar esse patamar significa vender mais sem trazer um visitante a mais — mexendo em frete, cupom, prazo de envio e formas de pagamento.':'O patamar está próximo do melhor do período.'}</p></div>`:''}
+  ${rod()}</div>`;
+
+  if(temCanal){
+    const cores={ads:PAL.lar,org:PAL.vd,afi:PAL.rx,vid:PAL.az,liv:PAL.am};
+    const ser=[{n:'Ads',v:vAds,c:cores.ads},{n:'Orgânico',v:vOrg,c:cores.org},{n:'Afiliados',v:vAfi,c:cores.afi}];
+    if(temVideo){ser.push({n:'Vídeo',v:vVid,c:cores.vid});ser.push({n:'Live',v:vLiv,c:cores.liv});}
+    const ult=[{n:'Ads',v:vAds[iUlt],c:cores.ads},{n:'Orgânico',v:vOrg[iUlt],c:cores.org},{n:'Afiliados',v:vAfi[iUlt],c:cores.afi}];
+    if(temVideo){ult.push({n:'Vídeo',v:vVid[iUlt],c:cores.vid});ult.push({n:'Live',v:vLiv[iUlt],c:cores.liv});}
+    const totU=ult.reduce((s,x)=>s+x.v,0)||1;
+    H+=`<div class="pg"><div class="olho">Canais de venda</div><h2>De onde vem<br>cada real</h2>
+    <p>A área colorida mostra como o faturamento se divide entre os canais ao longo dos meses. Quanto mais equilibrado, menos a loja depende de um só caminho.</p>
+    ${legenda(ser)}
+    ${gArea(ser,rots,k)}
+    <div class="dois" style="margin-top:4mm">
+      <div><h3>Divisão em ${rots[iUlt]}</h3>${gRosca(ult)}${legenda(ult)}</div>
+      <div><h3>O que isso significa</h3>
+        <p>Em ${rots[iUlt]}, <b>${br(vAds[iUlt]/totU*100,0)}%</b> das vendas vieram de anúncio, <b>${br(vOrg[iUlt]/totU*100,0)}%</b> de busca orgânica e <b>${br(vAfi[iUlt]/totU*100,0)}%</b> de afiliados.</p>
+        <div class="cx ${vAds[iUlt]/totU>0.7?'am':'vd'}"><div class="t">Dependência de mídia</div><p>${vAds[iUlt]/totU>0.7?'Com '+br(vAds[iUlt]/totU*100,0)+'% das vendas vindas de Ads, uma pausa no investimento tem efeito imediato no faturamento. Fortalecer orgânico, afiliados e recompra reduz esse risco.':'A loja tem boa distribuição entre canais, o que torna o faturamento menos sensível ao orçamento de anúncio.'}</p></div>
+        <div class="cx"><div class="t">Clientes novos e recorrentes</div><p>Em ${rots[iUlt]}, <b>${nn(novos[iUlt])}</b> compradores novos e <b>${nn(volta[iUlt])}</b> que já haviam comprado — taxa de recompra de <b>${br(recomp[iUlt],1)}%</b>.</p></div>
+      </div></div>
+    ${rod()}</div>`;
+  }
+
+  if(origem.length){
+    const totO=origem.reduce((s,x)=>s+x.v,0)||1;
+    H+=`<div class="pg"><div class="olho">Origem do tráfego</div><h2>Como o cliente<br>chega até você</h2>
+    <p>Dentro da Shopee existem caminhos diferentes até o seu produto. Saber qual domina mostra se você está sendo <b>procurado</b> ou <b>recomendado</b>.</p>
+    ${gBarrasH(origem.sort((a,b)=>b.v-a.v).map(o=>({...o,n:o.n})),v=>k(v)+' · '+br(v/totO*100,0)+'%')}
+    <div class="dois" style="margin-top:4mm">
+      <div class="cx"><div class="t">Pesquisa</div><p><b>${br(M[ultM].pes,1)}%</b> do faturamento vem de quem <b>procurou</b> o produto. Depende de título, palavras-chave e posicionamento na busca.</p></div>
+      <div class="cx"><div class="t">Recomendação</div><p><b>${br(M[ultM].rec,1)}%</b> vem de quem <b>foi encontrado</b> pela vitrine da Shopee. Depende de histórico de vendas e avaliação.</p></div>
+    </div>
+    ${temCar&&M[ultM].canais?`<div class="cx am"><div class="t">O caminho do carrinho</div><p>As vendas que entraram pelo carrinho mostram quem decidiu comprar em um segundo momento — é o público que responde a cupom, frete grátis e lembrete.</p></div>`:''}
+    ${rod()}</div>`;
+  }
+
+  if(MS.some(m=>g(m,'afp')>0)||temVideo){
+    const afp=MS.map(m=>g(m,'afp')),afc=MS.map(m=>g(m,'afc')),afv=MS.map(m=>g(m,'afv'));
+    H+=`<div class="pg"><div class="olho">Afiliados, vídeo e live</div><h2>Os canais que<br>não custam mídia</h2>
+    <p>Afiliados divulgam o seu produto e só ganham quando vendem. Vídeo e live são formatos da própria Shopee que entregam alcance sem leilão de anúncio.</p>
+    <div class="dois">
+      <div><h3>Pedidos vindos de afiliados</h3>${gLinha([{v:afp,c:PAL.rx}],rots,nn,366,180)}</div>
+      <div><h3>Faturamento de afiliados</h3>${gLinha([{v:vAfi,c:PAL.rx}],rots,k,366,180)}</div>
+    </div>
+    ${afc.some(v=>v>0)?`<div class="dois"><div><h3>CTR dos afiliados</h3>${gLinha([{v:afc,c:PAL.az}],rots,v=>pc(v,1),366,170)}</div>
+      <div><h3>Conversão dos afiliados</h3>${gLinha([{v:afv,c:PAL.vd}],rots,v=>pc(v),366,170)}</div></div>`:''}
+    ${temVideo?`<h3>Vídeo e Live</h3>${legenda([{n:'Vídeo',c:PAL.az},{n:'Live',c:PAL.am}])}${gLinha([{v:vVid,c:PAL.az},{v:vLiv,c:PAL.am}],rots,k,760,180)}
+      <div class="cx"><div class="t">Leitura</div><p>Em ${rots[iUlt]}, vídeo trouxe <b>${k(vVid[iUlt])}</b> e live <b>${k(vLiv[iUlt])}</b>. São canais que a Shopee privilegia e que a maioria das lojas ainda não explora.</p></div>`
+     :`<div class="cx am"><div class="t">Vídeo e Live: espaço aberto</div><p>Não há registro de vendas por <b>Shopee Vídeo</b> ou <b>Live</b> no período. São dois canais que a plataforma empurra com alcance gratuito — e que hoje estão fora da operação.</p></div>`}
+    ${rod()}</div>`;
+  }
+
+  H+=`<div class="pg"><div class="olho">Anúncios</div><h2>O que a mídia<br>entregou</h2>
+  <p>O <b>ROAS</b> é quanto cada real investido devolveu em vendas. O <b>CTR</b> é o percentual de pessoas que clicam ao ver o anúncio — mostra se a vitrine está competitiva.</p>
   <div class="dois">
-    <div><h3>Visitas na loja</h3>${gLinha(vis,rots,v=>nn(v/1000)+'k','#7B2FFF',366,180)}</div>
-    <div><h3>Taxa de conversão</h3>${gLinha(conv,rots,v=>pc(v),'#c0392b',366,180)}</div></div>
+    <div><h3>ROAS — retorno por real investido</h3>${gLinha([{v:roas,c:PAL.vd}],rots,xx,366,180)}</div>
+    <div><h3>CTR — cliques por aparição</h3>${gLinha([{v:ctr,c:PAL.lar}],rots,v=>pc(v),366,180)}</div></div>
   <div class="dois">
-    <div><h3>Ticket médio</h3>${gLinha(tk,rots,rs,'#1a9e52',366,180)}</div>
-    <div><h3>Pedidos</h3>${gLinha(ped,rots,nn,'#1a1d23',366,180)}</div></div>
-  ${rod(3)}</div>
+    <div><h3>Custo por venda</h3>${gLinha([{v:cpa,c:PAL.rx}],rots,rs2,366,180)}</div>
+    <div><h3>Custo por mil aparições</h3>${gLinha([{v:cpm,c:PAL.vm}],rots,rs2,366,180)}</div></div>
+  <table><thead><tr><th>Mês</th><th class="n">Investido</th><th class="n">Gerado</th><th class="n">ROAS</th><th class="n">% do fat.</th><th class="n">Custo/venda</th><th class="n">Custo/clique</th><th class="n">CPM</th><th class="n">CTR</th><th class="n">Conv. anúncio</th></tr></thead><tbody>${trsA}</tbody></table>
+  ${rod()}</div>
 
-  <div class="pg"><div class="olho">Anúncios</div><h2>O que os Ads entregaram</h2>
-  <p>Desempenho da mídia no período. O CTR mostra quantas pessoas clicam ao ver o anúncio; o ROAS, quanto cada real investido devolveu.</p>
+  <div class="pg"><div class="olho">Investimento × faturamento</div><h2>O quanto um<br>puxa o outro</h2>
   <div class="dois">
-    <div><h3>ROAS</h3>${gLinha(roas,rots,xx,'#1a9e52',366,180)}</div>
-    <div><h3>CTR</h3>${gLinha(ctr,rots,v=>pc(v),'#ff4d1c',366,180)}</div></div>
-  <h3>Percentual do faturamento investido em anúncio</h3>
-  ${gBarras(tacos,rots,v=>br(v,0)+'%',tacos.map(t=>t<10?'#1a9e52':t<14?'#d99a00':'#c0392b'),760,175)}
-  <p>O investimento saiu de <b>${br(tacos[0],1)}%</b> do faturamento para <b>${br(tacos[iUlt],1)}%</b>.</p>
-  <h3>Anúncios ativos — ${rot(ultM)}</h3>
-  <table><thead><tr><th>Anúncio</th><th class="n">Investido</th><th class="n">% do total</th><th class="n">Gerado</th><th class="n">ROAS</th><th class="n">Acumulado</th></tr></thead><tbody>${tra2}</tbody></table>
-  ${rod(4)}</div>
+    <div><h3>Cada ponto é um mês</h3>${gDisp(inv,fat,rots,b0,b1)}
+    <p style="font-size:8.4pt;color:#6b727c">Horizontal: investimento. Vertical: faturamento. A linha verde é a tendência.</p></div>
+    <div>
+      <p>A correlação entre investimento e faturamento é de <b>${br(r,2)}</b>${r>=0.7?' — forte':r>=0.4?' — moderada':' — fraca'}. ${br(r*r*100,0)}% da variação do faturamento acompanha a do investimento.</p>
+      <div class="cx"><div class="t">A régua do período</div><p>A cada <b>R$ 1.000</b> a mais por mês, o faturamento acompanhou em cerca de <b>${rs(b1*1000)}</b>.</p></div>
+      <div class="cx vd"><div class="t">A base sem Ads</div><p>Mesmo sem investimento, a tendência aponta <b>${rs(Math.max(0,b0))}</b> por mês, de orgânico, afiliados e recompra.</p></div>
+    </div></div>
+  <h3>Quando subiu e quando cortou</h3>
+  <div class="dois">
+    <div><table><thead><tr><th>Período</th><th class="n">Investimento</th><th class="n">Faturamento</th></tr></thead><tbody>${varTab}</tbody></table></div>
+    <div>${subiu.length?`<div class="cx vd"><div class="t">Quando subiu</div><p>Nas <b>${subiu.length} vezes</b> em que o investimento aumentou, o faturamento variou em média <b>${sin(mS)}</b>.</p></div>`:''}
+    ${caiu.length?`<div class="cx am"><div class="t">Quando cortou</div><p>Nas <b>${caiu.length} vezes</b> em que foi reduzido, o faturamento variou em média <b>${sin(mC)}</b>.</p></div>`:''}
+    <div class="cx lar"><div class="t">Projeção</div><p>Mantido o ROAS atual, estes são os patamares esperados:</p></div></div></div>
+  <div class="proj">${proj.map((x,i)=>`<div class="c ${i===1?'hoje':''}"><div class="i">${i===1?'hoje':'investindo'}</div><div class="v">${rs(x)}</div><div class="i" style="margin-top:2mm">faturamento</div><div class="f">${k(b0+b1*x)}</div></div>`).join('')}</div>
+  ${rod()}</div>
 
-  ${prods.length?`<div class="pg"><div class="olho">Produtos</div><h2>De onde vem o faturamento</h2>
-  <h3>Principais produtos — ${rot(ultM)}</h3>
-  <table><thead><tr><th>Produto</th><th class="n">Faturamento</th><th class="n">% do mês</th><th class="n">Conversão</th></tr></thead><tbody>${trp}</tbody></table>
-  <div class="cx ${top2>50?'am':''}"><div class="t">Concentração</div><p>Os dois primeiros produtos somam <b>${br(top2,0)}%</b> do faturamento do mês.${top2>50?' É uma força — estão maduros e com histórico —, mas também um risco: qualquer problema em um deles afeta boa parte da operação.':''}</p></div>
-  <div class="cx"><div class="t">A oportunidade mais clara</div><p>A conversão dos produtos principais está entre <b>${pc(Math.min(...prods.slice(0,5).map(p=>f(p.conv))))}</b> e <b>${pc(Math.max(...prods.slice(0,5).map(p=>f(p.conv))))}</b>. Fotos, descrição, avaliações e preço são as alavancas que mexem nesse número — sem custo de mídia.</p></div>
-  ${rod(5)}</div>`:''}
+  <div class="pg"><div class="olho">Onde o dinheiro está</div><h2>Concentração<br>do investimento</h2>
+  <p>Distribuição do orçamento entre os anúncios ativos em ${rot(ultM)}:</p>
+  ${gBarrasH(barrasAnun,rs)}
+  <table style="margin-top:3mm"><thead><tr><th>Anúncio</th><th class="n">Investido</th><th class="n">% do total</th><th class="n">Gerado</th><th class="n">ROAS</th><th class="n">Acumulado</th></tr></thead><tbody>${tra2}</tbody></table>
+  <div class="cx ${conc2>60?'am':''}"><div class="t">Concentração</div><p>Os dois primeiros anúncios levam <b>${br(conc2,0)}%</b> do investimento.${conc2>60?' O resultado da conta depende de poucos anúncios — vale desenvolver mais um campeão para diluir o risco.':''}</p></div>
+  <div class="cx"><div class="t">Métodos de lance</div><p>${metTxt||'sem dados de método no período'}.</p></div>
+  ${rod()}</div>`;
 
-  ${pgTrabalho}
+  if(prodsU.length){
+    H+=`<div class="pg"><div class="olho">Produtos</div><h2>Quem vende e<br>quem converte</h2>
+    <p>Cada bolha é um produto. Quanto mais à direita, mais fatura. Quanto mais alto, melhor converte. O tamanho mostra o peso no faturamento — <b>o produto ideal fica no canto superior direito</b>.</p>
+    ${gBolhas(bolhas,760,250,'faturamento no mês →')}
+    <table style="margin-top:2mm"><thead><tr><th>Produto</th><th class="n">Faturamento</th><th class="n">% do mês</th><th class="n">Conversão</th><th class="n">Ticket</th></tr></thead><tbody>${trp}</tbody></table>
+    ${rod()}</div>`;
+    if(calor.length){
+      H+=`<div class="pg"><div class="olho">Evolução por produto</div><h2>A conversão de cada<br>produto, mês a mês</h2>
+      <p>Quanto mais escura a célula, melhor a conversão naquele mês. Linhas que clareiam da esquerda para a direita mostram produtos que <b>perderam força</b>.</p>
+      ${gCalor(calor,mesesCalor.map(rot))}
+      <h3 style="margin-top:5mm">O melhor mês contra o atual</h3>
+      <p>Comparando os produtos que lideraram <b>${rot(bestM)}</b> (o melhor mês do período) com o desempenho deles em <b>${rot(ultM)}</b>:</p>
+      <table><thead><tr><th>Produto</th><th class="n">Conv. ${rot(bestM)}</th><th class="n">Conv. ${rot(ultM)}</th><th class="n">Variação</th><th class="n">Fat. ${rot(bestM)}</th><th class="n">Fat. ${rot(ultM)}</th></tr></thead><tbody>${comp}</tbody></table>
+      <div class="cx lar"><div class="t">A oportunidade quantificada</div><p>${(()=>{const p=prodsB[0],at=prodsU.find(x=>x.nome===(p||{}).nome);
+        if(p&&at&&f(at.conv)&&f(p.conv)>f(at.conv)){const ganho=f(at.gmv)*(f(p.conv)/f(at.conv)-1);
+          return 'O produto que mais fatura converteu <b>'+pc(f(p.conv))+'</b> em '+rot(bestM)+' e converte <b>'+pc(f(at.conv))+'</b> hoje. Voltar ao patamar anterior, com o mesmo tráfego, valeria cerca de <b>'+k(ganho)+' por mês</b> só nesse item.';}
+        return 'Os produtos principais mantêm a conversão do melhor mês — o caminho de crescimento passa por trazer mais tráfego qualificado.';})()}</p></div>
+      ${rod()}</div>`;
+    }
+  }
 
-  <div class="pg"><div class="olho">Conclusão</div><h2>Onde focar agora</h2>
-  <div class="passo"><div class="n">1</div><div><h4>Conversão dos produtos principais</h4><p>É a alavanca de maior retorno e a única que não exige aumentar investimento. Fotos, tabela de medidas, avaliações e preço nos produtos que mais faturam.</p></div></div>
-  <div class="passo"><div class="n">2</div><div><h4>${varia(vis[iMax],vis[iUlt])<-15?'Recuperar o volume de visitas':'Sustentar o volume de visitas'}</h4><p>${varia(vis[iMax],vis[iUlt])<-15?'As visitas caíram '+br(Math.abs(varia(vis[iMax],vis[iUlt])),0)+'% desde o melhor mês. Revisão de títulos e palavras-chave devolve alcance sem aumentar orçamento.':'O tráfego está estável. Manter títulos e palavras-chave revisados preserva o alcance conquistado.'}</p></div></div>
-  <div class="passo"><div class="n">3</div><div><h4>${tf&&ti/tf*100<10?'Espaço para escalar a mídia':'Eficiência antes de verba'}</h4><p>${tf&&ti/tf*100<10?'Com ROAS de '+xx(ti?tg/ti:0)+' e apenas '+br(tf?ti/tf*100:0,1)+'% do faturamento em mídia, há margem para aumentar em etapas de 20%, sempre com estoque garantido.':'O investimento já representa '+br(tf?ti/tf*100:0,1)+'% do faturamento. O próximo ganho vem de melhorar conversão e ticket, não de aumentar verba.'}</p></div></div>
-  <div class="passo"><div class="n">4</div><div><h4>Aproveitar a sazonalidade</h4><p>O melhor mês do período foi ${rots[iMax]}, com ${k(fat[iMax])}. Planejar estoque e campanhas para repetir esse pico é a forma mais direta de crescer.</p></div></div>
-  <div class="cx lar"><div class="t">Em resumo</div><p>${roas[iUlt]>=8?'A operação de mídia está saudável, com retorno de '+xx(roas[iUlt])+' no último mês. ':''}O ganho dos próximos meses vem de <b>conversão</b> e de <b>produto certo na hora certa</b> — frentes que dependem de catálogo, não de orçamento.</p></div>
-  ${rod('')}</div>`;
+  if(D.check.length){
+    H+=`<div class="pg"><div class="olho">O trabalho executado</div><h2>O que foi feito<br>na conta</h2>
+    <p>Todo atendimento é registrado no sistema da Efeito Vendas, com data, responsável e evidência. No período com registro ativo foram <b>${D.check.length} execuções</b>, sendo <b>${comPrint}</b> com print de comprovação.</p>
+    <table style="max-width:162mm"><thead><tr><th>Mês</th><th class="n">Execuções</th><th class="n">Dias com atendimento</th><th>Equipe</th></tr></thead><tbody>${trt}</tbody></table>
+    <h3>As ações mais executadas</h3>
+    <table style="max-width:152mm"><thead><tr><th>Ação</th><th class="n">Vezes</th></tr></thead><tbody>${tra}</tbody></table>
+    ${rod()}</div>`;
+  }
+
+  const temVid=temVideo;
+  H+=`<div class="pg"><div class="olho">Conclusão</div><h2>Onde focar agora</h2>
+  <div class="passo"><div class="n">1</div><div><h4>${temCar&&convCar[iUlt]<Math.max(...convCar)*0.85?'Recuperar a conversão do carrinho':'Conversão dos produtos principais'}</h4><p>${temCar&&convCar[iUlt]<Math.max(...convCar)*0.85?'A conversão do carrinho está em '+br(convCar[iUlt],1)+'% contra '+br(Math.max(...convCar),1)+'% no melhor mês. Frete, cupom, prazo de envio e formas de pagamento são as alavancas — e nenhuma custa mídia.':'Fotos, descrição, tabela de medidas e avaliações nos produtos que mais faturam. É a alavanca de maior retorno sem aumentar investimento.'}</p></div></div>
+  <div class="passo"><div class="n">2</div><div><h4>${varia(vis[iMax],vis[iUlt])<-15?'Recuperar o volume de visitas':'Sustentar o tráfego conquistado'}</h4><p>${varia(vis[iMax],vis[iUlt])<-15?'As visitas caíram '+br(Math.abs(varia(vis[iMax],vis[iUlt])),0)+'% desde o melhor mês. Revisão de títulos e palavras-chave devolve alcance sem aumentar orçamento.':'O tráfego está estável. Manter títulos e palavras-chave revisados preserva o alcance.'}</p></div></div>
+  <div class="passo"><div class="n">3</div><div><h4>${tf&&ti/tf*100<10?'Espaço para escalar a mídia':'Eficiência antes de verba'}</h4><p>${tf&&ti/tf*100<10?'Com ROAS de '+xx(ti?tg/ti:0)+' e apenas '+br(tf?ti/tf*100:0,1)+'% do faturamento em mídia, há margem para crescer em etapas de 20% — sempre com estoque garantido.':'O investimento já é '+br(tf?ti/tf*100:0,1)+'% do faturamento. O próximo ganho vem de conversão e ticket, não de verba.'}</p></div></div>
+  <div class="passo"><div class="n">4</div><div><h4>${temVid?'Ampliar vídeo e live':'Ativar vídeo e live'}</h4><p>${temVid?'Os canais de vídeo e live já trazem resultado e têm espaço para crescer — entregam alcance sem leilão de anúncio.':'Shopee Vídeo e Live estão sem uso nesta conta. São canais com alcance gratuito que a plataforma privilegia hoje.'}</p></div></div>
+  <div class="cx lar"><div class="t">Em resumo</div><p>${roas[iUlt]>=8?'A mídia está saudável, com retorno de '+xx(roas[iUlt])+' no último mês. ':''}O crescimento dos próximos meses vem de <b>conversão</b> e de <b>diversificar os canais</b> — frentes que dependem de operação, não de orçamento.</p></div>
+  ${rod()}</div>`;
+  return H;
 }
 
 /* sessão salva */
