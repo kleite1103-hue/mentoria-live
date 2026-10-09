@@ -644,6 +644,15 @@ function montar(D){
     <p>A área colorida mostra como o faturamento se divide entre os canais ao longo dos meses. Quanto mais equilibrado, menos a loja depende de um só caminho.</p>
     ${legenda(ser)}
     ${gArea(ser,rots,k)}
+    ${(()=>{
+      const T={ads:vAds.reduce((x,y)=>x+y,0),org:vOrg.reduce((x,y)=>x+y,0),afi:vAfi.reduce((x,y)=>x+y,0),
+               vid:vVid.reduce((x,y)=>x+y,0),liv:vLiv.reduce((x,y)=>x+y,0)};
+      const tt=T.ads+T.org+T.afi+T.vid+T.liv||1;
+      const itens=[{n:'Ads',v:T.ads,c:cores.ads},{n:'Orgânico',v:T.org,c:cores.org},{n:'Afiliados',v:T.afi,c:cores.afi},
+                   {n:'Vídeo',v:T.vid,c:cores.vid},{n:'Live',v:T.liv,c:cores.liv}].filter(x=>x.v>0).sort((x,y)=>y.v-x.v);
+      return `<h3 style="margin-top:4mm">Total gerado por cada canal no período</h3>
+      ${gBarrasH(itens,v=>k(v)+' · '+br(v/tt*100,0)+'%')}
+      <p style="font-size:8.4pt;color:#6b727c">Soma de ${idxCanal.length} ${idxCanal.length===1?'mês':'meses'} com dados de canal, de ${rots[idxCanal[0]]} a ${rots[iCan]}.</p>`;})()}
     <div class="dois" style="margin-top:4mm">
       <div><h3>Divisão em ${rots[iCan]}</h3>${gRosca(ult)}${legenda(ult)}</div>
       <div><h3>O que isso significa</h3>
@@ -671,6 +680,16 @@ function montar(D){
     const afp=MS.map(m=>g(m,'afp')),afc=MS.map(m=>g(m,'afc')),afv=MS.map(m=>g(m,'afv'));
     H+=`<div class="pg"><div class="olho">Afiliados, vídeo e live</div><h2>Os canais que<br>não custam mídia</h2>
     <p>Afiliados divulgam o seu produto e só ganham quando vendem. Vídeo e live são formatos da própria Shopee que entregam alcance sem leilão de anúncio.</p>
+    ${(()=>{
+      const tAfi=vAfi.reduce((x,y)=>x+y,0), tVid=vVid.reduce((x,y)=>x+y,0), tLiv=vLiv.reduce((x,y)=>x+y,0);
+      const tAds=vAds.reduce((x,y)=>x+y,0), tOrg=vOrg.reduce((x,y)=>x+y,0);
+      const tt=tAds+tOrg+tAfi+tVid+tLiv||1;
+      const pedAfi=MS.reduce((s,m)=>s+g(m,'afp'),0);
+      return `<div class="kpis" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kpi" style="--c:#7B2FFF"><div class="l">Afiliados no período</div><div class="v">${k(tAfi)}</div><div class="s">${br(tAfi/tt*100,1)}% do faturamento${pedAfi?' · '+nn(pedAfi)+' pedidos':''}</div></div>
+        <div class="kpi" style="--c:#2d7ff9"><div class="l">Vídeo no período</div><div class="v">${k(tVid)}</div><div class="s">${br(tVid/tt*100,1)}% do faturamento</div></div>
+        <div class="kpi" style="--c:#d99a00"><div class="l">Live no período</div><div class="v">${k(tLiv)}</div><div class="s">${br(tLiv/tt*100,1)}% do faturamento</div></div>
+      </div>`;})()}
     <div class="dois">
       <div><h3>Pedidos vindos de afiliados</h3>${gLinha([{v:afp,c:PAL.rx}],rots,nn,366,180)}</div>
       <div><h3>Faturamento de afiliados</h3>${gLinha([{v:vAfi,c:PAL.rx}],rots,k,366,180)}</div>
