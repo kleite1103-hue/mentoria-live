@@ -742,41 +742,74 @@ function montarSemana(D){
   if(d.length<14) return '<div class="pg"><p>Esta conta não tem 14 dias de dados para comparar.</p></div>';
   const som=(arr,c)=>arr.reduce((s,x)=>s+f(x[c]),0);
   const u7=d.slice(-7), a7=d.slice(-14,-7), m7=d.length>=35?d.slice(-35,-28):null;
-  const bloco=arr=>{const fa=som(arr,'faturamento'),pe=som(arr,'pedidos'),vi=som(arr,'visitantes');
-    return {fat:fa,ped:pe,vis:vi,conv:vi?pe/vi*100:0,tk:pe?fa/pe:0,
+  const bloco=arr=>{const fa=som(arr,'faturamento'),pe=som(arr,'pedidos'),vi=som(arr,'visitantes'),cl=som(arr,'cliques');
+    return {fat:fa,ped:pe,vis:vi,clk:cl,conv:vi?pe/vi*100:0,tk:pe?fa/pe:0,
       ads:som(arr,'vendas_ads'),org:som(arr,'vendas_organico'),afi:som(arr,'vendas_afiliado'),
       vid:som(arr,'vendas_videos'),liv:som(arr,'vendas_lives'),
-      canc:som(arr,'pedidos_cancelados'),novos:som(arr,'compradores_novos'),volta:som(arr,'compradores_existentes'),
+      canc:som(arr,'pedidos_cancelados'),vcanc:som(arr,'vendas_canceladas'),
+      novos:som(arr,'compradores_novos'),volta:som(arr,'compradores_existentes'),
       ini:arr[0].data,fim:arr[arr.length-1].data};};
-  const A=bloco(u7), B=bloco(a7), C=m7?bloco(m7):null;
+  const A=bloco(u7),B=bloco(a7),C=m7?bloco(m7):null;
   const dia=s=>{const p=s.slice(5).split('-');return p[1]+'/'+p[0]};
+  const DS=['dom','seg','ter','qua','qui','sex','sáb'];
+  const diaSem=s=>DS[new Date(s+'T12:00:00').getDay()];
   const vv=(x,y)=>x?((y/x-1)*100):0, seta=v=>v>=0?'▲':'▼', cv=v=>v>=0?'#1a9e52':'#c0392b';
   const sinal=v=>(v>=0?'+':'')+br(v,0)+'%';
-  const rotsD=u7.map(x=>dia(x.data));
+  const rotsD=u7.map(x=>dia(x.data)+'\n'+diaSem(x.data));
+  const rots7=u7.map(x=>dia(x.data));
   const serieF=u7.map(x=>f(x.faturamento)), serieA=a7.map(x=>f(x.faturamento));
   const serieP=u7.map(x=>f(x.pedidos)), serieV=u7.map(x=>f(x.visitantes));
+  const serieC=u7.map(x=>f(x.visitantes)?f(x.pedidos)/f(x.visitantes)*100:0);
+  const serieCl=u7.map(x=>f(x.cliques));
   const melhor=u7.reduce((m,x)=>f(x.faturamento)>f(m.faturamento)?x:m,u7[0]);
   const pior=u7.reduce((m,x)=>f(x.faturamento)<f(m.faturamento)?x:m,u7[0]);
-  const totCan=A.ads+A.org+A.afi+A.vid+A.liv||1;
+  const comCanal=u7.filter(x=>x.vendas_organico!==null&&x.vendas_organico!==undefined);
+  const comCanalA=a7.filter(x=>x.vendas_organico!==null&&x.vendas_organico!==undefined);
+  const CA=comCanal.length?bloco(comCanal):null, CB=comCanalA.length?bloco(comCanalA):null;
+  const totC=CA?(CA.ads+CA.org+CA.afi+CA.vid+CA.liv)||1:1;
   const hoje=new Date().toLocaleDateString('pt-BR');
   const linha=(nome,a,b,c,fmt,inv)=>{
     const v1=vv(b,a), v2=c?vv(c,a):null;
     const c1=inv?(v1<=0?'#1a9e52':'#c0392b'):cv(v1), c2=v2===null?'':(inv?(v2<=0?'#1a9e52':'#c0392b'):cv(v2));
-    return `<tr><td><b>${nome}</b></td><td class="n">${fmt(a)}</td><td class="n">${fmt(b)}</td><td class="n" style="color:${c1}">${seta(v1)} ${sinal(v1)}</td>${c?`<td class="n">${fmt(c)}</td><td class="n" style="color:${c2}">${seta(v2)} ${sinal(v2)}</td>`:''}</tr>`;};
-  const diaria=u7.map((x,i)=>{const fa=f(x.faturamento),pe=f(x.pedidos),vi=f(x.visitantes);
-    return `<tr><td><b>${dia(x.data)}</b></td><td class="n">${rs(fa)}</td><td class="n">${nn(pe)}</td><td class="n">${nn(vi)}</td><td class="n">${pc(vi?pe/vi*100:0)}</td><td class="n">${rs(pe?fa/pe:0)}</td></tr>`}).join('');
-  let alertas=[];
-  if(vv(B.fat,A.fat)<-20) alertas.push({c:'am',t:'Queda na semana',p:'O faturamento caiu <b>'+br(Math.abs(vv(B.fat,A.fat)),0)+'%</b> contra a semana anterior. '+(Math.abs(vv(B.vis,A.vis))>Math.abs(vv(B.conv,A.conv))?'A origem é <b>menos visitas</b> — olhar orçamento de anúncio e posicionamento.':'A origem é <b>queda de conversão</b> — olhar preço, estoque e concorrência direta.')});
-  if(vv(B.fat,A.fat)>20) alertas.push({c:'vd',t:'Semana em alta',p:'O faturamento subiu <b>'+br(vv(B.fat,A.fat),0)+'%</b> contra a semana anterior, puxado por '+(vv(B.vis,A.vis)>vv(B.conv,A.conv)?'<b>mais tráfego</b>':'<b>melhor conversão</b>')+'. Vale sustentar o que foi feito.'});
-  if(A.canc>0 && A.ped && A.canc/(A.ped+A.canc)>0.05) alertas.push({c:'am',t:'Cancelamentos',p:'<b>'+nn(A.canc)+' pedidos cancelados</b> na semana, '+br(A.canc/(A.ped+A.canc)*100,1)+'% do total. Cada cancelamento custa a venda e afeta a reputação da loja.'});
-  if(A.ads/totCan>0.8) alertas.push({c:'am',t:'Dependência de anúncio',p:'<b>'+br(A.ads/totCan*100,0)+'%</b> das vendas da semana vieram de Ads. Qualquer pausa no investimento aparece no mesmo dia.'});
-  if((A.novos+A.volta)&&A.volta/(A.novos+A.volta)<0.08) alertas.push({c:'',t:'Recompra baixa',p:'Só <b>'+br(A.volta/(A.novos+A.volta)*100,1)+'%</b> das compras foram de clientes que já tinham comprado.'});
-  if(!alertas.length) alertas.push({c:'vd',t:'Semana estável',p:'Sem variações relevantes contra a semana anterior. A operação seguiu o padrão.'});
+    return `<tr><td><b>${nome}</b></td><td class="n">${fmt(a)}</td><td class="n">${fmt(b)}</td><td class="n" style="color:${c1}">${seta(v1)} ${sinal(v1)}</td>${C?`<td class="n">${fmt(c)}</td><td class="n" style="color:${c2}">${seta(v2)} ${sinal(v2)}</td>`:''}</tr>`;};
+  const diaria=u7.map(x=>{const fa=f(x.faturamento),pe=f(x.pedidos),vi=f(x.visitantes),cl=f(x.cliques);
+    return `<tr><td><b>${dia(x.data)}</b> <span style="color:#9aa0a8">${diaSem(x.data)}</span></td><td class="n">${rs(fa)}</td><td class="n">${nn(pe)}</td><td class="n">${nn(vi)}</td><td class="n">${nn(cl)}</td><td class="n">${pc(vi?pe/vi*100:0)}</td><td class="n">${rs(pe?fa/pe:0)}</td><td class="n">${f(x.pedidos_cancelados)?nn(f(x.pedidos_cancelados)):'—'}</td></tr>`}).join('');
+  /* canais: comparação semana × semana */
+  let canaisHTML='', acoesCanal=[];
+  if(CA&&CB){
+    const chans=[{n:'Ads',a:CA.ads,b:CB.ads,c:PAL.lar},{n:'Orgânico',a:CA.org,b:CB.org,c:PAL.vd},
+                 {n:'Afiliados',a:CA.afi,b:CB.afi,c:PAL.rx},{n:'Vídeo',a:CA.vid,b:CB.vid,c:PAL.az},
+                 {n:'Live',a:CA.liv,b:CB.liv,c:PAL.am}].filter(x=>x.a>0||x.b>0);
+    canaisHTML=`<table><thead><tr><th>Canal</th><th class="n">Esta semana</th><th class="n">% do total</th><th class="n">Semana anterior</th><th class="n">Variação</th></tr></thead><tbody>
+      ${chans.map(x=>`<tr><td><b style="color:${x.c}">${x.n}</b></td><td class="n">${rs(x.a)}</td><td class="n">${br(x.a/totC*100,0)}%</td><td class="n">${rs(x.b)}</td><td class="n" style="color:${cv(vv(x.b,x.a))}">${x.b?seta(vv(x.b,x.a))+' '+sinal(vv(x.b,x.a)):'novo'}</td></tr>`).join('')}
+      </tbody></table>`;
+    const caiu=chans.filter(x=>x.b>0&&vv(x.b,x.a)<-20);
+    const subiu=chans.filter(x=>x.b>0&&vv(x.b,x.a)>20);
+    if(caiu.length) acoesCanal.push({t:'Canal em queda: '+caiu.map(x=>x.n).join(' e '),
+      d:caiu.map(x=>x.n+' caiu '+br(Math.abs(vv(x.b,x.a)),0)+'%').join(' · ')+'. '+(caiu.some(x=>x.n==='Ads')?'Conferir orçamento diário, estoque dos principais e se algum anúncio saiu do ar.':'Conferir posicionamento na busca e preço dos produtos que puxavam esse canal.')});
+    if(subiu.length) acoesCanal.push({t:'Canal em alta: '+subiu.map(x=>x.n).join(' e '),
+      d:subiu.map(x=>x.n+' subiu '+br(vv(x.b,x.a),0)+'%').join(' · ')+'. Identificar o que mudou e sustentar — é o caminho mais barato de crescer.'});
+    if(CA.ads/totC>0.8) acoesCanal.push({t:'Dependência de anúncio',d:br(CA.ads/totC*100,0)+'% das vendas vieram de Ads. Ativar cupom de recompra e afiliados reduz o risco de uma pausa derrubar o faturamento.'});
+    if(CA.afi/totC<0.03) acoesCanal.push({t:'Afiliados quase parados',d:'Apenas '+br(CA.afi/totC*100,1)+'% das vendas vieram de afiliados. Subir a comissão do programa por 15 dias costuma destravar esse canal.'});
+    if(!CA.vid&&!CA.liv) acoesCanal.push({t:'Vídeo e Live sem uso',d:'Nenhuma venda por Shopee Vídeo ou Live na semana. São canais com alcance gratuito — postar 3 vídeos curtos por semana já gera movimento.'});
+  }
+  /* ações */
+  let acoes=[];
+  if(vv(B.fat,A.fat)<-15) acoes.push({t:'Investigar a queda da semana',d:'O faturamento caiu '+br(Math.abs(vv(B.fat,A.fat)),0)+'%. '+(Math.abs(vv(B.vis,A.vis))>Math.abs(vv(B.conv,A.conv))?'A origem é <b>menos visitas</b>: conferir orçamento de Ads, estoque e se algum anúncio parou.':'A origem é <b>queda de conversão</b>: conferir preço contra concorrência, avaliações recentes e prazo de envio.')});
+  if(vv(B.conv,A.conv)<-15) acoes.push({t:'Conversão caiu',d:'De '+pc(B.conv)+' para '+pc(A.conv)+'. Revisar preço dos principais, cupom ativo e se houve avaliação negativa nos últimos dias.'});
+  if(A.canc&&A.ped&&A.canc/(A.ped+A.canc)>0.05) acoes.push({t:'Cancelamentos acima do normal',d:nn(A.canc)+' pedidos cancelados ('+br(A.canc/(A.ped+A.canc)*100,1)+'% do total, '+rs(A.vcanc)+'). Verificar ruptura de estoque e prazo de postagem.'});
+  if((A.novos+A.volta)&&A.volta/(A.novos+A.volta)<0.08) acoes.push({t:'Trabalhar recompra',d:'Só '+br(A.volta/(A.novos+A.volta)*100,1)+'% das compras foram de clientes que já compraram. Disparar cupom para a base dos últimos 90 dias.'});
+  if(vv(B.tk,A.tk)<-10) acoes.push({t:'Ticket em queda',d:'De '+rs(B.tk)+' para '+rs(A.tk)+'. Conferir se os produtos mais baratos tomaram o lugar dos principais na vitrine.'});
+  if(A.vis&&A.clk&&A.clk/A.vis>1.3) acoes.push({t:'Muito clique, pouca visita única',d:'Foram '+nn(A.clk)+' cliques para '+nn(A.vis)+' visitantes. O anúncio atrai, mas a página não segura — revisar primeira foto e preço.'});
+  acoes=acoes.concat(acoesCanal);
+  if(vv(B.fat,A.fat)>15) acoes.unshift({t:'Semana em alta — sustentar',d:'Faturamento subiu '+br(vv(B.fat,A.fat),0)+'%, puxado por '+(vv(B.vis,A.vis)>vv(B.conv,A.conv)?'mais tráfego':'melhor conversão')+'. Manter orçamento e estoque dos produtos que puxaram.'});
+  if(!acoes.length) acoes.push({t:'Seguir o plano',d:'Sem variações relevantes na semana. Manter a rotina de oferta relâmpago, acompanhamento de Ads e atendimento.'});
+  const topDias=[...u7].sort((a,b)=>f(b.faturamento)-f(a.faturamento)).slice(0,3).map(x=>dia(x.data)+' ('+diaSem(x.data)+')').join(' · ');
   return `<div class="pg capa"><div><div class="tag">Efeito Vendas · Resumo semanal</div>
-  <h2>${D.nome}</h2><p class="s">Os últimos 7 dias comparados com a semana anterior${C?' e com a mesma semana do mês passado':''}.</p></div>
+  <h2>${D.nome}</h2><p class="s">Os últimos 7 dias comparados com a semana anterior${C?' e com o mesmo período do mês passado':''}: vendas, tráfego, canais e o que fazer nesta semana.</p></div>
   <div class="r"><span>Período: <b>${dia(A.ini)} a ${dia(A.fim)}</b></span><span>Gerado em ${hoje}</span></div></div>
 
-  <div class="pg"><div class="olho">A semana</div><h2>Como foi de<br>${dia(A.ini)} a ${dia(A.fim)}</h2>
+  <div class="pg"><div class="olho">A semana</div><h2>De ${dia(A.ini)} a ${dia(A.fim)}</h2>
   <div class="kpis">
     <div class="kpi" style="--c:#1a1d23"><div class="l">Faturamento</div><div class="v">${k(A.fat)}</div><div class="s" style="color:${cv(vv(B.fat,A.fat))}">${seta(vv(B.fat,A.fat))} ${br(Math.abs(vv(B.fat,A.fat)),0)}% vs semana anterior</div></div>
     <div class="kpi" style="--c:#7B2FFF"><div class="l">Pedidos</div><div class="v">${nn(A.ped)}</div><div class="s" style="color:${cv(vv(B.ped,A.ped))}">${seta(vv(B.ped,A.ped))} ${br(Math.abs(vv(B.ped,A.ped)),0)}% · ${br(A.ped/7,0)}/dia</div></div>
@@ -785,32 +818,67 @@ function montarSemana(D){
   </div>
   <h3>Faturamento dia a dia</h3>
   ${legenda([{n:'Esta semana',c:PAL.lar},{n:'Semana anterior',c:'#c9ced6'}])}
-  ${gLinha([{v:serieA,c:'#c9ced6'},{v:serieF,c:PAL.lar}],rotsD,k,760,190)}
+  ${gLinha([{v:serieA,c:'#c9ced6'},{v:serieF,c:PAL.lar}],rots7,k,760,185)}
   <table style="margin-top:3mm"><thead><tr><th>Indicador</th><th class="n">Esta semana</th><th class="n">Anterior</th><th class="n">Variação</th>${C?'<th class="n">Mês passado</th><th class="n">Variação</th>':''}</tr></thead><tbody>
   ${linha('Faturamento',A.fat,B.fat,C&&C.fat,k)}
   ${linha('Pedidos',A.ped,B.ped,C&&C.ped,nn)}
   ${linha('Visitas',A.vis,B.vis,C&&C.vis,nn)}
   ${linha('Conversão',A.conv,B.conv,C&&C.conv,v=>pc(v))}
   ${linha('Ticket médio',A.tk,B.tk,C&&C.tk,rs)}
+  ${linha('Clientes novos',A.novos,B.novos,C&&C.novos,nn)}
   ${linha('Cancelados',A.canc,B.canc,C&&C.canc,nn,true)}
   </tbody></table>
   <div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>2</span></div></div>
 
-  <div class="pg"><div class="olho">Detalhe e leitura</div><h2>O que aconteceu<br>em cada dia</h2>
-  <table><thead><tr><th>Dia</th><th class="n">Faturamento</th><th class="n">Pedidos</th><th class="n">Visitas</th><th class="n">Conversão</th><th class="n">Ticket</th></tr></thead><tbody>${diaria}</tbody></table>
-  <div class="dois" style="margin-top:4mm">
-    <div><h3>De onde vieram as vendas</h3>
-      ${gRosca([{n:'Ads',v:A.ads,c:PAL.lar},{n:'Orgânico',v:A.org,c:PAL.vd},{n:'Afiliados',v:A.afi,c:PAL.rx}].filter(x=>x.v>0),320,200)}
-      ${legenda([{n:'Ads · '+k(A.ads),c:PAL.lar},{n:'Orgânico · '+k(A.org),c:PAL.vd},{n:'Afiliados · '+k(A.afi),c:PAL.rx}])}
+  <div class="pg"><div class="olho">Origem das vendas</div><h2>De onde veio<br>cada real</h2>
+  ${CA?`<p>Composição das vendas da semana por canal${comCanal.length<7?' (dados de canal disponíveis em '+comCanal.length+' dos 7 dias)':''}.</p>
+  <div class="dois">
+    <div><h3>Divisão da semana</h3>
+      ${gRosca([{n:'Ads',v:CA.ads,c:PAL.lar},{n:'Orgânico',v:CA.org,c:PAL.vd},{n:'Afiliados',v:CA.afi,c:PAL.rx},{n:'Vídeo',v:CA.vid,c:PAL.az},{n:'Live',v:CA.liv,c:PAL.am}].filter(x=>x.v>0),330,215)}
+      ${legenda([{n:'Ads',c:PAL.lar},{n:'Orgânico',c:PAL.vd},{n:'Afiliados',c:PAL.rx}].concat(CA.vid?[{n:'Vídeo',c:PAL.az}]:[]).concat(CA.liv?[{n:'Live',c:PAL.am}]:[]))}
     </div>
-    <div><h3>Destaques</h3>
-      <div class="cx"><div class="t">Melhor dia</div><p><b>${dia(melhor.data)}</b> com ${k(f(melhor.faturamento))} e ${nn(f(melhor.pedidos))} pedidos.</p></div>
-      <div class="cx"><div class="t">Dia mais fraco</div><p><b>${dia(pior.data)}</b> com ${k(f(pior.faturamento))} e ${nn(f(pior.pedidos))} pedidos.</p></div>
-      <div class="cx"><div class="t">Clientes</div><p><b>${nn(A.novos)}</b> novos e <b>${nn(A.volta)}</b> recorrentes na semana.</p></div>
+    <div><h3>Canal por canal</h3>
+      ${gBarrasH([{n:'Ads',v:CA.ads,c:PAL.lar},{n:'Orgânico',v:CA.org,c:PAL.vd},{n:'Afiliados',v:CA.afi,c:PAL.rx}].concat(CA.vid?[{n:'Vídeo',v:CA.vid,c:PAL.az}]:[]).concat(CA.liv?[{n:'Live',v:CA.liv,c:PAL.am}]:[]).sort((a,b)=>b.v-a.v),rs,370)}
     </div>
   </div>
-  ${alertas.slice(0,3).map(a=>`<div class="cx ${a.c}"><div class="t">${a.t}</div><p>${a.p}</p></div>`).join('')}
-  <div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>3</span></div></div>`;
+  ${canaisHTML}
+  <div class="cx ${CA.ads/totC>0.75?'am':'vd'}"><div class="t">O que essa divisão diz</div><p>${CA.ads/totC>0.75?'<b>'+br(CA.ads/totC*100,0)+'% das vendas dependem de anúncio.</b> É o canal mais rápido, mas também o único que para quando o orçamento acaba. Orgânico, afiliados e recompra sustentam o faturamento nos dias em que a mídia oscila.':'A loja tem <b>distribuição saudável</b> entre canais: '+br(CA.ads/totC*100,0)+'% de Ads, '+br(CA.org/totC*100,0)+'% de orgânico e '+br(CA.afi/totC*100,0)+'% de afiliados. Isso torna o faturamento menos sensível ao orçamento diário.'}</p></div>`
+  :'<div class="cx am"><div class="t">Dados de canal indisponíveis</div><p>O relatório de canais da Shopee ainda não foi carregado para esta semana. Assim que o upload for feito, esta página mostra a divisão completa.</p></div>'}
+  <div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>3</span></div></div>
+
+  <div class="pg"><div class="olho">Comportamento do tráfego</div><h2>Como as pessoas<br>chegaram e o que fizeram</h2>
+  <p>Visitas são pessoas distintas que entraram na loja. Cliques contam cada vez que alguém abriu um produto — comparando os dois, dá para ver se quem chega está explorando ou saindo na primeira tela.</p>
+  <div class="dois">
+    <div><h3>Visitas por dia</h3>${gLinha([{v:serieV,c:PAL.az}],rots7,nn,366,175)}</div>
+    <div><h3>Cliques em produtos por dia</h3>${gLinha([{v:serieCl,c:PAL.rx}],rots7,nn,366,175)}</div>
+  </div>
+  <div class="dois">
+    <div><h3>Conversão por dia</h3>${gLinha([{v:serieC,c:PAL.vd}],rots7,v=>pc(v),366,175)}</div>
+    <div><h3>Pedidos por dia</h3>${gLinha([{v:serieP,c:PAL.lar}],rots7,nn,366,175)}</div>
+  </div>
+  <div class="dois">
+    <div class="cx"><div class="t">Páginas vistas por visitante</div><p>Em média <b>${br(A.vis?A.clk/A.vis:0,2)}</b> produtos abertos por pessoa${B.vis?' (semana anterior: '+br(B.clk/B.vis,2)+')':''}. ${A.vis&&A.clk/A.vis>1.3?'Está explorando bastante o catálogo e não comprando — a dúvida está na página do produto.':'Quem entra vê poucos produtos — vale revisar vitrine e produtos relacionados.'}</p></div>
+    <div class="cx"><div class="t">Melhores dias da semana</div><p>${topDias}. Vale concentrar oferta relâmpago e aumento de orçamento nesses dias.</p></div>
+  </div>
+  <div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>4</span></div></div>
+
+  <div class="pg"><div class="olho">Dia a dia</div><h2>O detalhe de<br>cada dia</h2>
+  <table><thead><tr><th>Dia</th><th class="n">Faturamento</th><th class="n">Pedidos</th><th class="n">Visitas</th><th class="n">Cliques</th><th class="n">Conversão</th><th class="n">Ticket</th><th class="n">Cancel.</th></tr></thead><tbody>${diaria}</tbody></table>
+  <div class="dois" style="margin-top:4mm">
+    <div class="cx vd"><div class="t">Melhor dia</div><p><b>${dia(melhor.data)} (${diaSem(melhor.data)})</b> com ${k(f(melhor.faturamento))} e ${nn(f(melhor.pedidos))} pedidos.</p></div>
+    <div class="cx am"><div class="t">Dia mais fraco</div><p><b>${dia(pior.data)} (${diaSem(pior.data)})</b> com ${k(f(pior.faturamento))} e ${nn(f(pior.pedidos))} pedidos.</p></div>
+  </div>
+  <div class="dois">
+    <div class="cx"><div class="t">Clientes</div><p><b>${nn(A.novos)}</b> novos e <b>${nn(A.volta)}</b> recorrentes — recompra de ${br((A.novos+A.volta)?A.volta/(A.novos+A.volta)*100:0,1)}%.</p></div>
+    <div class="cx"><div class="t">Cancelamentos</div><p><b>${nn(A.canc)}</b> pedidos${A.vcanc?' ('+rs(A.vcanc)+')':''}, ${br((A.ped+A.canc)?A.canc/(A.ped+A.canc)*100:0,1)}% do total da semana.</p></div>
+  </div>
+  <div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>5</span></div></div>
+
+  <div class="pg"><div class="olho">Ações da semana</div><h2>O que fazer<br>nos próximos dias</h2>
+  <p>Recomendações geradas a partir do que os números mostraram nesta semana, em ordem de prioridade.</p>
+  ${acoes.slice(0,6).map((a,i)=>`<div class="passo"><div class="n">${i+1}</div><div><h4>${a.t}</h4><p>${a.d}</p></div></div>`).join('')}
+  <div class="cx lar"><div class="t">Resumo em uma linha</div><p>A semana fechou em <b>${k(A.fat)}</b> (${sinal(vv(B.fat,A.fat))} contra a anterior${C?', '+sinal(vv(C.fat,A.fat))+' contra o mês passado':''}), com ${nn(A.ped)} pedidos e conversão de ${pc(A.conv)}.</p></div>
+  <div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>6</span></div></div>`;
 }
 
 /* sessão salva */
