@@ -151,6 +151,13 @@ h1{font-family:'Bebas Neue';font-size:38px;letter-spacing:1px;line-height:1}
         <div class="tipo on" data-tipo="completo"><b>Completo</b><span>15 páginas · faturamento, funil, carrinho, canais, afiliados, anúncios, produtos, trabalho e conclusão. Para reunião e fechamento de mês.</span></div>
         <div class="tipo" data-tipo="semanal"><b>Rápido · 7 dias</b><span>3 páginas · a semana comparada com a anterior e com a mesma semana do mês passado. Para mandar toda segunda.</span></div>
       </div>
+      <label style="margin-top:16px">Incluir no relatório</label>
+      <div class="tipos" style="grid-template-columns:1fr">
+        <div class="tipo on" id="opt-trabalho" style="display:flex;gap:11px;align-items:flex-start">
+          <span id="cbx" style="width:18px;height:18px;border-radius:5px;border:2px solid var(--lar);background:var(--lar);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700">✓</span>
+          <span><b>Trabalho executado pela equipe</b><span style="display:block;font-size:12px;color:#8a919c;line-height:1.4">Detalhamento do checklist: ações por categoria, por responsável, evolução semanal e evidências anexadas</span></span>
+        </div>
+      </div>
       <button class="btn" id="gerar">GERAR RELATÓRIO</button>
       <div class="barra" id="barra"><i></i></div>
       <div id="status"></div>
@@ -204,10 +211,18 @@ $('entrar').onclick=async()=>{
   $('entrar').disabled=false;
 };
 $('senha').addEventListener('keydown',e=>{if(e.key==='Enter')$('entrar').click()});
-document.querySelectorAll('.tipo').forEach(t=>t.onclick=()=>{
-  document.querySelectorAll('.tipo').forEach(x=>x.classList.remove('on'));
+document.querySelectorAll('.tipo[data-tipo]').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tipo[data-tipo]').forEach(x=>x.classList.remove('on'));
   t.classList.add('on'); tipo=t.dataset.tipo;
 });
+let incluirTrabalho=true;
+$('opt-trabalho').onclick=()=>{
+  incluirTrabalho=!incluirTrabalho;
+  $('opt-trabalho').classList.toggle('on',incluirTrabalho);
+  $('cbx').style.background=incluirTrabalho?'var(--lar)':'transparent';
+  $('cbx').style.borderColor=incluirTrabalho?'var(--lar)':'#39414d';
+  $('cbx').textContent=incluirTrabalho?'✓':'';
+};
 $('sair').onclick=()=>{sessionStorage.removeItem('ev_tok');location.reload()};
 
 async function abrirPainel(){
@@ -388,7 +403,7 @@ $('gerar').onclick=async()=>{
     prog(55);
     if(!diarias.length){ st('Esta conta não tem dados no período escolhido.','err'); $('gerar').disabled=false; $('barra').style.display='none'; return; }
     st('Montando o relatório…'); prog(75);
-    const html = (tipo==='semanal') ? montarSemana({nome,diarias,ads}) : montar({nome,diarias,ads,adsProd,produtos,shop,check});
+    const html = (tipo==='semanal') ? montarSemana({nome,diarias,ads}) : montar({nome,diarias,ads,adsProd,produtos,shop,check,incluirTrabalho});
     $('rel').innerHTML=html; prog(100);
     st('Relatório pronto.','ok');
     $('painel').style.display='none'; $('saida').style.display='block'; $('acoes').style.display='flex';
@@ -462,6 +477,8 @@ function montar(D){
   const hoje=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   const per=rots[0]+' a '+rots[iUlt];
   let np=1; const rod=()=>{np++;return `<div class="rodp"><span>Efeito Vendas · ${D.nome}</span><span>${np}</span></div>`};
+  /* produtos */
+  const pMes={};D.produtos.forEach(p=>{(pMes[p.mes_referencia]=pMes[p.mes_referencia]||[]).push(p)});
   /* trabalho */
   const ex={},dias={};
   D.check.forEach(x=>{const d=(x.executado_em||'').slice(0,7); if(!d)return;
@@ -473,8 +490,7 @@ function montar(D){
   const ac={};D.check.forEach(x=>ac[x.acao]=(ac[x.acao]||0)+1);
   const tra=Object.entries(ac).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([a,q])=>`<tr><td>${a}</td><td class="n">${q}</td></tr>`).join('');
   const comPrint=D.check.filter(x=>x.anexo_url).length;
-  /* produtos */
-  const pMes={};D.produtos.forEach(p=>{(pMes[p.mes_referencia]=pMes[p.mes_referencia]||[]).push(p)});
+
   const prodsU=(pMes[ultM]||[]).sort((a,b)=>f(b.gmv)-f(a.gmv));
   const prodsB=(pMes[bestM]||[]).sort((a,b)=>f(b.gmv)-f(a.gmv));
   const recor={};D.produtos.forEach(p=>{(recor[p.nome]=recor[p.nome]||{})[p.mes_referencia]=f(p.conv)});
@@ -595,8 +611,15 @@ function montar(D){
     ${gLinha([{v:convCarV,c:'#1a9e52'}],rotsCar,v=>pc(v,1),760,185)}
     <h3 style="margin-top:4mm">E quantos desistiram</h3>
     ${gArea([{n:'Abandonaram',v:abandono,c:'#f3c9c2'},{n:'Compraram',v:convCarV,c:'#1a9e52'}],rotsCar,v=>br(v,0)+'%',760,165)}
-    <div class="cx ${convCar[iCarU]<convCar[iCarBest]*0.85?'am':'vd'}"><div class="t">O que dá para fazer</div><p>A melhor taxa do período foi <b>${br(convCar[iCarBest],1)}%</b> em ${rots[iCarBest]}; hoje está em <b>${br(convCar[iCarU],1)}%</b>. ${convCar[iCarU]<convCar[iCarBest]*0.85?'Voltar a esse patamar, com o mesmo tráfego, valeria cerca de <b>'+k(ganhoCar)+' por mês</b>. As alavancas são frete grátis a partir de um valor, cupom de primeira compra, prazo de envio e parcelamento — nenhuma delas custa mídia.':'A taxa está próxima do melhor do período. Manter cupom, frete e prazo de envio competitivos sustenta esse patamar.'}</p></div>
-    <div class="cx"><div class="t">Por que as pessoas abandonam</div><p>Frete alto ou prazo longo · falta de cupom na hora de fechar · poucas formas de pagamento · dúvida sobre medida ou cor que a página não respondeu · valor total acima do esperado.</p></div>
+    <div class="cx ${convCar[iCarU]<convCar[iCarBest]*0.85?'am':'vd'}"><div class="t">O que dá para fazer</div><p>A melhor taxa do período foi <b>${br(convCar[iCarBest],1)}%</b> em ${rots[iCarBest]}; hoje está em <b>${br(convCar[iCarU],1)}%</b>. ${convCar[iCarU]<convCar[iCarBest]*0.85?'Voltar a esse patamar, com o mesmo tráfego, valeria cerca de <b>'+k(ganhoCar)+' por mês</b>.':'A taxa está próxima do melhor do período.'}</p></div>
+    <h3>O melhor mês contra o atual</h3>
+    <table style="max-width:170mm"><thead><tr><th>Indicador</th><th class="n">${rots[iCarBest]} (melhor)</th><th class="n">${rots[iCarU]} (atual)</th><th class="n">Diferença</th></tr></thead><tbody>
+      <tr><td>Conversão do carrinho</td><td class="n">${br(convCar[iCarBest],2)}%</td><td class="n">${br(convCar[iCarU],2)}%</td><td class="n" style="color:${convCar[iCarU]>=convCar[iCarBest]?'#1a9e52':'#c0392b'}">${sin(varia(convCar[iCarBest],convCar[iCarU]))}</td></tr>
+      <tr><td>Chegaram ao carrinho</td><td class="n">${nn(pot[iCarBest])}</td><td class="n">${nn(pot[iCarU])}</td><td class="n" style="color:${cor(varia(pot[iCarBest],pot[iCarU]))}">${sin(varia(pot[iCarBest],pot[iCarU]))}</td></tr>
+      <tr><td>Ticket médio</td><td class="n">${rs(tk[iCarBest])}</td><td class="n">${rs(tk[iCarU])}</td><td class="n" style="color:${cor(varia(tk[iCarBest],tk[iCarU]))}">${sin(varia(tk[iCarBest],tk[iCarU]))}</td></tr>
+      ${(pMes[MS[iCarBest]]||[]).length&&(pMes[MS[iCarU]]||[]).length?`<tr><td>Produto que liderava</td><td class="n" style="font-size:8pt">${String((pMes[MS[iCarBest]].sort((a,b)=>f(b.gmv)-f(a.gmv))[0]||{}).nome||'—').slice(0,26)}</td><td class="n" style="font-size:8pt">${String((pMes[MS[iCarU]].sort((a,b)=>f(b.gmv)-f(a.gmv))[0]||{}).nome||'—').slice(0,26)}</td><td class="n">${(pMes[MS[iCarBest]][0]||{}).nome===(pMes[MS[iCarU]][0]||{}).nome?'mesmo produto':'mudou'}</td></tr>`:''}
+    </tbody></table>
+    <div class="cx"><div class="t">O que trava o carrinho na Shopee</div><p>Como frete e pagamento são padronizados pela plataforma, o que diferencia uma loja da outra é: <b>preço contra o concorrente direto</b> na mesma busca · <b>cupom da loja</b> ativo na hora de fechar · <b>tempo de preparo</b> declarado (quanto maior, mais gente desiste) · <b>variação sem estoque</b> (cor ou tamanho que o cliente queria) · <b>peso e dimensões</b> que encarecem o frete em itens grandes ou enviados fora do programa · <b>avaliações recentes</b> do produto.</p></div>
     ${rod()}</div>`;
   }
 
@@ -708,12 +731,71 @@ function montar(D){
     }
   }
 
-  if(D.check.length){
+  if(D.check.length && D.incluirTrabalho!==false){
+    /* por responsável */
+    const porPes={};D.check.forEach(x=>{const p=x.executado_por||'?';porPes[p]=porPes[p]||{n:0,print:0,acoes:new Set()};
+      porPes[p].n++; if(x.anexo_url)porPes[p].print++; porPes[p].acoes.add(x.acao);});
+    const pes=Object.entries(porPes).sort((a,b)=>b[1].n-a[1].n);
+    const trPes=pes.map(([p,v])=>`<tr><td><b>${p}</b></td><td class="n">${v.n}</td><td class="n">${br(v.n/D.check.length*100,0)}%</td><td class="n">${v.print}</td><td class="n">${v.acoes.size}</td></tr>`).join('');
+    const barrasPes=pes.slice(0,7).map((x,i)=>({n:x[0],v:x[1].n,c:[PAL.lar,PAL.rx,PAL.vd,PAL.az,PAL.am,PAL.vm,PAL.cz][i]}));
+    /* por cargo */
+    const porCargo={};D.check.forEach(x=>{const c=(x.cargo||'não informado').replace(/_/g,' ');porCargo[c]=(porCargo[c]||0)+1});
+    const cargos=Object.entries(porCargo).sort((a,b)=>b[1]-a[1]);
+    /* agrupar ações por família */
+    const fam=x=>{const a=(x.acao||'').toLowerCase();
+      if(a.includes('ads')||a.includes('anúncio')||a.includes('anuncio')||a.includes('campanha')||a.includes('roas')) return 'Anúncios';
+      if(a.includes('oferta')||a.includes('promo')||a.includes('cupom')||a.includes('relâmpago')||a.includes('relampago')||a.includes('desconto')) return 'Promoções e ofertas';
+      if(a.includes('chat')||a.includes('atendimento')||a.includes('cliente')||a.includes('avaliaç')) return 'Atendimento';
+      if(a.includes('produto')||a.includes('cadastro')||a.includes('estoque')||a.includes('vitrine')||a.includes('foto')) return 'Catálogo e produtos';
+      if(a.includes('penalidade')||a.includes('saúde')||a.includes('saude')||a.includes('bloqueio')) return 'Saúde da conta';
+      if(a.includes('análise')||a.includes('analise')||a.includes('diagnóstico')||a.includes('diagnostico')||a.includes('relatório')||a.includes('relatorio')||a.includes('monitoramento')||a.includes('performance')) return 'Análise e monitoramento';
+      if(a.includes('vídeo')||a.includes('video')||a.includes('live')||a.includes('marketing')||a.includes('afiliado')) return 'Conteúdo e divulgação';
+      return 'Outras rotinas';};
+    const porFam={};D.check.forEach(x=>{const ff=fam(x);porFam[ff]=(porFam[ff]||0)+1});
+    const fams=Object.entries(porFam).sort((a,b)=>b[1]-a[1]);
+    const coresF=[PAL.lar,PAL.rx,PAL.vd,PAL.az,PAL.am,PAL.vm,PAL.cz,'#e07a5f'];
+    const roscaF=fams.map(([nm,q],i)=>({n:nm,v:q,c:coresF[i%coresF.length]}));
+    /* evolução semanal */
+    const porSem={};D.check.forEach(x=>{const s=x.semana_inicio||(x.executado_em||'').slice(0,10);if(s)porSem[s]=(porSem[s]||0)+1});
+    const sems=Object.keys(porSem).sort().slice(-10);
+    const serieSem=sems.map(s=>porSem[s]);
+    const rotsSem=sems.map(s=>{const p=s.slice(5).split('-');return p[1]+'/'+p[0]});
+    /* top ações detalhadas */
+    const acDet={};D.check.forEach(x=>{const a=x.acao||'?';acDet[a]=acDet[a]||{n:0,print:0,ult:''};
+      acDet[a].n++; if(x.anexo_url)acDet[a].print++;
+      if((x.executado_em||'')>acDet[a].ult)acDet[a].ult=x.executado_em||'';});
+    const trAcDet=Object.entries(acDet).sort((a,b)=>b[1].n-a[1].n).slice(0,14)
+      .map(([a,v])=>`<tr><td>${a}</td><td class="n">${v.n}</td><td class="n">${v.print}</td><td class="n">${v.ult?v.ult.slice(8,10)+'/'+v.ult.slice(5,7):'—'}</td></tr>`).join('');
+    const totDias=Object.values(dias).reduce((s,x)=>s+x.size,0);
+    const mesesAt=Object.keys(ex).length;
     H+=`<div class="pg"><div class="olho">O trabalho executado</div><h2>O que foi feito<br>na conta</h2>
-    <p>Todo atendimento é registrado no sistema da Efeito Vendas, com data, responsável e evidência. No período com registro ativo foram <b>${D.check.length} execuções</b>, sendo <b>${comPrint}</b> com print de comprovação.</p>
-    <table style="max-width:162mm"><thead><tr><th>Mês</th><th class="n">Execuções</th><th class="n">Dias com atendimento</th><th>Equipe</th></tr></thead><tbody>${trt}</tbody></table>
-    <h3>As ações mais executadas</h3>
-    <table style="max-width:152mm"><thead><tr><th>Ação</th><th class="n">Vezes</th></tr></thead><tbody>${tra}</tbody></table>
+    <p>Todo atendimento é registrado no sistema da Efeito Vendas, com data, responsável, ação e evidência anexada. Estes são os registros do período.</p>
+    <div class="kpis">
+      <div class="kpi" style="--c:#1a1d23"><div class="l">Execuções</div><div class="v">${nn(D.check.length)}</div><div class="s">em ${mesesAt} ${mesesAt===1?'mês':'meses'}</div></div>
+      <div class="kpi" style="--c:#2d7ff9"><div class="l">Dias com atendimento</div><div class="v">${nn(totDias)}</div><div class="s">${br(D.check.length/Math.max(1,totDias),1)} ações por dia</div></div>
+      <div class="kpi" style="--c:#1a9e52"><div class="l">Com evidência</div><div class="v">${nn(comPrint)}</div><div class="s">${br(comPrint/D.check.length*100,0)}% com print anexado</div></div>
+      <div class="kpi" style="--c:#7B2FFF"><div class="l">Pessoas envolvidas</div><div class="v">${pes.length}</div><div class="s">${Object.keys(acDet).length} tipos de ação</div></div>
+    </div>
+    <h3>Volume por mês</h3>
+    <table style="max-width:166mm"><thead><tr><th>Mês</th><th class="n">Execuções</th><th class="n">Dias com atendimento</th><th>Equipe</th></tr></thead><tbody>${trt}</tbody></table>
+    <h3>Ritmo semana a semana</h3>
+    ${gLinha([{v:serieSem,c:PAL.lar}],rotsSem,nn,760,160)}
+    ${rod()}</div>
+
+    <div class="pg"><div class="olho">Detalhe do trabalho</div><h2>Em que a equipe<br>colocou o tempo</h2>
+    <div class="dois">
+      <div><h3>Por frente de trabalho</h3>${gRosca(roscaF,330,215)}
+      ${legenda(roscaF.slice(0,5))}</div>
+      <div><h3>Por responsável</h3>${gBarrasH(barrasPes,nn,370)}</div>
+    </div>
+    <table style="margin-top:3mm;max-width:170mm"><thead><tr><th>Responsável</th><th class="n">Execuções</th><th class="n">% do total</th><th class="n">Com print</th><th class="n">Tipos de ação</th></tr></thead><tbody>${trPes}</tbody></table>
+    <div class="cx"><div class="t">Como o time se divide</div><p>${cargos.map(([c,q])=>'<b>'+c+'</b> com '+q+' execuções').join(' · ')}. A frente que mais consumiu tempo foi <b>${fams[0][0].toLowerCase()}</b>, com ${br(fams[0][1]/D.check.length*100,0)}% do total.</p></div>
+    ${rod()}</div>
+
+    <div class="pg"><div class="olho">Registro de ações</div><h2>Cada tipo de ação<br>executada</h2>
+    <p>Lista completa das rotinas aplicadas na conta, com quantas vezes cada uma foi executada, quantas têm print anexado e a data da última.</p>
+    <table><thead><tr><th>Ação</th><th class="n">Vezes</th><th class="n">Com print</th><th class="n">Última</th></tr></thead><tbody>${trAcDet}</tbody></table>
+    <div class="cx vd"><div class="t">O que isso significa para a loja</div><p>São <b>${Object.keys(acDet).length} rotinas diferentes</b> aplicadas de forma recorrente — da oferta relâmpago ao acompanhamento de penalidades. Cada uma registrada com responsável, data e, na maioria, print de comprovação.</p></div>
     ${rod()}</div>`;
   }
 
