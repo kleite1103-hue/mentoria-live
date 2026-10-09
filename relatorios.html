@@ -227,17 +227,14 @@ async function abrirPainel(){
   $('acesso').style.display='none'; $('painel').style.display='block';
   $('quem').innerHTML='<b>'+eu.nome+'</b> · '+(eu.is_admin?'administrador':eu.cargo.replace('_',' '));
   const todas=await api('contas?ativa=eq.true&select=id,nome,consultor_id,analista_ads_id,assistente_id&order=nome');
-  const vêTudo = eu.is_admin===true || ['gerente_conta','gerente_ads'].includes(eu.cargo);
-  contas = vêTudo ? todas : todas.filter(c=>c.consultor_id===eu.id||c.analista_ads_id===eu.id||c.assistente_id===eu.id);
-  if(!contas.length){
-    $('conta').innerHTML='<option>nenhuma conta atribuída a você</option>';
-    $('gerar').disabled=true;
-    $('status').textContent='Você ainda não tem contas atribuídas. Fale com a sua liderança.';
-    $('status').className='err';
-    return;
-  }
-  $('conta').innerHTML=contas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
-  if(!vêTudo) $('quem').innerHTML+=' · <span style="color:#8a919c">'+contas.length+' contas</span>';
+  contas = todas;
+  // as contas que a pessoa atende aparecem primeiro, com marcador
+  const minhas = todas.filter(c=>c.consultor_id===eu.id||c.analista_ads_id===eu.id||c.assistente_id===eu.id);
+  const outras = todas.filter(c=>!minhas.includes(c));
+  $('conta').innerHTML =
+    (minhas.length?`<optgroup label="Minhas contas (${minhas.length})">`+minhas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('')+'</optgroup>':'') +
+    `<optgroup label="Todas as contas (${outras.length})">`+outras.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('')+'</optgroup>';
+  $('quem').innerHTML+=' · <span style="color:#8a919c">'+todas.length+' contas</span>';
 }
 
 
@@ -470,6 +467,7 @@ function montar(D){
   const vAds=MS.map(m=>g(m,'v_ads')),vAfi=MS.map(m=>g(m,'v_afi')),vOrg=MS.map(m=>g(m,'v_org')),
         vLiv=MS.map(m=>g(m,'v_liv')),vVid=MS.map(m=>g(m,'v_vid'));
   const temCanal=vAds.some(v=>v>0)||vOrg.some(v=>v>0)||vAfi.some(v=>v>0);
+
   const temVideo=vVid.some(v=>v>0)||vLiv.some(v=>v>0);
   const temCar=pot.some(v=>v>0);
   const tf=fat.reduce((a,b)=>a+b,0),tp=ped.reduce((a,b)=>a+b,0);
@@ -479,6 +477,10 @@ function montar(D){
   const si=Math.sqrt(inv.reduce((s,a)=>s+(a-mi)**2,0)/n),sf=Math.sqrt(fat.reduce((s,b)=>s+(b-mf)**2,0)/n);
   const r=(si&&sf)?cov/(si*sf):0,b1=si?cov/si**2:0,b0=mf-b1*mi;
   const iMax=fat.indexOf(Math.max(...fat)),iUlt=MS.length-1,ultM=MS[iUlt];
+  // último mês que realmente tem dado de canal (o upload costuma atrasar)
+  const idxCanal=MS.map((m,i)=>i).filter(i=>(vAds[i]+vOrg[i]+vAfi[i]+vVid[i]+vLiv[i])>0);
+  const iCan = idxCanal.length ? idxCanal[idxCanal.length-1] : iUlt;
+  const canalAtrasado = iCan !== iUlt;
   const mesesComProd=[...new Set(D.produtos.map(p=>p.mes_referencia))].filter(m=>MS.includes(m));
   const bestM=mesesComProd.length?mesesComProd.reduce((a,b)=>fat[MS.indexOf(b)]>fat[MS.indexOf(a)]?b:a):MS[iMax];
   const varia=(a,b)=>a?((b/a-1)*100):0, cor=v=>v>=0?'#1a9e52':'#c0392b', sin=v=>(v>=0?'+':'')+br(v,0)+'%';
@@ -635,18 +637,18 @@ function montar(D){
     const cores={ads:PAL.lar,org:PAL.vd,afi:PAL.rx,vid:PAL.az,liv:PAL.am};
     const ser=[{n:'Ads',v:vAds,c:cores.ads},{n:'Orgânico',v:vOrg,c:cores.org},{n:'Afiliados',v:vAfi,c:cores.afi}];
     if(temVideo){ser.push({n:'Vídeo',v:vVid,c:cores.vid});ser.push({n:'Live',v:vLiv,c:cores.liv});}
-    const ult=[{n:'Ads',v:vAds[iUlt],c:cores.ads},{n:'Orgânico',v:vOrg[iUlt],c:cores.org},{n:'Afiliados',v:vAfi[iUlt],c:cores.afi}];
-    if(temVideo){ult.push({n:'Vídeo',v:vVid[iUlt],c:cores.vid});ult.push({n:'Live',v:vLiv[iUlt],c:cores.liv});}
+    const ult=[{n:'Ads',v:vAds[iCan],c:cores.ads},{n:'Orgânico',v:vOrg[iCan],c:cores.org},{n:'Afiliados',v:vAfi[iCan],c:cores.afi}];
+    if(temVideo){ult.push({n:'Vídeo',v:vVid[iCan],c:cores.vid});ult.push({n:'Live',v:vLiv[iCan],c:cores.liv});}
     const totU=ult.reduce((s,x)=>s+x.v,0)||1;
     H+=`<div class="pg"><div class="olho">Canais de venda</div><h2>De onde vem<br>cada real</h2>
     <p>A área colorida mostra como o faturamento se divide entre os canais ao longo dos meses. Quanto mais equilibrado, menos a loja depende de um só caminho.</p>
     ${legenda(ser)}
     ${gArea(ser,rots,k)}
     <div class="dois" style="margin-top:4mm">
-      <div><h3>Divisão em ${rots[iUlt]}</h3>${gRosca(ult)}${legenda(ult)}</div>
+      <div><h3>Divisão em ${rots[iCan]}</h3>${gRosca(ult)}${legenda(ult)}</div>
       <div><h3>O que isso significa</h3>
-        <p>Em ${rots[iUlt]}, <b>${br(vAds[iUlt]/totU*100,0)}%</b> das vendas vieram de anúncio, <b>${br(vOrg[iUlt]/totU*100,0)}%</b> de busca orgânica e <b>${br(vAfi[iUlt]/totU*100,0)}%</b> de afiliados.</p>
-        <div class="cx ${vAds[iUlt]/totU>0.7?'am':'vd'}"><div class="t">Dependência de mídia</div><p>${vAds[iUlt]/totU>0.7?'Com '+br(vAds[iUlt]/totU*100,0)+'% das vendas vindas de Ads, uma pausa no investimento tem efeito imediato no faturamento. Fortalecer orgânico, afiliados e recompra reduz esse risco.':'A loja tem boa distribuição entre canais, o que torna o faturamento menos sensível ao orçamento de anúncio.'}</p></div>
+        <p>Em ${rots[iCan]}, <b>${br(vAds[iCan]/totU*100,0)}%</b> das vendas vieram de anúncio, <b>${br(vOrg[iCan]/totU*100,0)}%</b> de busca orgânica e <b>${br(vAfi[iCan]/totU*100,0)}%</b> de afiliados.${canalAtrasado?' <span style="color:#8a919c">(o relatório de canais de '+rots[iUlt]+' ainda não foi carregado)</span>':''}</p>
+        <div class="cx ${vAds[iCan]/totU>0.7?'am':'vd'}"><div class="t">Dependência de mídia</div><p>${vAds[iCan]/totU>0.7?'Com '+br(vAds[iCan]/totU*100,0)+'% das vendas vindas de Ads, uma pausa no investimento tem efeito imediato no faturamento. Fortalecer orgânico, afiliados e recompra reduz esse risco.':'A loja tem boa distribuição entre canais, o que torna o faturamento menos sensível ao orçamento de anúncio.'}</p></div>
         <div class="cx"><div class="t">Clientes novos e recorrentes</div><p>Em ${rots[iUlt]}, <b>${nn(novos[iUlt])}</b> compradores novos e <b>${nn(volta[iUlt])}</b> que já haviam comprado — taxa de recompra de <b>${br(recomp[iUlt],1)}%</b>.</p></div>
       </div></div>
     ${rod()}</div>`;
@@ -675,8 +677,12 @@ function montar(D){
     </div>
     ${afc.some(v=>v>0)?`<div class="dois"><div><h3>CTR dos afiliados</h3>${gLinha([{v:afc,c:PAL.az}],rots,v=>pc(v,1),366,170)}</div>
       <div><h3>Conversão dos afiliados</h3>${gLinha([{v:afv,c:PAL.vd}],rots,v=>pc(v),366,170)}</div></div>`:''}
-    ${temVideo?`<h3>Vídeo e Live</h3>${legenda([{n:'Vídeo',c:PAL.az},{n:'Live',c:PAL.am}])}${gLinha([{v:vVid,c:PAL.az},{v:vLiv,c:PAL.am}],rots,k,760,180)}
-      <div class="cx"><div class="t">Leitura</div><p>Em ${rots[iUlt]}, vídeo trouxe <b>${k(vVid[iUlt])}</b> e live <b>${k(vLiv[iUlt])}</b>. São canais que a Shopee privilegia e que a maioria das lojas ainda não explora.</p></div>`
+    ${temVideo?(()=>{
+      const tv=vVid.reduce((a,b)=>a+b,0), tl=vLiv.reduce((a,b)=>a+b,0);
+      const totGeral=vAds.reduce((a,b)=>a+b,0)+vOrg.reduce((a,b)=>a+b,0)+vAfi.reduce((a,b)=>a+b,0)+tv+tl;
+      const iMelhor=vLiv.indexOf(Math.max(...vLiv));
+      return `<h3>Vídeo e Live</h3>${legenda([{n:'Vídeo',c:PAL.az},{n:'Live',c:PAL.am}])}${gLinha([{v:vVid,c:PAL.az},{v:vLiv,c:PAL.am}],rots,k,760,180)}
+      <div class="cx vd"><div class="t">Leitura</div><p>No período, <b>vídeo trouxe ${k(tv)}</b> e <b>live trouxe ${k(tl)}</b> — juntos, <b>${br(totGeral?(tv+tl)/totGeral*100:0,0)}% de tudo que a loja faturou</b>. O melhor mês de live foi ${rots[iMelhor]}, com ${k(vLiv[iMelhor])}. São canais sem custo de mídia e que a Shopee privilegia hoje.</p></div>`;})()
      :`<div class="cx am"><div class="t">Vídeo e Live: espaço aberto</div><p>Não há registro de vendas por <b>Shopee Vídeo</b> ou <b>Live</b> no período. São dois canais que a plataforma empurra com alcance gratuito — e que hoje estão fora da operação.</p></div>`}
     ${rod()}</div>`;
   }
