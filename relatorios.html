@@ -101,6 +101,23 @@ h1{font-family:'Bebas Neue';font-size:38px;letter-spacing:1px;line-height:1}
 .proj .i{font-size:7pt;color:#8a919c;text-transform:uppercase}
 .proj .v{font-family:'Bebas Neue';font-size:15pt;line-height:1.1}
 .proj .f{font-size:8pt;color:#1a9e52;font-weight:600}
+
+.vs{display:grid;grid-template-columns:1fr 40px 1fr;gap:4mm;align-items:stretch;margin:4mm 0}
+.lado{border:1px solid #e6e8ec;border-radius:3mm;padding:5mm;border-top:3px solid var(--c)}
+.lado .tg{font-size:7pt;letter-spacing:1.5px;text-transform:uppercase;color:#8a919c}
+.lado .nome{font-family:'Bebas Neue';font-size:18pt;line-height:1.05;color:var(--c);margin:1mm 0 3mm}
+.lado .ln{display:flex;justify-content:space-between;font-size:9.5pt;padding:1.8mm 0;border-bottom:1px solid #f1f3f5}
+.lado .ln:last-child{border:none}
+.meio{display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:16pt;color:#b0b5bd}
+.blur{filter:blur(4.5px)}
+.selo{display:inline-block;font-size:7pt;letter-spacing:1px;text-transform:uppercase;background:#f1e8ff;color:#7B2FFF;padding:1mm 2.5mm;border-radius:2mm;font-weight:700;vertical-align:middle}
+.leg2{display:flex;gap:6mm;font-size:8.5pt;color:#6b727c;margin:2mm 0}
+.leg2 i{display:inline-block;width:4mm;height:2.5mm;border-radius:1mm;margin-right:1.5mm;vertical-align:middle}
+.gap3{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin:3mm 0}
+.gapc{border:1px solid #e6e8ec;border-radius:3mm;padding:4mm;text-align:center;border-top:3px solid var(--c)}
+.gapc .v{font-family:'Bebas Neue';font-size:23pt;line-height:1;color:var(--c)}
+.gapc .l{font-size:7pt;color:#8a919c;text-transform:uppercase;letter-spacing:.5px}
+.gapc .s{font-size:8.5pt;color:#3d434d;margin-top:1mm;line-height:1.35}
 #acoes{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:none;gap:10px;z-index:100}
 #acoes button{background:var(--lar);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-family:'Outfit';font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.4)}
 #acoes button.sec{background:#222935}
@@ -149,12 +166,25 @@ h1{font-family:'Bebas Neue';font-size:38px;letter-spacing:1px;line-height:1}
       <label style="margin-top:18px">Tipo</label>
       <div class="tipos">
         <div class="tipo on" data-tipo="completo"><b>Completo</b><span>15 páginas · faturamento, funil, carrinho, canais, afiliados, anúncios, produtos, trabalho e conclusão. Para reunião e fechamento de mês.</span></div>
-        <div class="tipo" data-tipo="semanal"><b>Rápido · 7 dias</b><span>3 páginas · a semana comparada com a anterior e com a mesma semana do mês passado. Para mandar toda segunda.</span></div>
+        <div class="tipo" data-tipo="semanal"><b>Rápido · 7 dias</b><span>6 páginas · a semana comparada com a anterior e com o mesmo período do mês passado. Para mandar toda segunda.</span></div>
+        <div class="tipo" data-tipo="comparativo"><b>Comparativo entre contas</b><span>6 páginas · a conta escolhida contra outra da carteira, lado a lado. Para mostrar em reunião o que outra operação faz diferente.</span></div>
+      </div>
+      <div id="bloco-ref" style="display:none;margin-top:16px">
+        <label>Conta de referência</label>
+        <div style="display:grid;grid-template-columns:1fr 150px;gap:12px">
+          <select id="conta-ref"></select>
+          <button class="btn sec" id="sugerir" style="margin-top:0;padding:12px">Sugerir</button>
+        </div>
+        <div class="tipo on" id="opt-blur" style="display:flex;gap:11px;align-items:flex-start;margin-top:12px">
+          <span id="cbx2" style="width:18px;height:18px;border-radius:5px;border:2px solid var(--lar);background:var(--lar);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700">✓</span>
+          <span><b>Preservar a identificação da referência</b><span style="display:block;font-size:12px;color:#8a919c;line-height:1.4">Borra o nome da loja e dos produtos dela. As métricas continuam visíveis — use ao mostrar para um cliente.</span></span>
+        </div>
+        <div id="ref-info" style="font-size:12.5px;color:#8a919c;margin-top:10px;line-height:1.5"></div>
       </div>
       <label style="margin-top:16px">Incluir no relatório</label>
       <div class="tipos" style="grid-template-columns:1fr">
-        <div class="tipo on" id="opt-trabalho" style="display:flex;gap:11px;align-items:flex-start">
-          <span id="cbx" style="width:18px;height:18px;border-radius:5px;border:2px solid var(--lar);background:var(--lar);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700">✓</span>
+        <div class="tipo" id="opt-trabalho" style="display:flex;gap:11px;align-items:flex-start">
+          <span id="cbx" style="width:18px;height:18px;border-radius:5px;border:2px solid #39414d;background:transparent;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700"></span>
           <span><b>Trabalho executado pela equipe</b><span style="display:block;font-size:12px;color:#8a919c;line-height:1.4">Detalhamento do checklist: ações por categoria, por responsável, evolução semanal e evidências anexadas</span></span>
         </div>
       </div>
@@ -212,8 +242,31 @@ $('senha').addEventListener('keydown',e=>{if(e.key==='Enter')$('entrar').click()
 document.querySelectorAll('.tipo[data-tipo]').forEach(t=>t.onclick=()=>{
   document.querySelectorAll('.tipo[data-tipo]').forEach(x=>x.classList.remove('on'));
   t.classList.add('on'); tipo=t.dataset.tipo;
+  $('bloco-ref').style.display = tipo==='comparativo' ? 'block' : 'none';
+  $('opt-trabalho').parentElement.previousElementSibling.style.display = tipo==='comparativo' ? 'none' : 'block';
+  $('opt-trabalho').parentElement.style.display = tipo==='comparativo' ? 'none' : 'grid';
 });
-let incluirTrabalho=true;
+let preservar=true;
+$('opt-blur').onclick=()=>{
+  preservar=!preservar;
+  $('opt-blur').classList.toggle('on',preservar);
+  $('cbx2').style.background=preservar?'var(--lar)':'transparent';
+  $('cbx2').style.borderColor=preservar?'var(--lar)':'#39414d';
+  $('cbx2').textContent=preservar?'✓':'';
+};
+$('sugerir').onclick=async()=>{
+  const cid=+$('conta').value;
+  $('ref-info').textContent='Procurando a melhor referência…';
+  $('sugerir').disabled=true;
+  try{
+    const r=await sugerirReferencia(cid);
+    if(!r){ $('ref-info').textContent='Não encontrei uma referência com dados suficientes. Escolha manualmente.'; }
+    else{ $('conta-ref').value=r.id;
+      $('ref-info').innerHTML='<b style="color:#f4f6f9">'+r.nome+'</b> — '+r.motivo+'<br><span style="color:#5b6472">Critério: '+r.nivel+'</span>'; }
+  }catch(e){ $('ref-info').textContent='Não foi possível sugerir agora: '+e.message; }
+  $('sugerir').disabled=false;
+};
+let incluirTrabalho=false;
 $('opt-trabalho').onclick=()=>{
   incluirTrabalho=!incluirTrabalho;
   $('opt-trabalho').classList.toggle('on',incluirTrabalho);
@@ -235,6 +288,7 @@ async function abrirPainel(){
     (minhas.length?`<optgroup label="Minhas contas (${minhas.length})">`+minhas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('')+'</optgroup>':'') +
     `<optgroup label="Todas as contas (${outras.length})">`+outras.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('')+'</optgroup>';
   $('quem').innerHTML+=' · <span style="color:#8a919c">'+todas.length+' contas</span>';
+  $('conta-ref').innerHTML='<option value="">escolha ou clique em Sugerir</option>'+todas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
 }
 
 
@@ -394,6 +448,21 @@ $('gerar').onclick=async()=>{
   const prog=p=>{$('barra').querySelector('i').style.width=p+'%'};
   const st=(t,c='')=>{$('status').textContent=t;$('status').className=c};
   try{
+    if(tipo==='comparativo'){
+      const rid=+$('conta-ref').value;
+      if(!rid){ st('Escolha a conta de referência ou clique em Sugerir.','err'); $('gerar').disabled=false; $('barra').style.display='none'; return; }
+      st('Buscando as duas contas…'); prog(20);
+      const mesesC=janelaMeses(6);
+      const [PA,PB]=await Promise.all([perfilConta(cid,mesesC),perfilConta(rid,mesesC)]);
+      if(!PA.meses.length||!PB.meses.length){ st('Uma das contas não tem meses fechados suficientes.','err'); $('gerar').disabled=false; return; }
+      prog(70); st('Montando o comparativo…');
+      const nomeRef=(contas.find(c=>c.id===rid)||{}).nome||'referência';
+      $('rel').innerHTML=montarComparativo(PA,PB,nome,nomeRef,preservar);
+      prog(100); st('Comparativo pronto.','ok');
+      $('painel').style.display='none'; $('saida').style.display='block'; $('acoes').style.display='flex';
+      window.scrollTo(0,0); $('gerar').disabled=false; setTimeout(()=>{$('barra').style.display='none';prog(0)},600);
+      return;
+    }
     st('Buscando dados da conta…'); prog(10);
     const hoje=new Date(); const ini=new Date(hoje.getFullYear(),hoje.getMonth()-meses+1,1);
     const di=ini.toISOString().slice(0,10);
@@ -850,6 +919,218 @@ function montar(D){
   return H;
 }
 
+
+
+/* ───── COMPARATIVO ENTRE CONTAS ───── */
+const MESES_CMP = 6;
+function janelaMeses(n){
+  const hoje=new Date(), out=[];
+  for(let i=n;i>=1;i--){const d=new Date(hoje.getFullYear(),hoje.getMonth()-i,1);
+    out.push(d.toISOString().slice(0,7));}
+  return out;
+}
+async function perfilConta(cid, meses){
+  const ini=meses[0]+'-01';
+  const [di,ad,pr]=await Promise.all([
+    api(`metricas_diarias?conta_id=eq.${cid}&data=gte.${ini}&select=data,faturamento,pedidos,visitantes,vendas_ads,vendas_organico,vendas_afiliado,vendas_videos,vendas_lives&order=data&limit=1000`),
+    api(`metricas_ads?conta_id=eq.${cid}&select=*&order=mes_referencia&limit=60`),
+    api(`metricas_produtos?conta_id=eq.${cid}&select=*&order=mes_referencia&limit=400`)
+  ]);
+  const M={}; const add=(m,k,v)=>{M[m]=M[m]||{};M[m][k]=(M[m][k]||0)+v};
+  di.forEach(x=>{const m=x.data.slice(0,7); if(!meses.includes(m))return;
+    ['faturamento','pedidos','visitantes','vendas_ads','vendas_organico','vendas_afiliado','vendas_videos','vendas_lives'].forEach(c=>add(m,c,f(x[c])));
+    add(m,'dias',1);});
+  ad.forEach(a=>{const m=a.mes_referencia; if(!M[m])return;
+    ['gmv_total','despesas_total','impressoes_total','cliques_total','conversoes_total'].forEach(c=>M[m][c]=f(a[c]));});
+  const ms=meses.filter(m=>M[m]&&M[m].dias>=20);
+  const T=c=>ms.reduce((s,m)=>s+f(M[m][c]),0);
+  const fat=T('faturamento'),ped=T('pedidos'),vis=T('visitantes');
+  const gmv=T('gmv_total'),dsp=T('despesas_total'),imp=T('impressoes_total'),clk=T('cliques_total');
+  const canalMs=ms.filter(m=>(f(M[m].vendas_ads)+f(M[m].vendas_organico)+f(M[m].vendas_afiliado)+f(M[m].vendas_lives)+f(M[m].vendas_videos))>0);
+  const C=c=>canalMs.reduce((s,m)=>s+f(M[m][c]),0);
+  const tc=C('vendas_ads')+C('vendas_organico')+C('vendas_afiliado')+C('vendas_videos')+C('vendas_lives')||1;
+  return {cid,meses:ms,M,prod:pr,
+    fat,ped,vis,tk:ped?fat/ped:0,conv:vis?ped/vis*100:0,
+    roas:dsp?gmv/dsp:0,ctr:imp?clk/imp*100:0,inv:dsp,tacos:fat?dsp/fat*100:0,
+    ads:C('vendas_ads')/tc*100,org:C('vendas_organico')/tc*100,afi:C('vendas_afiliado')/tc*100,
+    vid:C('vendas_videos')/tc*100,liv:C('vendas_lives')/tc*100,
+    ads_rs:C('vendas_ads'),org_rs:C('vendas_organico'),afi_rs:C('vendas_afiliado'),
+    vid_rs:C('vendas_videos'),liv_rs:C('vendas_lives')};
+}
+async function sugerirReferencia(cid){
+  const meses=janelaMeses(MESES_CMP), ini=meses[0]+'-01';
+  const [di,ad]=await Promise.all([
+    api(`metricas_diarias?data=gte.${ini}&select=conta_id,faturamento,pedidos,visitantes,vendas_ads,vendas_organico,vendas_afiliado,vendas_videos,vendas_lives&limit=100000`),
+    api(`metricas_ads?mes_referencia=gte.${meses[0]}&select=conta_id,gmv_total,despesas_total,impressoes_total,cliques_total&limit=5000`)
+  ]);
+  const A={};
+  const bump=(id,k,v)=>{A[id]=A[id]||{};A[id][k]=(A[id][k]||0)+v};
+  di.forEach(x=>['faturamento','pedidos','visitantes','vendas_ads','vendas_organico','vendas_afiliado','vendas_videos','vendas_lives'].forEach(c=>bump(x.conta_id,c,f(x[c]))));
+  ad.forEach(x=>['gmv_total','despesas_total','impressoes_total','cliques_total'].forEach(c=>bump(x.conta_id,c,f(x[c]))));
+  const perf=id=>{const v=A[id]; if(!v||!v.pedidos)return null;
+    const tc=f(v.vendas_ads)+f(v.vendas_organico)+f(v.vendas_afiliado)+f(v.vendas_videos)+f(v.vendas_lives)||1;
+    return {id,fat:f(v.faturamento),tk:f(v.faturamento)/f(v.pedidos),
+      conv:v.visitantes?f(v.pedidos)/f(v.visitantes)*100:0,
+      ctr:v.impressoes_total?f(v.cliques_total)/f(v.impressoes_total)*100:0,
+      roas:v.despesas_total?f(v.gmv_total)/f(v.despesas_total):0,
+      liv:f(v.vendas_lives)/tc*100,vid:f(v.vendas_videos)/tc*100,afi:f(v.vendas_afiliado)/tc*100};};
+  const eu=perf(cid); if(!eu) return null;
+  const universo=contas.map(c=>c.id).filter(id=>id!==cid).map(perf)
+    .filter(p=>p&&p.fat>30000&&p.pedidos!==0);
+  const ganhos=p=>{const g=[];
+    if(p.conv>eu.conv*1.2) g.push(['converte '+br(p.conv/eu.conv,1)+'× mais',p.conv/eu.conv]);
+    if(p.ctr>eu.ctr*1.15) g.push(['CTR '+br(p.ctr,2)+'% contra '+br(eu.ctr,2)+'%',p.ctr/eu.ctr]);
+    if(p.roas>eu.roas*1.2) g.push(['ROAS '+br(p.roas,1)+'× contra '+br(eu.roas,1)+'×',p.roas/eu.roas]);
+    if(p.liv>5&&eu.liv<2) g.push([br(p.liv,0)+'% das vendas vêm de live',3]);
+    if(p.vid>5&&eu.vid<2) g.push([br(p.vid,0)+'% das vendas vêm de vídeo',3]);
+    if(p.afi>8&&p.afi>eu.afi*1.5) g.push([br(p.afi,0)+'% das vendas vêm de afiliados',2]);
+    return g;};
+  const nome=id=>(contas.find(c=>c.id===id)||{}).nome||'conta '+id;
+  const niveis=[
+    {n:'gêmea — ticket e porte parecidos',ok:p=>p.tk>=eu.tk*0.6&&p.tk<=eu.tk*1.6&&p.fat>=eu.fat*0.5&&p.fat<=eu.fat*2},
+    {n:'mesma faixa de ticket',ok:p=>p.tk>=eu.tk*0.5&&p.tk<=eu.tk*2},
+    {n:'referência de canal — ticket diferente',ok:()=>true}
+  ];
+  for(const nv of niveis){
+    const cand=universo.filter(nv.ok).map(p=>({p,g:ganhos(p)})).filter(x=>x.g.length);
+    if(!cand.length) continue;
+    cand.sort((a,b)=>(b.g.length-a.g.length)||(b.g.reduce((s,x)=>s+x[1],0)-a.g.reduce((s,x)=>s+x[1],0)));
+    const top=cand[0];
+    return {id:top.p.id,nome:nome(top.p.id),nivel:nv.n,motivo:top.g.map(x=>x[0]).join(' · ')};
+  }
+  return null;
+}
+
+
+/* ── as 6 páginas do comparativo ── */
+function barraDupla(itens,w=760){
+  const L=165,R=52,T=10,alt=34,gap=13,h=T+itens.length*(alt+gap)+6,pw=w-L-R,o=[];
+  itens.forEach((it,i)=>{const y=T+i*(alt+gap),mx=Math.max(it.a,it.b)||1;
+    const wa=pw*it.a/mx*0.9, wb=pw*it.b/mx*0.9;
+    o.push(`<text x="${L-10}" y="${y+19}" text-anchor="end" font-size="9.5" font-weight="600" fill="#1a1d23">${it.n}</text>`);
+    o.push(`<rect x="${L}" y="${y}" width="${wa.toFixed(1)}" height="14" fill="#ff4d1c" rx="2"/><text x="${(L+wa+6).toFixed(1)}" y="${y+11.5}" font-size="9" font-weight="700" fill="#ff4d1c">${it.fmt(it.a)}</text>`);
+    o.push(`<rect x="${L}" y="${y+17}" width="${wb.toFixed(1)}" height="14" fill="#7B2FFF" rx="2"/><text x="${(L+wb+6).toFixed(1)}" y="${y+28.5}" font-size="9" font-weight="700" fill="#7B2FFF">${it.fmt(it.b)}</text>`);});
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+function duasLinhas(sa,sb,rots,fmt,w=760,h=190){
+  const L=60,T=18,R=16,B=28,pw=w-L-R,ph=h-T-B,ym=(Math.max(...sa.concat(sb))||1)*1.2;
+  const x=i=>L+pw*i/Math.max(1,rots.length-1), y=v=>T+ph-v/ym*ph, o=[];
+  for(let t=0;t<5;t++){const v=ym*t/4,yy=T+ph-v/ym*ph;
+    o.push(`<line x1="${L}" y1="${yy.toFixed(1)}" x2="${w-R}" y2="${yy.toFixed(1)}" stroke="#eceef1"/><text x="${L-7}" y="${(yy+3.5).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#9aa0a8">${fmt(v)}</text>`);}
+  [[sa,'#ff4d1c'],[sb,'#7B2FFF']].forEach(([s,c])=>{
+    o.push(`<polyline points="${s.map((v,i)=>x(i).toFixed(1)+','+y(v).toFixed(1)).join(' ')}" fill="none" stroke="${c}" stroke-width="2.8"/>`);
+    s.forEach((v,i)=>o.push(`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3.2" fill="${c}"/><text x="${x(i).toFixed(1)}" y="${(y(v)-8).toFixed(1)}" text-anchor="middle" font-size="8.2" font-weight="700" fill="${c}">${fmt(v)}</text>`));});
+  rots.forEach((m,i)=>o.push(`<text x="${x(i).toFixed(1)}" y="${h-9}" text-anchor="middle" font-size="8.4" fill="#6b727c">${m}</text>`));
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit,sans-serif">${o.join('')}</svg>`;
+}
+function montarComparativo(A,B,nomeA,nomeB,preservar){
+  const ms=A.meses.filter(m=>B.meses.includes(m));
+  const rots=ms.map(rot);
+  const serie=(P,fn)=>ms.map(m=>fn(P.M[m]||{}));
+  const fatA=serie(A,v=>f(v.faturamento)), fatB=serie(B,v=>f(v.faturamento));
+  const roasA=serie(A,v=>f(v.despesas_total)?f(v.gmv_total)/f(v.despesas_total):0);
+  const roasB=serie(B,v=>f(v.despesas_total)?f(v.gmv_total)/f(v.despesas_total):0);
+  const convA=serie(A,v=>f(v.visitantes)?f(v.pedidos)/f(v.visitantes)*100:0);
+  const convB=serie(B,v=>f(v.visitantes)?f(v.pedidos)/f(v.visitantes)*100:0);
+  const bl=preservar?' class="blur"':'';
+  const nomeRef=preservar?'LOJA DE REFERÊNCIA':String(nomeB).toUpperCase();
+  const ultP=p=>{const mm=[...new Set(p.prod.map(x=>x.mes_referencia))].sort().pop();
+    return p.prod.filter(x=>x.mes_referencia===mm).sort((a,b)=>f(b.gmv)-f(a.gmv)).slice(0,4);};
+  const pa=ultP(A), pb=ultP(B);
+  const tkRazao=A.tk&&B.tk?Math.max(A.tk,B.tk)/Math.min(A.tk,B.tk):1;
+  const difTicket=tkRazao>1.6;
+  // canal que a referência tem e a conta não
+  const faltas=[];
+  if(B.liv>5&&A.liv<2) faltas.push({n:'Shopee Live',p:B.liv,v:B.liv_rs});
+  if(B.vid>5&&A.vid<2) faltas.push({n:'Shopee Vídeo',p:B.vid,v:B.vid_rs});
+  if(B.afi>A.afi*1.5&&B.afi>8) faltas.push({n:'afiliados',p:B.afi,v:B.afi_rs});
+  const falta=faltas.sort((a,b)=>b.p-a.p)[0];
+  const rodC=n=>`<div class="rodp"><span>Efeito Vendas · comparativo</span><span>${n}</span></div>`;
+  const cmp=(nome,a,b,fmt,maiorMelhor=true)=>{
+    const frente=(a>=b)===maiorMelhor;
+    return `<tr><td><b>${nome}</b></td><td class="n" style="color:#ff4d1c">${fmt(a)}</td><td class="n" style="color:#7B2FFF">${fmt(b)}</td><td class="n" style="color:${frente?'#1a9e52':'#c0392b'}">${frente?'você está à frente':br(Math.abs(b?(a/b-1)*100:0),0)+'% atrás'}</td></tr>`;};
+  return `<div class="pg capa"><div><div class="tag">Efeito Vendas · Comparativo</div>
+  <h2>${nomeA}<br><span style="color:#7B2FFF">×</span><br>${preservar?'loja de referência':nomeB}</h2>
+  <p class="s">Como a sua loja se compara a outra conta da nossa carteira. ${preservar?'Os números da loja de referência são reais; a identificação e os produtos dela são preservados.':''}</p></div>
+  <div class="r"><span>Período: <b>${rots[0]} a ${rots[rots.length-1]}</b></span><span>${new Date().toLocaleDateString('pt-BR')}</span></div></div>
+
+  <div class="pg"><div class="olho">Lado a lado</div><h2>As duas lojas<br>em números</h2>
+  <p>${ms.length} meses fechados, mesmas métricas, mesma régua.</p>
+  <div class="vs">
+    <div class="lado" style="--c:#ff4d1c"><div class="tg">Sua loja</div><div class="nome">${String(nomeA).toUpperCase()}</div>
+      <div class="ln"><span>Faturamento</span><b>${k(A.fat)}</b></div>
+      <div class="ln"><span>Pedidos</span><b>${nn(A.ped)}</b></div>
+      <div class="ln"><span>Ticket médio</span><b>${rs(A.tk)}</b></div>
+      <div class="ln"><span>Conversão</span><b>${pc(A.conv)}</b></div>
+      <div class="ln"><span>CTR dos anúncios</span><b>${pc(A.ctr)}</b></div>
+      <div class="ln"><span>ROAS</span><b>${xx(A.roas)}</b></div>
+      <div class="ln"><span>Investimento em Ads</span><b>${br(A.tacos,1)}% do fat.</b></div></div>
+    <div class="meio">VS</div>
+    <div class="lado" style="--c:#7B2FFF"><div class="tg">Referência da carteira</div><div class="nome"><span${bl}>${nomeRef}</span></div>
+      <div class="ln"><span>Faturamento</span><b>${k(B.fat)}</b></div>
+      <div class="ln"><span>Pedidos</span><b>${nn(B.ped)}</b></div>
+      <div class="ln"><span>Ticket médio</span><b>${rs(B.tk)}</b></div>
+      <div class="ln"><span>Conversão</span><b>${pc(B.conv)}</b></div>
+      <div class="ln"><span>CTR dos anúncios</span><b>${pc(B.ctr)}</b></div>
+      <div class="ln"><span>ROAS</span><b>${xx(B.roas)}</b></div>
+      <div class="ln"><span>Investimento em Ads</span><b>${br(B.tacos,1)}% do fat.</b></div></div>
+  </div>
+  <div class="leg2"><span><i style="background:#ff4d1c"></i>${nomeA}</span><span><i style="background:#7B2FFF"></i>${preservar?'Loja de referência':nomeB}</span></div>
+  ${barraDupla([{n:'Faturamento',a:A.fat,b:B.fat,fmt:k},{n:'Pedidos',a:A.ped,b:B.ped,fmt:nn},
+    {n:'Ticket médio',a:A.tk,b:B.tk,fmt:rs},{n:'ROAS',a:A.roas,b:B.roas,fmt:xx}])}
+  ${difTicket?`<div class="cx am"><div class="t">Antes de comparar</div><p>As duas lojas têm <b>tickets muito diferentes</b> — ${rs(A.tk)} contra ${rs(B.tk)}. Ticket menor costuma converter mais e sustentar ROAS maior. A comparação aqui <b>não é de desempenho geral</b>, e sim do que uma faz e a outra não.</p></div>`:''}
+  ${rodC(2)}</div>
+
+  <div class="pg"><div class="olho">A diferença que importa</div><h2>De onde cada loja<br>tira o faturamento</h2>
+  <div class="dois">
+    <div style="text-align:center"><div style="font-size:8pt;color:#ff4d1c;font-weight:700;letter-spacing:1.5px">${String(nomeA).toUpperCase().slice(0,22)}</div>
+    ${gRosca([{n:'Ads',v:A.ads,c:PAL.lar},{n:'Orgânico',v:A.org,c:PAL.vd},{n:'Afiliados',v:A.afi,c:PAL.rx},{n:'Vídeo',v:A.vid,c:PAL.az},{n:'Live',v:A.liv,c:PAL.am}].filter(x=>x.v>0),320,210)}
+    <div style="font-size:8.5pt;color:#6b727c">Ads ${br(A.ads,0)}% · Orgânico ${br(A.org,0)}% · Afiliados ${br(A.afi,0)}%${A.liv>0?' · Live '+br(A.liv,0)+'%':'<br><b style="color:#c0392b">Live e vídeo: 0%</b>'}</div></div>
+    <div style="text-align:center"><div style="font-size:8pt;color:#7B2FFF;font-weight:700;letter-spacing:1.5px">${preservar?'LOJA DE REFERÊNCIA':String(nomeB).toUpperCase().slice(0,22)}</div>
+    ${gRosca([{n:'Ads',v:B.ads,c:PAL.lar},{n:'Orgânico',v:B.org,c:PAL.vd},{n:'Afiliados',v:B.afi,c:PAL.rx},{n:'Vídeo',v:B.vid,c:PAL.az},{n:'Live',v:B.liv,c:PAL.am}].filter(x=>x.v>0),320,210)}
+    <div style="font-size:8.5pt;color:#6b727c">Ads ${br(B.ads,0)}% · Orgânico ${br(B.org,0)}% · Afiliados ${br(B.afi,0)}%${B.liv>0?' · <b style="color:#1a9e52">Live '+br(B.liv,0)+'%</b>':''}</div></div>
+  </div>
+  ${falta?`<div class="gap3">
+    <div class="gapc" style="--c:#d99a00"><div class="l">${falta.n} na referência</div><div class="v">${br(falta.p,0)}%</div><div class="s">${k(falta.v)} no período</div></div>
+    <div class="gapc" style="--c:#c0392b"><div class="l">${falta.n} na sua loja</div><div class="v">${br(falta.n==='Shopee Live'?A.liv:falta.n==='Shopee Vídeo'?A.vid:A.afi,0)}%</div><div class="s">${falta.n==='afiliados'?'canal pouco explorado':'canal não utilizado'}</div></div>
+    <div class="gapc" style="--c:#1a9e52"><div class="l">Se chegasse à metade</div><div class="v">${k(A.fat*falta.p/100*0.5)}</div><div class="s">no mesmo período</div></div>
+  </div>
+  <div class="cx vd"><div class="t">A leitura</div><p>A loja de referência tira <b>${br(falta.p,0)}% de tudo que fatura de ${falta.n}</b> — ${k(falta.v)} no período. É faturamento que não passa por leilão de anúncio.</p></div>`
+  :`<div class="cx"><div class="t">Leitura</div><p>As duas lojas têm distribuição de canais parecida. A diferença de resultado está nas métricas de funil, não no mix de canais.</p></div>`}
+  ${rodC(3)}</div>
+
+  <div class="pg"><div class="olho">Comportamento no tempo</div><h2>As duas curvas</h2>
+  <div class="leg2"><span><i style="background:#ff4d1c"></i>${nomeA}</span><span><i style="background:#7B2FFF"></i>${preservar?'Referência':nomeB}</span></div>
+  <h3>Faturamento mês a mês</h3>${duasLinhas(fatA,fatB,rots,k)}
+  <h3>Taxa de conversão</h3>${duasLinhas(convA,convB,rots,v=>pc(v))}
+  <h3>ROAS</h3>${duasLinhas(roasA,roasB,rots,xx)}
+  ${rodC(4)}</div>
+
+  <div class="pg"><div class="olho">Catálogo</div><h2>Os produtos<br>de cada loja</h2>
+  <p>${preservar?'Os produtos da loja de referência são preservados. O que interessa é o <b>padrão</b>: faixa de preço, conversão e concentração.':'Principais produtos do último mês de cada loja.'}</p>
+  <h3 style="color:#ff4d1c">${nomeA}</h3>
+  <table><thead><tr><th>Produto</th><th class="n">Faturamento</th><th class="n">% do mês</th><th class="n">Conversão</th><th class="n">Ticket</th></tr></thead><tbody>
+  ${pa.map(p=>`<tr><td>${String(p.nome||'').slice(0,46)}</td><td class="n">${k(f(p.gmv))}</td><td class="n">${pc(f(p.pct_gmv),1)}</td><td class="n">${pc(f(p.conv))}</td><td class="n">${rs(f(p.ticket))}</td></tr>`).join('')}
+  </tbody></table>
+  <h3 style="color:#7B2FFF;margin-top:6mm">${preservar?'Loja de referência <span class="selo">identificação preservada</span>':nomeB}</h3>
+  <table><thead><tr><th>Produto</th><th class="n">Faturamento</th><th class="n">% do mês</th><th class="n">Conversão</th><th class="n">Ticket</th></tr></thead><tbody>
+  ${pb.map(p=>`<tr><td${bl}>${String(p.nome||'').slice(0,46)}</td><td class="n">${k(f(p.gmv))}</td><td class="n">${pc(f(p.pct_gmv),1)}</td><td class="n">${pc(f(p.conv))}</td><td class="n">${rs(f(p.ticket))}</td></tr>`).join('')}
+  </tbody></table>
+  ${difTicket?`<div class="cx"><div class="t">O padrão por trás dos números</div><p>A referência trabalha com ticket ${A.tk>B.tk?'mais baixo':'mais alto'} — ${rs(B.tk)} contra ${rs(A.tk)} da sua loja. Isso muda a forma de vender, mas não impede usar os mesmos canais.</p></div>`:''}
+  ${rodC(5)}</div>
+
+  <div class="pg"><div class="olho">Conclusão</div><h2>O que dá para<br>trazer para a sua loja</h2>
+  ${[
+    falta?{t:'Ativar '+falta.n,d:'A referência tira '+br(falta.p,0)+'% do faturamento desse canal — '+k(falta.v)+' no período. É alcance que não passa por leilão de anúncio.'}:null,
+    B.conv>A.conv*1.2?{t:'Conversão',d:'A referência converte '+pc(B.conv)+' contra '+pc(A.conv)+' da sua loja. Fotos, avaliações, preço e página do produto são as alavancas — nenhuma custa mídia.'}:null,
+    B.ctr>A.ctr*1.15?{t:'CTR dos anúncios',d:'O CTR dela é '+pc(B.ctr)+' contra '+pc(A.ctr)+'. Primeira foto, título e preço de vitrine decidem esse número.'}:null,
+    B.tacos<A.tacos*0.8?{t:'Eficiência de mídia',d:'Ela investe '+br(B.tacos,1)+'% do faturamento em Ads contra '+br(A.tacos,1)+'% da sua loja, com ROAS de '+xx(B.roas)+'.'}:null,
+    A.ctr>B.ctr*1.15?{t:'A vantagem que já é sua',d:'Seu CTR é '+pc(A.ctr)+' contra '+pc(B.ctr)+' da referência — sua vitrine converte atenção melhor que a dela. A oportunidade é somar o que falta, não copiar tudo.'}:null,
+    A.conv>B.conv*1.2?{t:'Você converte melhor',d:'Sua conversão é '+pc(A.conv)+' contra '+pc(B.conv)+'. O ponto a atacar não é a página, é o volume de gente chegando.'}:null
+  ].filter(Boolean).slice(0,4).map((x,i)=>`<div class="passo"><div class="n">${i+1}</div><div><h4>${x.t}</h4><p>${x.d}</p></div></div>`).join('')}
+  <div class="cx lar"><div class="t">Em resumo</div><p>${difTicket?'As duas lojas jogam jogos diferentes por causa do ticket. O que é transferível é <b>o canal e o método</b>, não a operação inteira.':'As duas lojas são comparáveis em porte e ticket. As diferenças de resultado vêm de execução — e são replicáveis.'}</p></div>
+  ${rodC(6)}</div>`;
+}
 
 /* ───── RELATÓRIO RÁPIDO · 7 DIAS ───── */
 function montarSemana(D){
