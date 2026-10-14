@@ -575,76 +575,84 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
 <div class="fonte" style="--c:var(--purple)"><div class="nm">AFILIADOS<span>PAGO · POR VENDA</span></div><p>Você só paga quando vende — comissão sobre o pedido. O afiliado escolhe o que divulgar, e ele escolhe <b>o que converte</b>. Por isso página boa atrai afiliado, e página ruim nenhum programa salva.</p></div>
 <div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange)">Repare na diferença de risco: <b>GMV Max você paga para aparecer</b>, aconteça venda ou não. <b>Afiliado você paga só se vender.</b> São alavancas diferentes, e as duas somam.</div>
 <div class="verdict-strip">Loja que só tem Ads para de vender no dia em que o orçamento acaba. <b>As outras portas não substituem o anúncio — elas seguram o faturamento quando ele oscila.</b></div></section>
-<section class="slide" data-dia="2"><div class="kicker">O leilão</div><h2 class="disp">Como a Shopee<br>escolhe quem aparece</h2>
-<p class="lead">Toda vez que alguém busca, acontece um leilão. E ele <b>não é ganho por quem paga mais</b> — é ganho por quem tem o maior Ad Rank.</p>
-<div class="formula" style="max-width:700px">AD RANK = lance × pontuação de qualidade</div>
-<div class="cards3" style="grid-template-columns:1fr 1fr;margin-top:12px">
-  <div class="cd3" style="--c:var(--orange)"><div class="t">O LANCE</div><p>Quanto o sistema pode pagar por clique para cumprir a sua meta. Sai de uma conta que a gente vê no próximo slide.</p></div>
-  <div class="cd3" style="--c:var(--green)"><div class="t">A QUALIDADE</div><p>Construída por três coisas: <b>CTR esperado</b>, <b>conversão esperada</b> e <b>relevância</b> do produto para a busca.</p></div>
+<section class="slide" data-dia="2"><div class="kicker">O leilão</div><h2 class="disp">Você não compra<br>tráfego. A plataforma<br><span class="hl">precifica você.</span></h2>
+<p class="lead">Aqui está a virada de chave que muda tudo. No Shopee Ads de hoje você <b>não dá lance por clique</b>. O algoritmo olha o seu produto, estima quanto de receita ele espera gerar com aquela impressão — e <b>cobra por mil aparições de acordo com essa expectativa</b>.</p>
+<div class="cards3" style="grid-template-columns:1fr 1fr">
+  <div class="cd3" style="--c:var(--red)"><div class="t">O QUE AS PESSOAS ACHAM</div><p>"Eu dou um lance, quem paga mais aparece." É assim no anúncio de loja, onde ainda existe palavra-chave e custo por clique. <b>No GMV Max não é.</b></p></div>
+  <div class="cd3" style="--c:var(--green)"><div class="t">O QUE REALMENTE ACONTECE</div><p>A plataforma calcula quanto <b>ela</b> espera ganhar mostrando o seu produto. Quem tem mais chance de gerar receita por mil aparições leva o espaço.</p></div>
 </div>
-<div class="leilao">
-  <div class="lt" style="--c:var(--green)"><div class="nm">VOCÊ</div>
-    <div class="ln"><span>Lance máximo</span><b>R$ 0,20</b></div>
-    <div class="ln"><span>CTR</span><b>5% — excelente</b></div>
-    <div class="ln"><span>Pontuação de qualidade</span><b>10</b></div>
-    <div class="res"><div class="v">2,0</div><div class="k">Ad Rank · 1º lugar</div></div></div>
-  <div class="lt" style="--c:var(--red)"><div class="nm">CONCORRENTE</div>
-    <div class="ln"><span>Lance máximo</span><b>R$ 0,20</b></div>
-    <div class="ln"><span>CTR</span><b>1% — ruim</b></div>
-    <div class="ln"><span>Pontuação de qualidade</span><b>2</b></div>
-    <div class="res"><div class="v">0,4</div><div class="k">Ad Rank · perde</div></div></div>
-</div>
-<div class="verdict-strip" style="background:var(--green-soft);border-color:var(--green)"><b>Mesmo lance. Mesmo dinheiro. Resultado cinco vezes diferente</b> — só porque o CTR é cinco vezes melhor. É por isso que foto, título e preço importam tanto: eles são metade da conta do leilão.</div></section>
-<section class="slide" data-dia="2"><div class="kicker">O lance</div><h2 class="disp">Quanto o sistema<br>pode pagar por você</h2>
-<p class="lead">No GMV Max você não define lance. O sistema calcula sozinho o máximo que pode pagar por clique — e essa conta usa exatamente os números que você trabalhou ontem.</p>
-<div class="formula" style="max-width:720px">LANCE MÁXIMO = (ticket médio × taxa de conversão) ÷ ROAS alvo</div>
-<div class="metric-wrap" style="margin-top:10px">
-  <div class="calc"><div class="brl">Simule</div>
-    <div class="field"><label>Ticket médio do produto (R$)</label><input type="number" id="l-vet" value="50" step="5"></div>
-    <div class="field"><label>Taxa de conversão (%)</label><input type="number" id="l-pc" value="2" step="0.5"></div>
-    <div class="field"><label>Meta de ROAS configurada</label><input type="number" id="l-roas" value="5" step="1"></div>
-    <div class="out-row tot"><span>Lance máximo por clique</span><b id="l-lance">—</b></div>
+<div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange);font-size:15px">É um <b>leilão ao contrário</b>: em vez de você comprar tráfego, o algoritmo avalia os anunciantes e precifica cada impressão pelo valor que espera extrair dela. <b>Quem é mais valioso para a plataforma aparece mais — e aparece mais barato.</b></div>
+<div class="verdict-strip">Entender isso muda a sua pergunta. Ela deixa de ser "quanto preciso pagar?" e passa a ser <b>"o que faz o meu produto valer mais para a Shopee mostrar?"</b></div></section>
+<section class="slide" data-dia="2"><div class="kicker">A fórmula</div><h2 class="disp">O que decide<br>quanto você paga</h2>
+<p class="lead">Quatro números do seu produto determinam o preço que a plataforma cobra para mostrar você mil vezes. Três deles você trabalhou ontem.</p>
+<div class="formula" style="max-width:780px">CPM = (ticket × conversão × CTR × 1000) ÷ ROAS alvo</div>
+<div class="metric-wrap" style="margin-top:9px">
+  <div class="calc"><div class="brl">Simule com o seu produto</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="field"><label>Ticket médio (R$)</label><input type="number" id="c-tk" value="50" step="5"></div>
+      <div class="field"><label>Conversão (%)</label><input type="number" id="c-conv" value="2" step="0.5"></div>
+      <div class="field"><label>CTR (%)</label><input type="number" id="c-ctr" value="5" step="0.5"></div>
+      <div class="field"><label>Meta de ROAS</label><input type="number" id="c-roas" value="5" step="1"></div>
+    </div>
+    <div class="out-row tot"><span>CPM que você comporta</span><b id="c-cpm">—</b></div>
   </div>
   <div class="metric-blocks">
-    <div class="mblock"><div class="lab">Se o ticket dobrar</div><div class="val" id="l-vet2">—</div><div class="obs">com kit ou combo</div></div>
-    <div class="mblock p"><div class="lab">Se a conversão dobrar</div><div class="val" id="l-pc2">—</div><div class="obs">com cupom, avaliação e página</div></div>
-    <div class="mblock g"><div class="lab">Se a meta for menor</div><div class="val" id="l-roas2">—</div><div class="obs">menos rentável, mais competitivo</div></div>
+    <div class="mblock"><div class="lab">Se o CTR dobrar</div><div class="val" id="c-ctr2">—</div><div class="obs">foto, título e preço de vitrine</div></div>
+    <div class="mblock p"><div class="lab">Se a conversão dobrar</div><div class="val" id="c-conv2">—</div><div class="obs">página, avaliação e cupom</div></div>
+    <div class="mblock g"><div class="lab">Se o ticket dobrar</div><div class="val" id="c-tk2">—</div><div class="obs">kit ou combo</div></div>
   </div>
 </div>
-<div class="verdict-strip" id="v-lance">—</div></section>
-<section class="slide" data-dia="2"><div class="kicker">A matriz</div><h2 class="disp">Ticket baixo pode<br>competir — se a<br>conversão for alta</h2>
-<p class="lead">A escala é determinada pela <b>multiplicação</b> de ticket e conversão. Um compensa o outro, e é isso que permite a lojas de produto barato brigarem de igual para igual.</p>
+<div class="verdict-strip" id="v-cpm">—</div></section>
+<section class="slide" data-dia="2"><div class="kicker">A variável mestre</div><h2 class="disp">Conversão entra<br>duas vezes na conta</h2>
+<p class="lead">Olhe a fórmula de novo. A conversão aparece lá, multiplicando. <b>Mas ela aparece de novo em outro lugar</b> — e é por isso que ela é a alavanca mais forte que existe.</p>
+<div class="cards3" style="grid-template-columns:1fr 1fr">
+  <div class="cd3" style="--c:var(--orange)"><div class="t">1 · NA PRECIFICAÇÃO</div><p>Entra direto na conta do CPM. Conversão maior significa que a plataforma espera mais receita da sua impressão — e aceita te mostrar mais.</p></div>
+  <div class="cd3" style="--c:var(--purple)"><div class="t">2 · NA QUALIDADE</div><p>Entra de novo na pontuação de qualidade do seu anúncio, que decide se você é elegível para o inventário bom.</p></div>
+</div>
+<div class="verdict-strip" style="background:var(--green-soft);border-color:var(--green);font-size:15px">Por isso o efeito da conversão não é linear — é <b>quadrático</b>. Dobrar a conversão vale muito mais do que dobrar qualquer outra variável. <b>É a variável mestre do sistema.</b></div>
+<div class="verdict-strip">E é por isso que tudo que você fez em <b>estrutura</b> — imagem, descrição, avaliação, cupom, variação com estoque — não é "caprichar". É mexer diretamente na variável que mais pesa no quanto você aparece e no quanto você paga.</div></section>
+<section class="slide" data-dia="2"><div class="kicker">O paradoxo</div><h2 class="disp">ROAS alto com<br>venda baixa é<br>uma armadilha</h2>
+<p class="lead">Esse é o erro mais caro de quem aprendeu a perseguir ROAS. Meta de ROAS muito alta faz o seu CPM despencar — e CPM baixo não te leva para o inventário onde as pessoas compram.</p>
 <table class="tb" style="max-width:830px">
-  <thead><tr><th>Cenário</th><th class="n">Ticket</th><th class="n">Conversão</th><th class="n">ROAS alvo</th><th class="n">Lance máximo</th><th>Leitura</th></tr></thead>
+  <thead><tr><th>Meta de ROAS</th><th class="n">CPM que você comporta</th><th>Onde você aparece</th><th class="n">ROAS real</th><th class="n">Venda total</th></tr></thead>
   <tbody>
-    <tr class="ruim"><td>Ticket baixo, conversão baixa</td><td class="n">R$ 20</td><td class="n">1%</td><td class="n">5×</td><td class="n">R$ 0,04</td><td>inviável — perde todo leilão e a campanha estagna</td></tr>
-    <tr class="ok"><td>Ticket baixo, conversão excelente</td><td class="n">R$ 20</td><td class="n">5%</td><td class="n">5×</td><td class="n">R$ 0,20</td><td>viável — a conversão compensa o ticket</td></tr>
-    <tr class="ruim"><td>Ticket alto, conversão baixa</td><td class="n">R$ 40</td><td class="n">1%</td><td class="n">10×</td><td class="n">R$ 0,04</td><td>inviável — a meta alta anula o ticket</td></tr>
-    <tr class="ok"><td>Ticket alto, conversão excelente</td><td class="n">R$ 40</td><td class="n">5%</td><td class="n">10×</td><td class="n">R$ 0,20</td><td>escala com rentabilidade alta</td></tr>
+    <tr class="ruim"><td><b>Muito alta</b></td><td class="n">baixo</td><td>sobras de inventário, público frio</td><td class="n">parece ótimo</td><td class="n">quase nada</td></tr>
+    <tr><td><b>Equilibrada</b></td><td class="n">competitivo</td><td>inventário bom, público com intenção</td><td class="n">saudável</td><td class="n">cresce</td></tr>
+    <tr class="ok"><td><b>Calculada no seu custo</b></td><td class="n">o que a sua margem permite</td><td>onde o seu cliente está</td><td class="n">o seu ROAS ideal</td><td class="n">escala</td></tr>
   </tbody>
 </table>
-<div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange)">Agora fecha o raciocínio de ontem: <b>subir o preço aumenta o ticket</b> — e isso aumenta o seu lance. <b>Mas se o preço derruba a conversão</b>, o lance cai junto. Por isso CTR e conversão mandam na decisão de preço: eles são as duas pernas da mesma conta.</div></section>
-<section class="slide" data-dia="2"><div class="kicker">As duas alavancas</div><h2 class="disp">Como aumentar o seu<br>poder no leilão</h2>
-<div class="cards3" style="grid-template-columns:1fr 1fr">
-  <div class="cd3" style="--c:var(--orange)"><div class="t">ALAVANCA 1 · O LANCE</div>
-  <p><b>Subir o ticket médio:</b> kits e combos. Um ticket de R$ 100 no lugar de R$ 50 dobra o seu lance.<br><br>
-  <b>Subir a conversão:</b> avaliações e cupons. Conversão de 4% no lugar de 2% também dobra o lance.<br><br>
-  <b>Baixar a meta de ROAS:</b> aumenta o lance, mas reduz a sua rentabilidade — use com consciência.</p>
-  <span class="q">kit precisa de anúncio novo: é outro produto, outro ID</span></div>
-  <div class="cd3" style="--c:var(--green)"><div class="t">ALAVANCA 2 · A QUALIDADE</div>
-  <p><b>Subir o CTR:</b> imagem principal, título e preço mais atraentes que os do concorrente. É o que decide antes do clique.<br><br>
-  <b>Subir a conversão esperada:</b> descrição completa, avaliações e promoções — confiança e urgência.<br><br>
-  <b>Relevância:</b> categoria e atributos certos, para aparecer na busca certa.</p>
-  <span class="q">é a alavanca mais barata: não custa verba, custa trabalho</span></div>
+<div class="verdict-strip" style="background:var(--red-soft);border-color:var(--red)"><b>O paradoxo:</b> campanha com meta altíssima mostra um percentual de ROAS lindo no painel e <b>vende quase nada em reais</b>. Você está ganhando uma corrida que não leva a lugar nenhum.</div>
+<div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange)">Volume e ROAS <b>não são inimigos</b>. O objetivo certo nunca foi ROAS alto — é <b>ROAS saudável com volume</b>. E o ROAS saudável é aquele que você calculou a partir da sua margem, não o que o vizinho postou no grupo.</div></section>
+<section class="slide" data-dia="2"><div class="kicker">As alavancas</div><h2 class="disp">Como ficar mais<br>valioso para a<br>plataforma mostrar</h2>
+<p class="lead">Se o algoritmo precifica você pelo que espera faturar, a estratégia inteira cabe numa frase: <b>aumentar o que ele espera ganhar mostrando o seu produto</b>. Três alavancas, em ordem de força.</p>
+<div class="lista">
+  <div class="li"><span class="nx">1</span><div><b>Conversão — a mais forte de todas</b><span>Entra duas vezes na conta: precifica a impressão e constrói a qualidade do anúncio. Mexe aqui quem trabalha página, avaliação, cupom, variação com estoque e resposta rápida no chat. <b>Dobrar conversão vale mais do que dobrar qualquer outra coisa.</b></span></div></div>
+  <div class="li"><span class="nx">2</span><div><b>CTR — a vitrine</b><span>Primeira foto, título e preço decidem quem clica. CTR alto diz ao algoritmo que a sua impressão rende — e ela passa a valer mais no leilão. É a alavanca mais barata: custa trabalho, não verba.</span></div></div>
+  <div class="li"><span class="nx">3</span><div><b>Ticket — kit e combo</b><span>Ticket maior aumenta a receita esperada por venda. Kit precisa de anúncio novo, com ID próprio: é outro produto. Ele herda a reputação da loja, o que acelera o aprendizado.</span></div></div>
 </div>
-<div class="verdict-strip" style="background:var(--green-soft);border-color:var(--green)">A estratégia completa combina as duas: <b>um produto com bom ticket e boa conversão</b> (para ter lance alto) <b>com um anúncio de CTR e conversão altos</b> (para ter qualidade alta). Mexer só em verba é usar nenhuma das duas.</div></section>
-<section class="slide" data-dia="2"><div class="kicker">Automático × meta</div><h2 class="disp">Os dois formatos<br>e quando usar<br>cada um</h2>
+<div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange)">A quarta "alavanca" é baixar a meta de ROAS — ela aumenta o seu CPM na hora, mas <b>come a sua rentabilidade</b>. Use com consciência e nunca abaixo do seu ROAS de equilíbrio.</div></section>
+<section class="slide" data-dia="2"><div class="kicker">A técnica do brinde</div><h2 class="disp">Por que o brinde<br>funciona — e quando<br>ele não funciona</h2>
+<p class="lead">Dar um brinde parece que deveria encarecer tudo. Na conta do CPM, não muda nada — e mesmo assim ele funciona. O motivo é interessante.</p>
 <div class="cards3" style="grid-template-columns:1fr 1fr">
-  <div class="cd3" style="--c:var(--orange)"><div class="t">LANCE AUTOMÁTICO</div><p>Foco em <b>volume e visibilidade</b>. Busca audiência ampla, topo de funil. Para produto novo, sem histórico — você deixa o sistema descobrir quem compra.</p><span class="q">0 a 100 cliques · R$ 15 a 30 por dia · não tocar por 7 dias</span></div>
-  <div class="cd3" style="--c:var(--green)"><div class="t">META DE ROAS</div><p>Foco em <b>rentabilidade</b>. Otimiza para a conversão mais alta. Para produto que já tem dado — você diz o retorno que precisa.</p><span class="q">a partir de 200 cliques e 20 conversões · meta = o seu ROAS ideal</span></div>
+  <div class="cd3" style="--c:var(--t3)"><div class="t">NO CPM · NEUTRO</div><p>O brinde sobe a conversão, mas o custo dele derruba o que sobra por venda. Na fórmula, <b>os dois efeitos se cancelam</b>: o seu CPM fica praticamente igual.</p></div>
+  <div class="cd3" style="--c:var(--green)"><div class="t">NA QUALIDADE · GANHA</div><p>A pontuação de qualidade olha a <b>conversão</b> — e ali o custo do brinde não entra. Você ganha o benefício sem pagar o divisor.</p></div>
 </div>
-<div class="verdict-strip" style="background:var(--red-soft);border-color:var(--red)"><b>O mecanismo de punição do automático:</b> ao buscar topo de funil, ele atrai público mais frio e <b>a sua conversão cai</b>. Se a conversão cai, o lance máximo cai junto — e o retorno piora. Por isso automático é passagem, não destino: serve para gerar histórico, não para ficar.</div>
-<div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange)"><b>O erro mais comum é o contrário:</b> subir produto novo direto na meta de ROAS. Sem histórico o sistema não sabe para quem mostrar, e com meta alta o lance fica tão baixo que ele simplesmente não mostra. O anúncio não gasta, não vende — e a conclusão errada é "Ads não funciona para mim".</div></section>
+<div class="verdict-strip" style="background:var(--green-soft);border-color:var(--green)"><b>Conclusão prática:</b> brinde é <b>técnica de lançamento</b>. Serve para ancorar produto novo, gerar as primeiras conversões e ensinar o algoritmo rápido. <b>Não é estratégia permanente de CPM</b> — passada a largada, ele vira só custo.</div></section>
+<section class="slide" data-dia="2"><div class="kicker">Os dois formatos</div><h2 class="disp">Automático ou<br>meta de ROAS</h2>
+<div class="cards3" style="grid-template-columns:1fr 1fr">
+  <div class="cd3" style="--c:var(--orange)"><div class="t">LANCE AUTOMÁTICO</div><p>Busca <b>volume e visibilidade</b>, em público amplo, topo de funil. Serve para produto novo gerar histórico — você deixa o sistema descobrir quem compra.</p><span class="q">0 a 100 cliques · R$ 15 a 30 por dia · não tocar por 7 dias</span></div>
+  <div class="cd3" style="--c:var(--green)"><div class="t">META DE ROAS</div><p>Busca <b>rentabilidade</b>. Otimiza para quem tem mais chance de comprar. Para produto que já tem dado suficiente.</p><span class="q">a partir de 200 cliques e 20 conversões · meta = o seu ROAS ideal</span></div>
+</div>
+<div class="verdict-strip" style="background:var(--red-soft);border-color:var(--red)"><b>O custo escondido do automático:</b> ao buscar topo de funil, ele atrai público mais frio e <b>a sua conversão cai</b>. Conversão menor derruba o CPM que você comporta — e o retorno piora junto. Por isso automático é <b>passagem, não destino</b>.</div>
+<div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange)"><b>E o erro contrário:</b> subir produto novo direto na meta de ROAS. Sem histórico, a conversão estimada é baixa, o CPM que você comporta fica no chão e o anúncio simplesmente não aparece. Não gasta, não vende — e a conclusão errada é "Ads não funciona para mim".</div></section>
+<section class="slide" data-dia="2"><div class="kicker">A Lei da Âncora</div><h2 class="disp">Por que a meta de ROAS<br>resiste e o automático<br>desmonta</h2>
+<p class="lead">Quando o algoritmo passa por turbulência — e ele passa —, os dois formatos reagem de forma muito diferente. Isso tem nome na nossa casa: <b>a Lei da Âncora</b>.</p>
+<div class="cards3" style="grid-template-columns:1fr 1fr">
+  <div class="cd3" style="--c:var(--green)"><div class="t">META DE ROAS · ANCORADA</div><p>Você deu um número ao sistema. Ele tem uma referência para voltar quando o ambiente muda. <b>A campanha oscila e se recupera.</b></p></div>
+  <div class="cd3" style="--c:var(--red)"><div class="t">AUTOMÁTICO · À DERIVA</div><p>Sem referência de retorno, ele acompanha o ambiente. Quando o ambiente piora, <b>a campanha degrada junto</b> — e não volta sozinha.</p></div>
+</div>
+<div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange);font-size:15px">Por isso a regra: <b>nunca reverta uma meta que já funcionou.</b> Baixar a meta para "dar um gás" joga fora a âncora que você levou meses construindo — e reancorar é muito mais lento do que ancorar.</div>
+<div class="verdict-strip">Ads é jogo de longo prazo. <b>ROAS alto é construção</b>, não resultado de uma semana. Cada vez que você mexe, o aprendizado recomeça — e o produto volta a ser um desconhecido para o algoritmo.</div></section>
 <section class="slide" data-dia="2"><div class="kicker">Quando trava</div><h2 class="disp">O que fazer quando<br>a campanha estagna</h2>
 <div class="lista">
   <div class="li"><span class="nx">1</span><div><b>Refresh de conversão</b><span>Pause a campanha por 24 horas. Durante a pausa, aplique um cupom agressivo e melhore a imagem principal. Reinicie. Isso força o sistema a reavaliar o produto com dados de conversão novos e mais altos.</span></div></div>
@@ -798,21 +806,22 @@ function calc(){
   else { vpl.style.background='var(--green-soft)'; vpl.style.borderColor='var(--green)';
     vpl.innerHTML='Para faturar <b>'+brl0(meta)+'</b> com ticket de '+brl0(tk)+', você precisa de <b>'+nm(Math.ceil(ped/30))+' vendas</b> e <b>'+nm(Math.ceil(visNec/30))+' visitas</b> por dia, investindo <b>'+brl0(inv/30)+'</b> por dia. <b>Viram como os números se conectam?</b>'; }
 
-  /* lance no leilão */
-  const vet=v('l-vet'), pcv=v('l-pc')/100, ra=v('l-roas');
-  const lance = ra? vet*pcv/ra : 0;
-  set('l-lance',brl(lance));
-  set('l-vet2',brl(ra?vet*2*pcv/ra:0));
-  set('l-pc2',brl(ra?vet*pcv*2/ra:0));
-  set('l-roas2',brl(ra>1?vet*pcv/(ra-1):0));
-  const vl=document.getElementById('v-lance'); vl.className='verdict-strip';
-  if(lance<0.10){ vl.style.background='var(--red-soft)'; vl.style.borderColor='var(--red)';
-    vl.innerHTML='Lance de <b>'+brl(lance)+'</b> é baixo demais para competir: o anúncio perde quase todo leilão e a campanha estagna sem gastar. <b>Nesse cenário, subir o orçamento não resolve — o limite não é verba, é a conta.</b>'; }
-  else { vl.style.background='var(--green-soft)'; vl.style.borderColor='var(--green)';
-    vl.innerHTML='Com ticket de '+brl0(vet)+', conversão de '+pc(v('l-pc'))+' e meta de '+ra+'×, o sistema pode pagar até <b>'+brl(lance)+'</b> por clique. <b>Dobrar o ticket ou dobrar a conversão dobra esse poder</b> — e é exatamente isso que kit, cupom e avaliação fazem.'; }
+  /* CPM — leilão reverso */
+  const ctk=v('c-tk'), cconv=v('c-conv')/100, cctr=v('c-ctr')/100, cra=v('c-roas');
+  const CPM=(t,cv2,ct,r)=> r? t*cv2*ct*1000/r : 0;
+  const cpmBase=CPM(ctk,cconv,cctr,cra);
+  set('c-cpm',brl(cpmBase));
+  set('c-ctr2',brl(CPM(ctk,cconv,cctr*2,cra)));
+  set('c-conv2',brl(CPM(ctk,cconv*2,cctr,cra)));
+  set('c-tk2',brl(CPM(ctk*2,cconv,cctr,cra)));
+  const vc2=document.getElementById('v-cpm'); vc2.className='verdict-strip';
+  if(cpmBase<4){ vc2.style.background='var(--red-soft)'; vc2.style.borderColor='var(--red)';
+    vc2.innerHTML='Com esses números, a plataforma só consegue te cobrar <b>'+brl(cpmBase)+'</b> por mil aparições — e por esse preço ela te mostra onde ninguém compra. <b>O limite aqui não é orçamento: é o que o seu produto promete de receita.</b> Mexer em conversão e CTR resolve; subir verba, não.'; }
+  else { vc2.style.background='var(--green-soft)'; vc2.style.borderColor='var(--green)';
+    vc2.innerHTML='O seu produto comporta um CPM de <b>'+brl(cpmBase)+'</b>. Repare o que acontece quando cada variável dobra — <b>a conta é multiplicativa</b>, então melhorar duas delas ao mesmo tempo não soma: multiplica.'; }
 }
 ['m-un','m-conc','m-fatia','p-custo','p-emb','p-preco','p-imp','p-ant','p-dev','s-lead','s-seg',
- 'd-vis','d-conv','d-queda','p-meta','p-tk','p-conv','p-cpa','l-vet','l-pc','l-roas']
+ 'd-vis','d-conv','d-queda','p-meta','p-tk','p-conv','p-cpa','c-tk','c-conv','c-ctr','c-roas']
   .forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener('input',calc);});
 calc();
 
