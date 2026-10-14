@@ -191,24 +191,25 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
   <div class="li"><span class="nx">3</span><div><b>Quanto dá para tirar daqui e quanto vai ficar parado?</b><span>antes de fechar o pedido</span></div></div>
   <div class="li"><span class="nx">4</span><div><b>Por quanto preciso vender para sobrar dinheiro?</b><span>antes de anunciar</span></div></div>
 </div></section>
-<section class="slide" data-dia="1"><div class="kicker">Ponto de partida</div><h2>Onde a sua<br>loja está hoje</h2>
+<section class="slide" data-dia="1"><div class="kicker">Ponto de partida</div>
+<h2>Onde a sua<br>loja está hoje</h2>
 <p class="lead">Preencha com os seus números dos últimos 30 dias. <b>Tudo que vier depois é calculado em cima disto.</b></p>
 <div class="alav" style="grid-template-columns:1fr 1fr">
   <div class="caixa">
     <div class="tt">Os seus números</div>
     <div class="c2" style="margin-top:0;gap:16px">
-      <div class="campo"><label>Visitas no mês</label><input type="number" id="b-vis" value="60000" step="1000"></div>
-      <div class="campo"><label>Conversão (%)</label><input type="number" id="b-conv" value="1.8" step="0.1"></div>
-      <div class="campo"><label>Ticket médio</label><input type="number" id="b-tk" value="72" step="1"></div>
-      <div class="campo"><label>Custo do produto</label><input type="number" id="b-custo" value="31" step="1"></div>
-      <div class="campo"><label>Imposto (%)</label><input type="number" id="b-imp" value="8" step="1"></div>
+      <div class="campo"><label>Faturamento no mês</label><input type="number" id="b-fatmes" value="207000" step="1000"></div>
+      <div class="campo"><label>Ticket médio</label><input type="number" id="b-tk" value="69" step="1"></div>
+      <div class="campo"><label>Custo do produto</label><input type="number" id="b-custo" value="27" step="1"></div>
       <div class="campo"><label>Embalagem</label><input type="number" id="b-emb" value="2" step="0.5"></div>
+      <div class="campo"><label>Imposto (%)</label><input type="number" id="b-imp" value="6" step="1"></div>
+      <div class="campo"><label>Conversão (%)</label><input type="number" id="b-conv" value="2.5" step="0.1"></div>
     </div>
   </div>
   <div>
     <div class="kpis" style="grid-template-columns:1fr 1fr">
       <div class="kpi" style="--c:var(--t1)"><div class="l">Pedidos no mês</div><div class="v" id="b-ped">—</div><div class="s" id="b-peddia">—</div></div>
-      <div class="kpi" style="--c:var(--orange)"><div class="l">Faturamento</div><div class="v" id="b-fat">—</div><div class="s">no mês</div></div>
+      <div class="kpi" style="--c:var(--purple)"><div class="l">Visitas que isso exige</div><div class="v" id="b-vis">—</div><div class="s" id="b-visdia">—</div></div>
       <div class="kpi" style="--c:var(--green)"><div class="l">Sobra por venda</div><div class="v" id="b-marg">—</div><div class="s" id="b-margp">—</div></div>
       <div class="kpi" style="--c:var(--green)"><div class="l">Lucro no mês</div><div class="v" id="b-lucro">—</div><div class="s">antes das despesas fixas</div></div>
     </div>
@@ -240,9 +241,10 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
   <div class="cd" style="--c:var(--t3)"><div class="t">TOP 40</div><p>O começo. Serve para saber se o produto se paga enquanto você ainda está subindo.</p></div>
 </div>
 <div class="strip lar">Planeje pelo <b>top 20</b>. Se a conta só fecha no top 10, você está apostando em chegar ao topo — e aposta não é plano.</div></section>
-<section class="slide" data-dia="1"><div class="kicker">O seu teto</div><h2>Quanto esse nicho<br>comporta para você</h2>
-<p class="lead">Solte aqui o relatório que você baixou no Radar — ele já traz quanto vende um anúncio típico em cada trecho da busca, e os números entram sozinhos.</p>
-<div class="alav" style="grid-template-columns:420px 1fr">
+<section class="slide" data-dia="1"><div class="kicker">O seu teto</div>
+<h2>Ninguém entra<br>no top 10</h2>
+<p class="lead">Chegar ao topo é construção, não ponto de partida. Você entra lá embaixo e sobe — e <b>cada fase tem um faturamento, um estoque e um capital parado diferentes</b>.</p>
+<div class="alav" style="grid-template-columns:380px 1fr">
   <div>
     <div class="drop" id="drop">
       <div class="ic">📄</div>
@@ -250,14 +252,12 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
       <div class="s" id="drop-s">clique para escolher o PDF que você baixou</div>
       <input type="file" id="arq" style="display:none">
     </div>
-    <div class="campo" style="margin-top:18px"><label>Vendas/mês no top 20</label><input type="number" id="t-vendas" value="148" step="1"></div>
+    <div class="campo" style="margin-top:16px"><label>Vendas/mês no top 20</label><input type="number" id="t-vendas" value="148" step="1"></div>
   </div>
-  <div class="kpis" style="grid-template-columns:1fr 1fr">
-    <div class="kpi" style="--c:var(--orange)"><div class="l">Seu teto por mês</div><div class="v" id="t-teto">—</div><div class="s">no top 20, com o seu preço</div></div>
-    <div class="kpi" style="--c:var(--purple)"><div class="l">Vendas por dia</div><div class="v" id="t-dia">—</div><div class="s">o ritmo a sustentar</div></div>
-    <div class="kpi" style="--c:var(--green)"><div class="l">No top 10</div><div class="v" id="t-top10">—</div><div class="s" id="t-top10s">o cenário bom</div></div>
-    <div class="kpi" style="--c:var(--t3)"><div class="l">No top 40</div><div class="v" id="t-top40">—</div><div class="s" id="t-top40s">enquanto você sobe</div></div>
-  </div>
+  <table style="margin-top:0">
+    <thead><tr><th>Fase</th><th class="n">Vendas/mês</th><th class="n">Faturamento</th><th class="n">Estoque</th><th class="n">Capital parado</th></tr></thead>
+    <tbody id="fases"></tbody>
+  </table>
 </div>
 <div class="strip" id="t-leitura">—</div></section>
 <section class="slide" data-dia="1"><div class="kicker">Passo 3 · a decisão</div><h2>O teto decide<br>três coisas</h2>
@@ -361,9 +361,9 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
 <div class="alav">
   <div class="caixa">
     <div class="tt">Simular a redução</div>
-    <div class="campo"><label>Quanto você consegue baixar o custo (%)</label><input type="number" id="a2-red" value="18" step="1"></div>
+    <div class="campo"><label>Novo custo por unidade (R$)</label><input type="number" id="a2-novo" value="22" step="0.5"></div>
     <div class="linha"><span>Custo hoje</span><b id="a2-c0">—</b></div>
-    <div class="linha"><span>Custo novo</span><b id="a2-c1">—</b></div>
+    <div class="linha"><span>Economia por unidade</span><b id="a2-c1">—</b></div>
   </div>
   <div class="ganho" id="a2-box"><div class="l">Ganho de lucro</div><div class="v" id="a2-ganho">—</div><div class="s">por mês, no mesmo volume</div></div>
 </div>
@@ -392,15 +392,16 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
   </tbody>
 </table>
 <div class="strip"><b>Número sozinho não diz nada — o poder está na leitura.</b> É isso que separa quem administra de quem torce.</div></section>
-<section class="slide" data-dia="1"><div class="kicker">Passo 8 · a meta</div><h2>Nada disso<br>nasce no painel</h2>
-<p class="lead">Agora olhe para trás. <b>Cada número da sua meta foi decidido antes</b>, num dos passos de hoje:</p>
+<section class="slide" data-dia="1"><div class="kicker">Antes da meta</div>
+<h2>Nada disso<br>nasce no painel</h2>
+<p class="lead">Olhe para trás. <b>Cada número da sua meta já foi decidido</b> em algum momento de hoje:</p>
 <div class="lista">
-  <div class="li"><span class="nx">→</span><div><b>O ticket médio</b><span>você decidiu no Passo 1, quando escolheu o papel do produto, e confirmou no Passo 5, quando fechou o preço</span></div></div>
-  <div class="li"><span class="nx">→</span><div><b>O volume esperado</b><span>veio do teto, no Passo 3 — não do que você gostaria de vender</span></div></div>
-  <div class="li"><span class="nx">→</span><div><b>A conversão</b><span>você leu no mercado e vai trabalhar amanhã, na estrutura</span></div></div>
-  <div class="li"><span class="nx">→</span><div><b>O CPA</b><span>você embutiu na margem, no Passo 6, quando definiu o ROAS que vai praticar</span></div></div>
+  <div class="li"><span class="nx">→</span><div><b>O ticket médio</b><span>você decidiu quando escolheu o papel do produto e quando fechou o preço na calculadora</span></div></div>
+  <div class="li"><span class="nx">→</span><div><b>O volume que dá para esperar</b><span>saiu do teto e da fase em que você está — não do que você gostaria de vender</span></div></div>
+  <div class="li"><span class="nx">→</span><div><b>A conversão</b><span>é o que a sua página entrega hoje. Amanhã a gente mexe nela — e aí a meta fica mais fácil</span></div></div>
+  <div class="li"><span class="nx">→</span><div><b>O custo do anúncio</b><span>você embutiu quando definiu o ROAS que vai praticar. Ele já está dentro do preço</span></div></div>
 </div>
-<div class="strip lar"><b>O painel não te dá meta. Ele só confirma a conta que você já tinha feito.</b> Vamos abrir a calculadora de meta e ver o que ela exige por dia.</div></section>
+<div class="strip lar"><b>O painel não te dá meta. Ele confirma a conta que você já tinha feito</b> — e mostra em quantas vendas por dia ela se traduz.</div></section>
 <section class="slide" data-dia="1"><div class="kicker">A sua meta</div>
 <h2>Meta vira tarefa<br>do dia</h2>
 <p class="lead">Meta não é número que se deseja — é conta que se faz. <b>Quantos pedidos, quantas visitas e quanto de anúncio por dia a sua meta exige.</b></p>
@@ -475,21 +476,15 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
   <div class="li"><span class="nx">3</span><div><b>Reclamação repetida é brief de melhoria</b><span>se três pessoas falaram de tamanho, o problema não é o cliente: é a sua tabela de medidas ou a sua foto</span></div></div>
   <div class="li"><span class="nx">4</span><div><b>Chat rápido vira venda</b><span>quem pergunta está com o dedo no botão. Demora de horas transfere essa venda para o concorrente</span></div></div>
 </div></section>
-<section class="slide" data-dia="2"><div class="kicker">Alavanca 3</div><h2>Quanto vale subir<br>a sua conversão</h2>
-<div class="c2">
-  <div class="cd" style="--c:var(--orange)"><div class="t">AS DEZ PRIMEIRAS</div><p>Produto sem nota converte muito menos. Embalagem caprichada, bilhete e acompanhamento da entrega nas dez primeiras vendas — depois a bola de neve corre sozinha.</p></div>
-  <div class="cd" style="--c:var(--green)"><div class="t">A RESPOSTA À NOTA BAIXA</div><p>Quem lê a reclamação lê a sua resposta. Uma resposta serena e resolutiva <b>converte mais do que a reclamação derruba</b>.</p></div>
-</div>
-<div class="alav">
-  <div class="caixa">
-    <div class="tt">O que a conversão nova te dá</div>
-    <div class="campo"><label>Conversão que você quer alcançar (%)</label><input type="number" id="a3-conv" value="2.5" step="0.1"></div>
-    <div class="linha"><span>Conversão hoje</span><b id="a3-c0">—</b></div>
-    <div class="linha"><span>Pedidos a mais no mês</span><b id="a3-ped">—</b></div>
-  </div>
-  <div class="ganho" id="a3-box"><div class="l">Ganho de faturamento</div><div class="v" id="a3-ganho">—</div><div class="s" id="a3-lucro">—</div></div>
-</div>
-<div class="strip" id="a3-leitura">—</div></section>
+<section class="slide" data-dia="2"><div class="kicker">Alavanca 3</div>
+<h2>Quanto vale subir<br>a sua conversão</h2>
+<p class="lead">Sem mexer em preço, sem trazer uma visita nova. <b>Só com o que a gente viu: cadastro, as nove imagens e as primeiras avaliações.</b></p>
+<table style="max-width:1560px">
+  <thead><tr><th>Se a sua conversão for de <b id="c3-base">—</b> para</th><th class="n">Pedidos/mês</th><th class="n">Faturamento a mais</th><th class="n">Lucro a mais</th><th>O que costuma levar até lá</th></tr></thead>
+  <tbody id="c3-tab"></tbody>
+</table>
+<div class="strip ok" id="a3-leitura">—</div>
+<div class="strip">Repare que não tem anúncio novo em nenhuma das linhas. <b>É o mesmo tráfego que você já paga, convertendo melhor.</b></div></section>
 <section class="slide" data-dia="2"><div class="kicker">Estrutura · o que os campeões fazem</div><h2>O Radar mostra o que<br>os campeões têm<br>de diferente</h2>
 <p class="lead">Não precisa adivinhar o que funciona no seu nicho. O relatório compara <b>os dez que mais vendem contra todo o resto</b> — e mostra onde está a diferença.</p>
 <div class="c3">
@@ -498,22 +493,28 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
   <div class="cd" style="--c:var(--purple)"><div class="t">PREÇO</div><p>Onde os campeões se posicionam na faixa. Nem sempre é no mais barato — quase nunca, na verdade.</p></div>
 </div>
 <div class="strip lar">Essa é a parte que ninguém faz: <b>copiar o padrão de quem já ganhou no seu nicho</b>, em vez de copiar o preço.</div></section>
-<section class="slide" data-dia="2"><div class="kicker">Alavanca 4</div><h2>Kit: o mesmo cliente<br>valendo mais</h2>
-<p class="lead">Subir ticket com kit é a alavanca mais rápida de volume — <b>desde que o preço do kit não caia logo acima de um degrau de comissão</b>. É o mesmo erro de ontem, agora multiplicado.</p>
-<div class="alav">
+<section class="slide" data-dia="2"><div class="kicker">Alavanca 4</div>
+<h2>Kit: a conta<br>do zero</h2>
+<p class="lead">Vamos montar junto. <b>Kit é um produto novo</b> — preço novo, custo novo, faixa de comissão nova. A conta tem que ser refeita do começo.</p>
+<div class="alav" style="grid-template-columns:420px 1fr">
   <div class="caixa">
-    <div class="tt">Montar o kit</div>
-    <div class="c2" style="margin-top:0;gap:16px">
-      <div class="campo"><label>Preço do kit</label><input type="number" id="a4-preco" value="142" step="1"></div>
-      <div class="campo"><label>Custo do kit</label><input type="number" id="a4-custo" value="62" step="1"></div>
-    </div>
-    <div class="linha"><span>Margem por venda hoje</span><b id="a4-m0">—</b></div>
-    <div class="linha"><span>Margem no kit</span><b id="a4-m1">—</b></div>
-    <div class="linha"><span>Quantos % das vendas viram kit</span><b>30%</b></div>
+    <div class="tt">Monte o kit</div>
+    <div class="campo"><label>Quantas unidades no kit</label><input type="number" id="k-qtd" value="2" step="1"></div>
+    <div class="campo"><label>Preço do kit</label><input type="number" id="k-preco" value="124" step="1"></div>
+    <div class="campo"><label>Quanto das vendas vira kit (%)</label><input type="number" id="k-pct" value="30" step="5"></div>
   </div>
-  <div class="ganho" id="a4-box"><div class="l">Ganho de faturamento</div><div class="v" id="a4-ganho">—</div><div class="s" id="a4-lucro">—</div></div>
+  <div class="caixa">
+    <div class="tt">A conta, linha por linha</div>
+    <div class="linha"><span>Preço do kit</span><b id="k-l1">—</b></div>
+    <div class="linha"><span>− custo de <span id="k-qtd2">2</span> unidades</span><b id="k-l2">—</b></div>
+    <div class="linha"><span>− embalagem</span><b id="k-l3">—</b></div>
+    <div class="linha"><span>− comissão <span id="k-faixa" style="color:var(--t3);font-size:17px"></span></span><b id="k-l4">—</b></div>
+    <div class="linha"><span>− imposto</span><b id="k-l5">—</b></div>
+    <div class="linha tot"><span>Sobra no kit</span><b id="k-marg">—</b></div>
+    <div class="linha" style="border-top:1px solid var(--line2);margin-top:8px;padding-top:12px"><span>Sobra vendendo 1 unidade</span><b id="k-unid">—</b></div>
+  </div>
 </div>
-<div class="strip" id="a4-leitura">—</div></section>
+<div class="strip" id="k-leitura">—</div></section>
 <section class="slide" data-dia="2"><div class="kicker">Alavanca 5</div><h2>Ferramentas de tráfego<br>que não cobram<br>por aparecer</h2>
 <div class="fonte" style="--c:var(--green)"><div class="nm">BUSCA<span>ORGÂNICO</span></div><p>O cliente digita e você aparece. Depende de <b>título, categoria, atributos e histórico</b>. É o canal mais estável — e o que mais responde a um cadastro bem-feito.</p></div>
 <div class="fonte" style="--c:var(--green)"><div class="nm">RECOMENDAÇÃO<span>ORGÂNICO</span></div><p>A plataforma mostra o seu produto para quem <b>não procurou</b>. Depende de conversão e reputação. É a Shopee dizendo que confia em você.</p></div>
@@ -523,15 +524,29 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
 <div class="fonte" style="--c:var(--orange)"><div class="nm">ANÚNCIO DE<br>PRODUTO<span>PAGO · POR APARIÇÃO</span></div><p>Você define orçamento e meta; o sistema decide onde mostrar. Caminho mais rápido para dar volume a produto novo — e o único que <b>para junto com o orçamento</b>.</p></div>
 <div class="fonte" style="--c:var(--orange)"><div class="nm">ANÚNCIO<br>DE LOJA<span>PAGO · POR CLIQUE</span></div><p>Coloca a loja inteira no topo da busca. Aqui ainda existem palavra-chave e custo por clique. Faz sentido com catálogo e recompra.</p></div>
 <div class="fonte" style="--c:var(--purple)"><div class="nm">AFILIADOS<span>PAGO · POR VENDA</span></div><p>Você <b>só paga quando vende</b>. O afiliado escolhe o que divulgar — e escolhe o que converte. Página boa atrai afiliado; página ruim nenhum programa salva.</p></div>
-<div class="alav">
+<div class="c2">
   <div class="caixa">
-    <div class="tt">Ligar uma ferramenta nova</div>
-    <div class="campo"><label>Quanto de venda a mais ela traz (%)</label><input type="number" id="a5-pct" value="15" step="1"></div>
-    <div class="linha"><span>Pedidos a mais no mês</span><b id="a5-ped">—</b></div>
+    <div class="tt">Afiliados · você paga por venda</div>
+    <div class="c2" style="margin-top:0;gap:14px">
+      <div class="campo"><label>Comissão que você oferece (%)</label><input type="number" id="af-com" value="12" step="1"></div>
+      <div class="campo"><label>Vendas por mês que espera</label><input type="number" id="af-ped" value="120" step="10"></div>
+    </div>
+    <div class="linha"><span>Faturamento</span><b id="af-fat">—</b></div>
+    <div class="linha"><span>− comissão paga</span><b id="af-pago">—</b></div>
+    <div class="linha tot"><span>Lucro que sobra</span><b id="af-lucro">—</b></div>
   </div>
-  <div class="ganho" id="a5-box"><div class="l">Ganho de faturamento</div><div class="v" id="a5-ganho">—</div><div class="s" id="a5-lucro">—</div></div>
+  <div class="caixa">
+    <div class="tt">Anúncio · você paga por aparição</div>
+    <div class="c2" style="margin-top:0;gap:14px">
+      <div class="campo"><label>Investimento por dia</label><input type="number" id="ad-dia" value="80" step="10"></div>
+      <div class="campo"><label>ROAS esperado</label><input type="number" id="ad-roas" value="8" step="0.5"></div>
+    </div>
+    <div class="linha"><span>Faturamento no mês</span><b id="ad-fat">—</b></div>
+    <div class="linha"><span>− investimento</span><b id="ad-inv">—</b></div>
+    <div class="linha tot"><span>Lucro que sobra</span><b id="ad-lucro">—</b></div>
+  </div>
 </div>
-<div class="strip lar">Afiliado tem a melhor relação de risco: <b>você paga depois da venda</b>. É por onde começar quando o caixa está apertado.</div></section>
+<div class="strip" id="a5-leitura">—</div></section>
 <section class="slide" data-dia="2"><div class="kicker">Anúncios</div><h2>Por que o seu anúncio<br>aparece — ou não</h2>
 <p class="lead">A Shopee precisa escolher quais anúncios mostrar. <b>Não é só quem paga mais.</b> Ela olha três coisas do seu produto — e você trabalhou as três nesta aula.</p>
 <div class="c3">
@@ -585,16 +600,16 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
 <div class="strip lar">Repare o que as quatro têm em comum: <b>nenhuma se resolve gastando mais</b>. Todas se resolvem arrumando o que já está no ar.</div>
 </section>
 <section class="slide" data-dia="2"><div class="kicker">O plano</div>
-<h2>O que fazer<br>na segunda-feira</h2>
-<p class="lead">Nenhuma destas cinco exige aumentar o orçamento de anúncio. Três começam esta semana.</p>
+<h2>O que fazer<br>já na sexta</h2>
+<p class="lead">Estamos a semanas do <b>11.11</b> e da <b>Black Friday</b> — as duas maiores janelas do ano. O que você arrumar agora entra nelas; o que ficar para depois, perde a data.</p>
 <div class="lista">
-  <div class="li"><span class="nx">1</span><div><b>Esta semana · refaça o preço dos cinco que mais vendem</b><span>Rode cada um na calculadora com todas as taxas que você usa. Tire os que caíram logo acima de um degrau. <b>É o único ganho que aparece na próxima venda.</b></span></div></div>
-  <div class="li"><span class="nx">2</span><div><b>Esta semana · ligue uma ferramenta que está parada</b><span>Afiliados, três vídeos ou uma live. Volume novo sem orçamento novo — e o afiliado você só paga depois que vender.</span></div></div>
-  <div class="li"><span class="nx">3</span><div><b>Esta semana · mande mensagem para quem já comprou</b><span>Cupom de retorno para a base dos últimos 90 dias. É o cliente mais barato que existe e o que a maioria esquece.</span></div></div>
-  <div class="li"><span class="nx">4</span><div><b>Este mês · um produto inteiro refeito</b><span>Título, categoria, atributos, variações e as nove imagens. <b>Um só, bem feito</b> — ele vira o padrão que você repete no resto do catálogo.</span></div></div>
-  <div class="li"><span class="nx">5</span><div><b>Nos próximos 90 dias · compre melhor</b><span>Negocie com quem você já compra, cote importação, estude marca própria. É o que demora mais e o que muda a sua margem para sempre.</span></div></div>
+  <div class="li"><span class="nx">1</span><div><b>Sexta · refaça o preço dos cinco que mais vendem</b><span>Rode cada um na calculadora com todas as taxas. Entre nas datas com o preço calculado, não copiado — <b>porque na campanha o desconto sai de cima dele</b>.</span></div></div>
+  <div class="li"><span class="nx">2</span><div><b>Sexta · garanta o estoque das datas</b><span>Reponha agora o que vai vender no 11.11. Fornecedor atrasa em novembro, e ficar sem produto no pico <b>derruba o posicionamento que você levou meses para construir</b>.</span></div></div>
+  <div class="li"><span class="nx">3</span><div><b>Este fim de semana · ligue uma ferramenta parada</b><span>Afiliados é a mais rápida: você só paga depois de vender, e o afiliado já começa a aquecer o produto antes da data.</span></div></div>
+  <div class="li"><span class="nx">4</span><div><b>Até o 11.11 · um produto inteiro refeito</b><span>Título, atributos, variações e as nove imagens no carro-chefe. <b>É ele que vai receber o tráfego da data</b> — não adianta trazer gente para uma página que não converte.</span></div></div>
+  <div class="li"><span class="nx">5</span><div><b>Depois da Black · compre melhor</b><span>Com o caixa das datas na mão, negocie, cote importação e estude marca própria. É o que prepara 2027 com outra margem.</span></div></div>
 </div>
-</section>
+<div class="strip lar"><b>Quem chega no 11.11 com preço certo, estoque e página pronta vende na data. Quem chega arrumando, assiste.</b></div></section>
 
 <section class="slide" data-dia="2"><div class="kicker">Para fechar</div>
 <h2>Em 2026 não falta<br>venda. Falta conta<br>feita antes.</h2>
@@ -605,7 +620,10 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
   <div class="cd" style="--c:var(--purple)"><div class="t">O QUE FALTA</div><p>Executar na ordem. Três coisas esta semana, uma este mês, uma nos próximos 90 dias.</p></div>
 </div>
 <div class="strip lar" style="font-size:30px;margin-top:26px"><b>Vender é estrutura. Não é sorte, não é algoritmo — é ordem.</b></div>
-<p class="lead" style="margin-top:22px;font-size:22px">Na próxima aula eu quero ver os seus números: <b>o preço que você corrigiu, a ferramenta que você ligou e o produto que você refez.</b></p>
+<div class="c2" style="margin-top:22px">
+  <div class="cd" style="--c:var(--orange)"><div class="t">TODA QUINTA, 16H</div><p>Aula ao vivo para <b>alunos e não alunos</b>, membros e clientes da comunidade. Toda semana um tema, sempre com os números na tela.</p></div>
+  <div class="cd" style="--c:var(--green)"><div class="t">NA PRÓXIMA</div><p>Quero ver <b>o preço que você corrigiu</b>, <b>a ferramenta que você ligou</b> e <b>o produto que você refez</b>. Traz o print.</p></div>
+</div>
 </section>
 <div id="zoom" onclick="this.style.display='none'"><img id="zoomimg" src="" alt=""></div>
 <canvas id="tela"></canvas>
@@ -845,72 +863,69 @@ function aplicarRadar(r){
   go=function(i){ salva(); antigo(i); rest(); };
   dim(); setModo('lapis');
 })();
-
-/* ══ motor das alavancas ══ */
 function comissao(p){
   if(p<=79.99) return p*0.20+4.5;
   if(p<=99.99) return p*0.14+16;
   if(p<=199.99) return p*0.14+20;
   return p*0.14+26;
 }
-var G={};   /* ganhos de cada alavanca */
+var brl2=function(n){return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})};
+var G={};
 
 function motor(){
-  /* base */
-  var V=val('b-vis'), c=val('b-conv'), T=val('b-tk'),
-      custo=val('b-custo'), imp=val('b-imp')/100, emb=val('b-emb');
-  var ped=V*c/100, F=ped*T;
-  var M=T-custo-emb-comissao(T)-T*imp;
-  var L=M*ped;
+  /* ── base: faturamento manda ── */
+  var FAT=val('b-fatmes'), T=val('b-tk'), c=val('b-conv'),
+      custo=val('b-custo'), emb=val('b-emb'), imp=val('b-imp')/100;
+  var ped = T? FAT/T : 0;
+  var vis = c? ped/(c/100) : 0;
+  var M = T-custo-emb-comissao(T)-T*imp;
+  var L = M*ped;
   set('b-ped',nm(ped)); set('b-peddia',nm(Math.ceil(ped/30))+' por dia');
-  set('b-fat',brl(F)); set('b-marg',brl2(M)); set('b-margp',(T?M/T*100:0).toFixed(0)+'% do preço');
+  set('b-vis',nm(vis)); set('b-visdia',nm(Math.ceil(vis/30))+' por dia');
+  set('b-marg',brl2(M)); set('b-margp',(T?M/T*100:0).toFixed(0)+'% do preço');
   set('b-lucro',brl(L));
   var bl=g('b-leitura');
-  if(bl){
-    bl.className='strip';
-    if(M<=0){ bl.className='strip bad'; bl.innerHTML='Com esses números <b>cada venda já sai no prejuízo</b>, antes do anúncio. É exatamente o que as duas primeiras alavancas resolvem.'; }
-    else { bl.className='strip ok';
-      bl.innerHTML='Hoje a sua loja faz <b>'+nm(ped)+' pedidos</b> e <b>'+brl(F)+'</b> por mês, sobrando <b>'+brl2(M)+' por venda</b> — <b>'+brl(L)+'</b> de lucro antes das despesas fixas. <b>É este o número que vamos mover.</b>'; }
-  }
+  if(bl){ bl.className = M>0?'strip ok':'strip bad';
+    bl.innerHTML = M>0
+      ? 'Hoje a sua loja faz <b>'+nm(ped)+' pedidos</b> e <b>'+brl(FAT)+'</b> por mês, sobrando <b>'+brl2(M)+' por venda</b> — <b>'+brl(L)+'</b> de lucro antes das despesas fixas. <b>É este o número que vamos mover.</b>'
+      : 'Com esses números <b>cada venda já sai no prejuízo</b>, antes do anúncio. É exatamente o que as duas primeiras alavancas resolvem.'; }
 
-  /* 1 · preço — o slide saiu; o preço de trabalho é o ticket */
-  var p1 = g('a1-preco') ? val('a1-preco') : T, queda = g('a1-queda') ? val('a1-queda')/100 : 0;
-  var M1=p1-custo-emb-comissao(p1)-p1*imp;
-  var ped1=ped*(1-queda);
-  G.a1={f:ped1*p1-F, l:ped1*M1-L};
-  set('a1-m0',brl2(M)); set('a1-m1',brl2(M1));
-  set('a1-ganho', brl(G.a1.l));
-  if(g('a1-box')) g('a1-box').className = G.a1.l>=0 ? 'ganho' : 'ganho neg';
-  var l1=g('a1-leitura');
-  if(l1){
-    l1.className='strip';
-    if(G.a1.l>0){ l1.className='strip ok';
-      l1.innerHTML='Passando de '+brl(T)+' para <b>'+brl(p1)+'</b>, cada venda deixa <b>'+brl2(M1-M)+' a mais</b>. Nas suas '+nm(ped1)+' vendas, são <b>'+brl(G.a1.l)+' por mês</b> — <b>'+brl(G.a1.l*12)+' no ano</b>, sem vender uma unidade a mais.'; }
-    else { l1.className='strip bad';
-      l1.innerHTML='Nesse preço você <b>perde</b> '+brl(Math.abs(G.a1.l))+' por mês. Provavelmente caiu logo acima de um degrau de comissão — teste um valor um pouco menor.'; }
-  }
+  var p1=T;
 
-  /* 2 · comprar melhor */
-  var red=val('a2-red')/100, custo2=custo*(1-red);
-  var M2=p1-custo2-emb-comissao(p1)-p1*imp;
-  G.a2={f:0, l:(M2-M1)*ped1};
-  set('a2-c0',brl2(custo)); set('a2-c1',brl2(custo2));
+  /* ── alavanca 2 · comprar melhor (em reais) ── */
+  var custo2 = g('a2-novo') ? val('a2-novo') : custo;
+  var M2 = p1-custo2-emb-comissao(p1)-p1*imp;
+  G.a2={f:0, l:(M2-M)*ped};
+  set('a2-c0',brl2(custo));
+  set('a2-c1', brl2(Math.max(0,custo-custo2))+' por unidade');
   set('a2-ganho',brl(G.a2.l));
-  if(g('a2-box')) g('a2-box').className='ganho';
+  if(g('a2-box')) g('a2-box').className = G.a2.l>=0?'ganho':'ganho neg';
 
-  /* teto */
-  var vend=val('t-vendas'), porDia=vend/30, teto=vend*p1;
+  /* ── teto por fases ── */
+  var v20=val('t-vendas');
+  var v10=(RADAR&&RADAR.curva['10'])?RADAR.curva['10']:v20*2.1;
+  var v40=(RADAR&&RADAR.curva['40'])?RADAR.curva['40']:v20*0.41;
+  var lead=g('s-lead')?val('s-lead'):20, seg=g('s-seg')?val('s-seg'):10, cob=lead+seg;
+  var fases=[
+    {n:'<b>Entrando</b> · top 40',v:v40,cor:''},
+    {n:'<b>Construindo</b> · top 20',v:v20,cor:'dst'},
+    {n:'<b>Consolidado</b> · top 10',v:v10,cor:'ok'}
+  ];
+  if(g('fases')){
+    g('fases').innerHTML = fases.map(function(f){
+      var est=Math.ceil(f.v/30*cob), cap=est*custo2;
+      return '<tr class="'+f.cor+'"><td>'+f.n+'</td><td class="n">'+nm(f.v)+'</td><td class="n">'+brl(f.v*p1)+
+             '</td><td class="n">'+nm(est)+' un</td><td class="n">'+brl(cap)+'</td></tr>';
+    }).join('');
+  }
+  var teto=v20*p1, porDia=v20/30;
   set('t-teto',brl(teto)); set('t-dia',nm(Math.ceil(porDia)));
-  var c10=(RADAR&&RADAR.curva['10'])?RADAR.curva['10']:vend*2.1;
-  var c40=(RADAR&&RADAR.curva['40'])?RADAR.curva['40']:vend*0.41;
-  set('t-top10',brl(c10*p1)); set('t-top10s',nm(c10)+' vendas/mês');
-  set('t-top40',brl(c40*p1)); set('t-top40s',nm(c40)+' vendas/mês');
   var tl=g('t-leitura');
-  if(tl){ tl.className='strip ok';
-    tl.innerHTML='No <b>top 20</b> desse nicho, este produto dá <b>'+brl(teto)+' por mês</b> ao preço de '+brl(p1)+' — '+nm(Math.ceil(porDia))+' vendas por dia. No top 10 seriam '+brl(c10*p1)+'. <b>Compare com a sua meta antes de comprar estoque.</b>'; }
+  if(tl){ tl.className='strip lar';
+    tl.innerHTML='Você entra no <b>top 40</b> e constrói. Repare como o estoque e o capital parado crescem junto: sair de '+brl(v40*p1)+' para '+brl(v10*p1)+' exige <b>'+brl(Math.ceil(v10/30*cob)*custo2 - Math.ceil(v40/30*cob)*custo2)+' a mais parados em produto</b>. <b>Planejar a fase errada quebra o caixa antes de a loja crescer.</b>'; }
 
-  /* estoque */
-  var lead=val('s-lead'), seg=val('s-seg'), cob=lead+seg, un=porDia*cob, cap=un*custo2;
+  /* ── estoque ── */
+  var un=porDia*cob, cap=un*custo2;
   set('e-ritmo',nm(Math.ceil(porDia))+' vendas por dia');
   set('e-f1',nm(Math.ceil(porDia))); set('e-f2',cob); set('e-f3',nm(Math.ceil(un)));
   set('s-un',nm(Math.ceil(un))); set('s-cob',cob+' dias de cobertura'); set('s-cap',brl(cap));
@@ -919,7 +934,7 @@ function motor(){
     sl2.className='strip';
     sl2.innerHTML='Vendendo <b>'+nm(Math.ceil(porDia))+' por dia</b> e levando <b>'+cob+' dias</b> entre pedir e receber, você precisa de <b>'+nm(Math.ceil(un))+' unidades</b> — <b>'+brl(cap)+' parados</b>. Nesse prazo o seu dinheiro dá <b>'+String(giros).replace('.',',')+' voltas por ano</b>.'; }
 
-  /* meta */
+  /* ── meta ── */
   var meta=val('m-meta'), roasM=val('m-roas'), ctrM=g('m-ctr')?val('m-ctr'):0;
   var pedM=p1?meta/p1:0, visM=c?pedM/(c/100):0, aparM=ctrM?visM/(ctrM/100):0;
   var cpaM=roasM?p1/roasM:0, invM=pedM*cpaM;
@@ -928,87 +943,82 @@ function motor(){
   set('m-inv',brl(invM)+' no mês');
   set('m-peddia',nm(Math.ceil(pedM/30))); set('m-visdia',nm(Math.ceil(visM/30)));
   set('m-apardia', aparM?nm(Math.ceil(aparM/30)):'—'); set('m-invdia',brl(invM/30));
-  set('m-hoje',brl(F));
-  set('m-falta', meta>F ? brl(meta-F) : 'meta já atingida');
-  var gapDia = Math.max(0, Math.ceil(pedM/30) - Math.ceil(ped/30));
+  set('m-hoje',brl(FAT));
+  set('m-falta', meta>FAT ? brl(meta-FAT) : 'meta já atingida');
+  var gapDia=Math.max(0, Math.ceil(pedM/30)-Math.ceil(ped/30));
   set('m-gap', gapDia? '+'+nm(gapDia)+' vendas por dia' : 'nenhuma — a meta precisa subir');
   var ml=g('m-leitura');
   if(ml){ ml.className='strip ok';
     ml.innerHTML='Para faturar <b>'+brl(meta)+'</b> ao preço de '+brl(p1)+', são <b>'+nm(Math.ceil(pedM/30))+' vendas</b> e <b>'+nm(Math.ceil(visM/30))+' visitas por dia</b>, com <b>'+brl(invM/30)+'</b> de anúncio.'+
-      (aparM? ' Com CTR de '+ctrM.toString().replace('.',',')+'%, o seu anúncio precisa aparecer <b>'+nm(Math.ceil(aparM/30))+' vezes por dia</b>.':'')+
-      (meta>F? ' Hoje você faz '+nm(Math.ceil(ped/30))+' vendas por dia — <b>faltam '+nm(gapDia)+' por dia</b>, e é isso que as alavancas vão cobrir.' : ' <b>Você já passou dessa meta.</b>'); }
+      (aparM?' Com CTR de '+String(ctrM).replace('.',',')+'%, o anúncio precisa aparecer <b>'+nm(Math.ceil(aparM/30))+' vezes por dia</b>.':'')+
+      (meta>FAT?' Hoje são '+nm(Math.ceil(ped/30))+' vendas por dia — <b>faltam '+nm(gapDia)+' por dia</b>.':' <b>Você já passou dessa meta.</b>'); }
 
-  /* 3 · conversão */
-  var c3=val('a3-conv'), ped3=V*c3/100, dped3=ped3-ped;
-  G.a3={f:dped3*p1, l:dped3*M2};
-  set('a3-c0',c.toString().replace('.',',')+'%');
-  set('a3-ped',nm(dped3));
-  set('a3-ganho',brl(G.a3.f)); set('a3-lucro','e '+brl(G.a3.l)+' de lucro');
-  if(g('a3-box')) g('a3-box').className = G.a3.f>=0?'ganho':'ganho neg';
-  var l3=g('a3-leitura');
-  if(l3){ l3.className='strip';
-    if(dped3>0){ l3.className='strip ok';
-      l3.innerHTML='Subindo a conversão de '+c.toString().replace('.',',')+'% para <b>'+c3.toString().replace('.',',')+'%</b>, as mesmas '+nm(V)+' visitas viram <b>'+nm(dped3)+' pedidos a mais</b> — <b>'+brl(G.a3.f)+' por mês</b>. <b>Zero de anúncio novo.</b>'; }
-    else l3.innerHTML='Coloque uma conversão maior que a atual para ver o ganho.'; }
-
-  /* 4 · kit */
-  var pk=val('a4-preco'), ck=val('a4-custo');
-  var Mk=pk-ck-emb-comissao(pk)-pk*imp;
-  var pedKit=ped3*0.30;
-  G.a4={f:pedKit*(pk-p1), l:pedKit*(Mk-M2)};
-  set('a4-m0',brl2(M2)); set('a4-m1',brl2(Mk));
-  set('a4-ganho',brl(G.a4.f)); set('a4-lucro', (G.a4.l>=0?'e ':'mas ')+brl(G.a4.l)+' de lucro');
-  if(g('a4-box')) g('a4-box').className = G.a4.l>=0?'ganho':'ganho neg';
-  var l4=g('a4-leitura');
-  if(l4){ l4.className='strip';
-    if(Mk<M2){ l4.className='strip bad';
-      l4.innerHTML='Atenção: o kit a '+brl(pk)+' deixa <b>'+brl2(Mk)+'</b> por venda, <b>menos que os '+brl2(M2)+' da unidade</b>. O preço caiu logo acima de um degrau de comissão — suba o preço do kit ou reveja o custo.'; }
-    else { l4.className='strip ok';
-      l4.innerHTML='O kit a '+brl(pk)+' deixa <b>'+brl2(Mk)+'</b> por venda contra '+brl2(M2)+' da unidade. Com <b>30% das vendas virando kit</b>, são <b>'+brl(G.a4.f)+'</b> de faturamento e <b>'+brl(G.a4.l)+'</b> de lucro a mais por mês.'; }
+  /* ── alavanca 3 · conversão, sem input ── */
+  set('c3-base', String(c).replace('.',',')+'%');
+  if(g('c3-tab')){
+    var cenarios=[
+      {c:c*1.2, t:'atributos completos e descrição que responde objeção'},
+      {c:c*1.5, t:'as nove imagens na ordem, com tabela de medidas'},
+      {c:c*2.0, t:'tudo acima mais as dez primeiras avaliações'}
+    ];
+    g('c3-tab').innerHTML = cenarios.map(function(x){
+      var pedN=vis*x.c/100, d=pedN-ped;
+      return '<tr><td><b>'+x.c.toFixed(1).replace('.',',')+'%</b></td><td class="n">+'+nm(d)+
+             '</td><td class="n">'+brl(d*p1)+'</td><td class="n">'+brl(d*M2)+'</td><td style="font-size:19px">'+x.t+'</td></tr>';
+    }).join('');
+    var d50=vis*(c*1.5)/100-ped;
+    G.a3={f:d50*p1, l:d50*M2};
+    var l3=g('a3-leitura');
+    if(l3) l3.innerHTML='Subir a conversão em 50% — de '+String(c).replace('.',',')+'% para '+(c*1.5).toFixed(1).replace('.',',')+'% — vale <b>'+brl(d50*p1)+' por mês</b> nas mesmas '+nm(vis)+' visitas. <b>'+brl(d50*p1*12)+' no ano.</b>';
   }
 
-  /* 5 · tráfego */
-  var pct5=val('a5-pct')/100, dped5=ped3*pct5;
-  G.a5={f:dped5*p1, l:dped5*M2};
-  set('a5-ped',nm(dped5));
-  set('a5-ganho',brl(G.a5.f)); set('a5-lucro','e '+brl(G.a5.l)+' de lucro');
+  /* ── alavanca 4 · kit ── */
+  var kq=g('k-qtd')?val('k-qtd'):2, kp=g('k-preco')?val('k-preco'):0, kpct=g('k-pct')?val('k-pct')/100:0;
+  var kcusto=custo2*kq, kcom=comissao(kp), kimp=kp*imp;
+  var Mk=kp-kcusto-emb-kcom-kimp;
+  set('k-qtd2',nm(kq));
+  set('k-l1',brl2(kp)); set('k-l2','− '+brl2(kcusto)); set('k-l3','− '+brl2(emb));
+  set('k-faixa','('+(kp<=79.99?'20% + R$ 4,50':kp<=99.99?'14% + R$ 16':kp<=199.99?'14% + R$ 20':'14% + R$ 26')+')');
+  set('k-l4','− '+brl2(kcom)); set('k-l5','− '+brl2(kimp));
+  set('k-marg',brl2(Mk)); set('k-unid',brl2(M2));
+  var pedKit=ped*kpct;
+  G.a4={f:pedKit*(kp-p1), l:pedKit*(Mk-M2)};
+  var kl=g('k-leitura');
+  if(kl){
+    var porUn=kq?Mk/kq:0;
+    if(Mk<M2*kq*0.8){ kl.className='strip bad';
+      kl.innerHTML='O kit deixa <b>'+brl2(Mk)+'</b> — mas vendendo '+nm(kq)+' unidades soltas você faria <b>'+brl2(M2*kq)+'</b>. <b>Esse kit está dando desconto demais</b> ou caiu numa faixa de comissão pior. Suba o preço.'; }
+    else { kl.className='strip ok';
+      kl.innerHTML='O kit deixa <b>'+brl2(Mk)+'</b> por venda, <b>'+brl2(porUn)+' por unidade</b> contra '+brl2(M2)+' na venda avulsa. Com '+nm(kpct*100)+'% das vendas virando kit, são <b>'+brl(G.a4.f)+'</b> de faturamento e <b>'+brl(G.a4.l)+'</b> de lucro a mais por mês.'; }
+  }
 
-  /* ROAS */
-  var equi = M2>0 ? p1/M2 : 0;
+  /* ── alavanca 5 · afiliados e ads ── */
+  var afc=g('af-com')?val('af-com')/100:0, afp=g('af-ped')?val('af-ped'):0;
+  var afFat=afp*p1, afPago=afFat*afc, afLucro=afp*M2-afPago;
+  set('af-fat',brl(afFat)); set('af-pago','− '+brl(afPago)); set('af-lucro',brl(afLucro));
+  var add=g('ad-dia')?val('ad-dia'):0, adr=g('ad-roas')?val('ad-roas'):0;
+  var adInv=add*30, adFat=adInv*adr, adPed=p1?adFat/p1:0, adLucro=adPed*M2-adInv;
+  set('ad-fat',brl(adFat)); set('ad-inv','− '+brl(adInv)); set('ad-lucro',brl(adLucro));
+  G.a5={f:afFat+adFat, l:afLucro+adLucro};
+  var l5=g('a5-leitura');
+  if(l5){ l5.className = (afLucro>0&&adLucro>0)?'strip ok':'strip warn';
+    l5.innerHTML='Juntas, as duas trariam <b>'+brl(afFat+adFat)+'</b> de faturamento e <b>'+brl(afLucro+adLucro)+'</b> de lucro por mês. '+
+      (afLucro>adLucro
+        ? '<b>O afiliado rende mais aqui</b> — e sem risco: você paga depois da venda.'
+        : '<b>O anúncio rende mais nesse cenário</b>, mas exige caixa antes. Comece pelo afiliado se o dinheiro está curto.'); }
+
+  /* ── ROAS ── */
+  var equi = M2>0 ? p1/M2 : 0, cpa8=p1/8, luc8=M2-cpa8;
   set('r-equi', equi>0?equi.toFixed(1).replace('.',',')+'×':'—');
-  var cpa8=p1/8, luc8=M2-cpa8;
   set('r-lucro8', brl2(luc8));
   var rl=g('r-leitura');
   if(rl){ rl.className = luc8>0?'strip ok':'strip bad';
     rl.innerHTML = luc8>0
-      ? 'Com a margem de <b>'+brl2(M2)+'</b> que você construiu, o seu equilíbrio é <b>ROAS '+equi.toFixed(1).replace('.',',')+'×</b>. Praticando 8×, o anúncio custa '+brl2(cpa8)+' e sobram <b>'+brl2(luc8)+'</b> de lucro por venda.'
-      : 'Com ROAS 8× o anúncio custa '+brl2(cpa8)+' e a sua margem é '+brl2(M2)+'. <b>Não fecha</b> — você precisa de uma meta mais alta ou de mais margem.'; }
-
-  /* placar */
-  var itens=[['1',G.a1],['2',G.a2],['3',G.a3],['4',G.a4],['5',G.a5]];
-  var tf=0,tlc=0;
-  itens.forEach(function(it,i){
-    var n=i+1, o=it[1]||{f:0,l:0};
-    tf+=o.f; tlc+=o.l;
-    set('q'+n+'f', o.f?brl(o.f):'—');
-    set('q'+n+'l', brl(o.l));
-    if(n<=2){ set('p'+n+'f', o.f?brl(o.f):'—'); set('p'+n+'l', brl(o.l)); }
-  });
-  var d1f=G.a1.f+G.a2.f, d1l=G.a1.l+G.a2.l;
-  set('pd1f', d1f?brl(d1f):'—'); set('pd1l', brl(d1l));
-  var df=g('d1-fecho');
-  if(df){ df.className='strip lar';
-    df.innerHTML='Só arrumando preço e custo, você ganha <b>'+brl(d1l)+' de lucro por mês</b> — <b>'+brl(d1l*12)+' no ano</b>. Sem tráfego novo, sem anúncio novo, sem vender uma unidade a mais.'; }
-
-  set('qtf', brl(tf)); set('qtl', brl(tlc));
-  set('q-fat', brl(F+tf)); set('q-fats','hoje '+brl(F)+' · '+(F?'+'+Math.round(tf/F*100):'0')+'%');
-  set('q-luc', brl(L+tlc)); set('q-lucs','hoje '+brl(L)+' · '+(L>0?'+'+Math.round(tlc/L*100):'0')+'%');
-  var ql=g('q-leitura');
-  if(ql){ ql.innerHTML='Somando as cinco: <b>'+brl(tf)+'</b> de faturamento e <b>'+brl(tlc)+'</b> de lucro a mais <b>por mês</b>. No ano, <b>'+brl(tlc*12)+' de lucro</b> que hoje está na mesa. <b>E nenhuma das cinco exige aumentar o orçamento de anúncio.</b>'; }
+      ? 'Com a margem de <b>'+brl2(M2)+'</b> que você construiu, o seu equilíbrio é <b>ROAS '+equi.toFixed(1).replace('.',',')+'×</b>. Praticando 8×, o anúncio custa '+brl2(cpa8)+' e sobram <b>'+brl2(luc8)+'</b> por venda.'
+      : 'Com ROAS 8× o anúncio custa '+brl2(cpa8)+' e a sua margem é '+brl2(M2)+'. <b>Não fecha</b> — precisa de meta mais alta ou mais margem.'; }
 }
-['b-vis','b-conv','b-tk','b-custo','b-imp','b-emb','a1-preco','a1-queda','a2-red',
- 't-vendas','s-lead','s-seg','m-meta','m-roas','m-ctr','a3-conv','a4-preco','a4-custo','a5-pct']
+['b-fatmes','b-tk','b-conv','b-custo','b-imp','b-emb','a2-novo','t-vendas','s-lead','s-seg',
+ 'm-meta','m-roas','m-ctr','k-qtd','k-preco','k-pct','af-com','af-ped','ad-dia','ad-roas']
  .forEach(function(id){ var e=g(id); if(e) e.addEventListener('input',motor); });
-var brl2=function(n){return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})};
 motor();
 </script></body></html>
