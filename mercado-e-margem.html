@@ -1,0 +1,540 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mercado e Margem · Dia 1 | Efeito Vendas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080a; --bg2:#0d0f13; --card:#101319; --card2:#161a22;
+  --line:#1e232d; --line2:#2a313d;
+  --orange:#ff4d1c; --orange-soft:rgba(255,77,28,.12); --orange-glow:rgba(255,77,28,.35);
+  --purple:#7B2FFF; --purple-soft:rgba(123,47,255,.12);
+  --green:#1fd47a; --green-soft:rgba(31,212,122,.12);
+  --yellow:#ffcb45; --yellow-soft:rgba(255,203,69,.12);
+  --red:#ff3b5c; --red-soft:rgba(255,59,92,.12);
+  --t1:#f4f6fa; --t2:#aab2c0; --t3:#6b7280;
+  --mono:'JetBrains Mono',monospace; --disp:'Bebas Neue',sans-serif; --body:'Outfit',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--t1);font-family:var(--body);-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(900px 500px at 12% -5%,rgba(255,77,28,.10),transparent 60%),radial-gradient(800px 600px at 95% 110%,rgba(123,47,255,.10),transparent 55%)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.035;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:46px 46px}
+.deck{position:relative;z-index:1;height:100vh;width:100vw}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:5vh 6vw;opacity:0;visibility:hidden;transform:translateY(24px);transition:opacity .45s ease,transform .45s ease;overflow-y:auto}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.slide::-webkit-scrollbar{width:6px}
+.slide::-webkit-scrollbar-thumb{background:var(--line2);border-radius:6px}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.kicker::before{content:'';width:26px;height:2px;background:var(--orange)}
+h1.disp{font-family:var(--disp);font-size:clamp(48px,8vw,108px);line-height:.92;letter-spacing:1px}
+h2.disp{font-family:var(--disp);font-size:clamp(34px,5.2vw,66px);line-height:.95;letter-spacing:.5px;margin-bottom:6px}
+.lead{font-size:clamp(15px,1.5vw,21px);color:var(--t2);max-width:860px;line-height:1.55;font-weight:300}
+.hl{color:var(--orange);font-weight:600}
+.hlg{color:var(--green);font-weight:600}
+.hlr{color:var(--red);font-weight:600}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:5px 11px;border-radius:6px;border:1px solid var(--line2);color:var(--t2)}
+.nav{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:14px;background:rgba(13,15,19,.85);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:50px;padding:8px 12px}
+.nav button{background:none;border:none;color:var(--t2);cursor:pointer;font-size:18px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.2s}
+.nav button:hover{background:var(--orange-soft);color:var(--orange)}
+.dots{display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line2);cursor:pointer;transition:.25s}
+.dot.on{background:var(--orange);width:22px;border-radius:5px}
+.counter{font-family:var(--mono);font-size:12px;color:var(--t3);min-width:52px;text-align:center}
+.brand-corner{position:fixed;top:22px;right:28px;z-index:40;font-family:var(--disp);font-size:20px;letter-spacing:1px;color:var(--t3)}
+.brand-corner b{color:var(--orange)}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--orange);z-index:60;transition:width .4s ease;box-shadow:0 0 12px var(--orange-glow)}
+.metric-wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:start;margin-top:10px}
+.metric-blocks{display:flex;flex-direction:column;gap:13px}
+.mblock{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px 18px;border-left:3px solid var(--orange)}
+.mblock.p{border-left-color:var(--purple)}
+.mblock.g{border-left-color:var(--green)}
+.mblock.r{border-left-color:var(--red)}
+.mblock .lab{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.mblock .val{font-size:15px;color:var(--t1);line-height:1.55;font-weight:300}
+.mblock .val b{font-weight:600}
+.formula{background:var(--bg2);border:1px dashed var(--line2);border-radius:12px;padding:18px 22px;font-family:var(--mono);font-size:clamp(13px,1.6vw,20px);color:var(--orange);text-align:center;letter-spacing:.5px}
+.formula small{color:var(--t3);font-size:12px;display:block;margin-top:8px;letter-spacing:0}
+.example-box{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line2);border-radius:16px;padding:22px}
+.example-box .et{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin-bottom:14px}
+.calc-chain{display:flex;flex-direction:column;gap:8px}
+.chain-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:8px 0;border-bottom:1px solid var(--line)}
+.chain-row:last-child{border-bottom:none}
+.chain-row span{color:var(--t2);font-weight:300}
+.chain-row b{font-family:var(--mono);color:var(--t1);font-size:15px}
+.chain-row.neg b{color:var(--red)}
+.chain-row.big b{color:var(--orange);font-size:19px}
+.chain-row.win b{color:var(--green);font-size:19px}
+.three-states{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:32px}
+.state{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;text-align:center;transition:.3s}
+.state.mid{border-color:var(--orange);background:var(--orange-soft)}
+.state .sl{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+.state .sv{font-family:var(--disp);font-size:clamp(28px,3.4vw,46px);letter-spacing:.5px}
+.state.low .sv{color:var(--red)}
+.state.mid .sv{color:var(--orange)}
+.state.high .sv{color:var(--green)}
+.state p{font-size:12.5px;color:var(--t2);font-weight:300;margin-top:8px;line-height:1.45}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:28px}
+.col{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px}
+.col.fix{border-top:3px solid var(--purple)}
+.col.var{border-top:3px solid var(--orange)}
+.col h3{font-family:var(--disp);font-size:30px;letter-spacing:.5px;margin-bottom:4px}
+.col .cs{font-size:13px;color:var(--t3);margin-bottom:16px;font-weight:300}
+.col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.col li{font-size:15px;color:var(--t2);padding-left:24px;position:relative;font-weight:300}
+.col li::before{content:'▸';position:absolute;left:0;color:var(--orange);font-weight:700}
+.col.fix li::before{color:var(--purple)}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px}
+.calc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column}
+.calc h3{font-family:var(--disp);font-size:25px;letter-spacing:.5px;margin-bottom:4px}
+.calc .ch-sub{font-size:12.5px;color:var(--t3);margin-bottom:16px;font-weight:300}
+.field{margin-bottom:11px}
+.field label{display:block;font-size:12px;color:var(--t2);margin-bottom:5px;font-weight:500}
+.field input{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:9px 13px;color:var(--t1);font-family:var(--mono);font-size:15px;transition:.2s}
+.field input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.out{margin-top:4px;background:var(--bg2);border:1px solid var(--line);border-radius:13px;padding:15px;display:flex;flex-direction:column;gap:8px}
+.out-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px}
+.out-row span{color:var(--t2);font-weight:300}
+.out-row b{font-family:var(--mono);font-size:16px;color:var(--t1)}
+.out-row.hot b{color:var(--orange);font-size:18px}
+.out-row.neg b{color:var(--red)}
+.out-row.win b{color:var(--green);font-size:18px}
+.bigres{background:linear-gradient(135deg,var(--orange-soft),transparent);border:1px solid var(--orange);border-radius:16px;padding:22px;text-align:center;margin-top:14px}
+.bigres .brl{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:6px}
+.bigres .brv{font-family:var(--disp);font-size:clamp(40px,5.5vw,74px);color:var(--t1);line-height:1;letter-spacing:1px}
+.bigres .brs{font-size:13px;color:var(--t2);font-weight:300;margin-top:8px}
+.slider-wrap{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;margin-top:20px}
+.slider-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.slider-head .sh-l{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--t3)}
+.slider-head .sh-v{font-family:var(--disp);font-size:clamp(38px,5vw,64px);line-height:.9;letter-spacing:1px}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:5px;background:var(--line2);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--orange);cursor:pointer;box-shadow:0 0 14px var(--orange-glow);border:3px solid var(--bg)}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--orange);cursor:pointer;border:3px solid var(--bg)}
+.verdict-strip{margin-top:22px;background:var(--orange-soft);border:1px solid var(--orange);border-radius:14px;padding:17px 24px;font-size:clamp(15px,1.6vw,19px);text-align:center;font-weight:300}
+.verdict-strip b{color:var(--orange);font-weight:700}
+.badge{display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.5px;padding:14px 18px;border-radius:12px;margin-top:16px}
+.badge.go{background:var(--green-soft);color:var(--green);border:1px solid rgba(31,212,122,.4)}
+.badge.warn{background:var(--yellow-soft);color:var(--yellow);border:1px solid rgba(255,203,69,.4)}
+.badge.stop{background:var(--red-soft);color:var(--red);border:1px solid rgba(255,59,92,.4)}
+.plan-table{width:100%;border-collapse:collapse;margin-top:18px;font-size:14.5px}
+.plan-table th{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);text-align:left;padding:11px 12px;border-bottom:1px solid var(--line2);font-weight:500}
+.plan-table td{padding:11px 12px;border-bottom:1px solid var(--line);color:var(--t2);font-weight:300}
+.plan-table td:last-child,.plan-table th:last-child{text-align:right;font-family:var(--mono);color:var(--t1)}
+.plan-table tr.neg td:last-child{color:var(--red)}
+.plan-table tr.sum td{background:var(--card);color:var(--t1);font-weight:500}
+.plan-table tr.sum td:last-child{color:var(--orange);font-size:16px}
+.plan-table tr.final td{background:var(--green-soft);color:var(--t1);font-weight:600}
+.plan-table tr.final td:last-child{color:var(--green);font-size:18px}
+.steps4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px}
+.stepc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;position:relative;transition:.3s}
+.stepc:hover{border-color:var(--orange);transform:translateY(-4px)}
+.stepc .si{font-family:var(--disp);font-size:46px;color:var(--line2);line-height:.8;position:absolute;top:12px;right:16px}
+.stepc:hover .si{color:var(--orange-glow)}
+.stepc h4{font-family:var(--disp);font-size:24px;letter-spacing:.5px;margin:2px 0 8px}
+.stepc p{font-size:13px;color:var(--t2);line-height:1.5;font-weight:300}
+.next-banner{margin-top:30px;background:linear-gradient(135deg,var(--purple-soft),transparent);border:1px solid rgba(123,47,255,.4);border-radius:16px;padding:22px 26px}
+.next-banner .nb-tag{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--purple)}
+.next-banner h4{font-family:var(--disp);font-size:30px;letter-spacing:.5px;margin-top:4px}
+.next-banner p{font-size:13.5px;color:var(--t2);font-weight:300;margin-top:4px;max-width:680px}
+.hint{font-size:12px;color:var(--t3);font-weight:300;margin-top:10px;text-align:center;font-family:var(--mono);letter-spacing:.5px}
+.faixa-badge{background:var(--orange-soft);border:1px solid var(--orange);border-radius:9px;padding:9px 13px;font-family:var(--mono);font-size:12px;letter-spacing:.5px;color:var(--orange);text-align:center;margin:-4px 0 13px}
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}
+.tier{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 18px;text-align:center;transition:.3s}
+.tier.on{border-color:var(--orange);background:var(--orange-soft);transform:translateY(-4px)}
+.tier .tf{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:12px;line-height:1.4}
+.tier .tc{font-family:var(--disp);font-size:clamp(30px,3.6vw,48px);color:var(--orange);line-height:.9}
+.tier .tx{font-size:13px;color:var(--t2);font-weight:300;margin-top:8px}
+.tier .tx b{color:var(--t1);font-family:var(--mono)}
+@media(max-width:920px){
+  .metric-wrap,.calc-grid,.split{grid-template-columns:1fr}
+  .three-states,.steps4{grid-template-columns:1fr 1fr}
+  .slide{padding:7vh 6vw}
+}
+
+.out-row{padding:6px 0;display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px}
+.out-row b{font-family:var(--mono);font-weight:600}
+.calc .brl{margin-bottom:12px}
+.field label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+.field input{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:11px 13px;color:var(--t1);font-family:var(--mono);font-size:15px;font-weight:600;outline:none}
+.field input:focus{border-color:var(--orange)}
+.mblock .val{font-family:var(--disp);font-size:30px;line-height:1.05}
+.mblock .lab{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+.mblock .obs{font-family:var(--mono);font-size:10.5px;color:var(--t3);margin-top:4px}
+.verdict-strip{text-align:left}
+
+#tela{position:fixed;inset:0;z-index:50;pointer-events:none;touch-action:none}
+body.desenhando #tela{pointer-events:auto;cursor:crosshair}
+body.apagando #tela{pointer-events:auto;cursor:cell}
+#ferramentas{position:fixed;right:16px;top:50%;transform:translateY(-50%);z-index:60;display:flex;flex-direction:column;gap:7px;
+ background:rgba(14,17,22,.92);backdrop-filter:blur(12px);border:1px solid var(--line2);border-radius:13px;padding:9px}
+.fb{width:34px;height:34px;border-radius:9px;border:1px solid var(--line2);background:transparent;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.fb:hover{border-color:var(--t3);color:var(--t1)}
+.fb.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.fcores{display:flex;flex-direction:column;gap:5px;padding-top:6px;margin-top:2px;border-top:1px solid var(--line2)}
+.fcores b{width:21px;height:21px;border-radius:50%;cursor:pointer;border:2px solid transparent;margin:0 auto;display:block}
+.fcores b.on{border-color:#fff;transform:scale(1.12)}
+@media print{#ferramentas{display:none}}
+.pilar{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:16px}
+.pl{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px;border-top:3px solid var(--c);text-align:center}
+.pl .n{font-family:var(--mono);font-size:9.5px;letter-spacing:2px;color:var(--t3)}
+.pl .t{font-family:var(--disp);font-size:24px;letter-spacing:1px;color:var(--c);line-height:1.1;margin:4px 0}
+.pl .d{font-size:12px;color:var(--t2);line-height:1.4}
+.pl.off{opacity:.38}
+.radar{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin-top:12px}
+.rd{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;border-left:3px solid var(--c)}
+.rd b{display:block;font-size:14px;margin-bottom:3px}
+.rd span{font-size:12.5px;color:var(--t2);line-height:1.45}
+.faixa-tab{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+.faixa-tab th{text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);padding:7px 9px;border-bottom:1px solid var(--line2)}
+.faixa-tab td{padding:7px 9px;border-bottom:1px solid var(--line)}
+.faixa-tab td.n{text-align:right;font-family:var(--mono)}
+.faixa-tab tr.ok td{background:rgba(31,212,122,.07)}
+.faixa-tab tr.ruim td{background:rgba(255,59,92,.06)}
+.out-row{padding:6px 0;display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px}
+.out-row b{font-family:var(--mono);font-weight:600}
+.out-row.tot{border-top:1px solid var(--line2);padding-top:9px;margin-top:4px;font-size:16px;font-weight:600}
+</style></head><body>
+<div class="progress" id="prog"></div>
+<div class="brand-corner">EFEITO <b>VENDAS</b></div>
+<div class="deck">
+
+<section class="slide active">
+  <div class="kicker">Aula ao vivo · Dia 1 de 2</div>
+  <h1 class="disp">Mercado<br>e <span class="hl">Margem</span></h1>
+  <p class="lead" style="margin-top:14px">Como descobrir <b>quanto um produto pode te dar</b> antes de comprar, e <b>qual preço fecha a sua conta</b> antes de anunciar. Hoje a gente resolve as duas primeiras perguntas — amanhã, estrutura e escala.</p>
+  <p class="lead" style="margin-top:18px;font-size:15px">Traga um produto que você quer lançar ou já vende. Vamos usar ele a aula inteira.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">O Conceito</div>
+  <h2 class="disp">Vender é ordem,<br>não é sorte</h2>
+  <p class="lead">Quase todo seller começa pelo fim: compra o produto, sobe o anúncio e depois tenta descobrir por que não dá lucro. A ordem certa tem quatro etapas, e cada uma responde uma pergunta.</p>
+  <div class="pilar">
+    <div class="pl" style="--c:var(--orange)"><div class="n">HOJE</div><div class="t">MERCADO</div><div class="d">Vale a pena vender isso? Quanto dá para faturar?</div></div>
+    <div class="pl" style="--c:var(--orange)"><div class="n">HOJE</div><div class="t">MARGEM</div><div class="d">Por quanto eu vendo para sobrar dinheiro?</div></div>
+    <div class="pl off" style="--c:var(--purple)"><div class="n">AMANHÃ</div><div class="t">ESTRUTURA</div><div class="d">Como faço o produto valer esse preço?</div></div>
+    <div class="pl off" style="--c:var(--purple)"><div class="n">AMANHÃ</div><div class="t">ESCALA</div><div class="d">Como levo gente até ele e multiplico?</div></div>
+  </div>
+  <div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange)">Pular uma etapa não acelera — só empurra o problema para a frente. <b>Quem erra o mercado não conserta com anúncio. Quem erra a margem não conserta com volume.</b></div>
+</section>
+
+<section class="slide">
+  <div class="kicker">A Base</div>
+  <h2 class="disp">As duas perguntas<br>do mercado</h2>
+  <p class="lead">Mercado não é "achar um produto bonito". São duas perguntas com resposta numérica:</p>
+  <div class="metric-blocks" style="grid-template-columns:1fr 1fr;margin-top:16px">
+    <div class="mblock"><div class="lab">Pergunta 1</div><div class="val" style="font-size:20px;line-height:1.3">Tem gente comprando isso?</div><div class="obs">volume de vendas do nicho, estabilidade ao longo dos meses e quantos vendedores dividem esse bolo</div></div>
+    <div class="mblock p"><div class="lab">Pergunta 2</div><div class="val" style="font-size:20px;line-height:1.3">Quanto eu consigo tirar daí?</div><div class="obs">o seu teto realista de faturamento, dado o preço que o mercado pratica e a fatia que você consegue conquistar</div></div>
+  </div>
+  <div class="verdict-strip">A maioria responde só a primeira — e descobre a segunda quando o estoque já está comprado. <b>As duas se respondem antes de pagar o fornecedor.</b></div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Passo 1 de 4 · Mercado</div>
+  <h2 class="disp">O que ler no<br>Radar 360</h2>
+  <p class="lead">Com a Shopee aberta, o Radar lê a busca e te devolve o retrato do nicho. Não é para olhar tudo — são <b>cinco leituras</b> que decidem se vale entrar.</p>
+  <div class="radar">
+    <div class="rd" style="--c:var(--orange)"><b>1 · A faixa de preço que domina</b><span>Onde está a maior parte das vendas, não a maior parte dos anúncios. É ela que define por quanto o mercado aceita comprar.</span></div>
+    <div class="rd" style="--c:var(--purple)"><b>2 · O volume dos primeiros colocados</b><span>Quantas unidades os tops vendem por mês. É a referência do tamanho do bolo.</span></div>
+    <div class="rd" style="--c:var(--blue)"><b>3 · A concentração</b><span>Se 2 lojas levam 80% das vendas, o nicho está dominado. Se 15 lojas dividem, há espaço para entrar.</span></div>
+    <div class="rd" style="--c:var(--green)"><b>4 · As avaliações dos concorrentes</b><span>Nota baixa e reclamação repetida no mesmo ponto é um buraco à sua espera — ali está a sua diferenciação.</span></div>
+    <div class="rd" style="--c:var(--yellow)"><b>5 · A estabilidade</b><span>O nicho vende o ano inteiro ou só numa data? Isso muda quanto estoque você compra e quando.</span></div>
+  </div>
+  <div class="verdict-strip" style="background:var(--green-soft);border-color:var(--green)">Nicho bom não é o que vende mais. É o que tem <b>demanda estável</b>, <b>concorrência dividida</b> e <b>faixa de preço que comporta a sua margem</b>.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Passo 2 de 4 · Mercado</div>
+  <h2 class="disp">O seu teto<br>de faturamento</h2>
+  <p class="lead">Esse é o número que quase ninguém calcula antes de comprar: <b>quanto esse produto pode te dar por mês, no melhor cenário realista</b>.</p>
+  <div class="formula" style="max-width:740px">TETO = unidades que o nicho vende por mês × a sua fatia × preço de venda</div>
+  <div class="metric-wrap" style="margin-top:12px">
+    <div class="calc">
+      <div class="brl">O que o Radar mostrou</div>
+      <div class="field"><label>Unidades vendidas por mês pelos 10 primeiros</label><input type="number" id="m-un" value="3000" step="100"></div>
+      <div class="field"><label>Quantos vendedores relevantes disputam</label><input type="number" id="m-conc" value="12" step="1"></div>
+      <div class="field"><label>Preço médio praticado (R$)</label><input type="number" id="m-preco" value="89" step="1"></div>
+      <div class="field"><label>Fatia que você espera conquistar (%)</label><input type="number" id="m-fatia" value="8" step="1"></div>
+    </div>
+    <div class="metric-blocks">
+      <div class="mblock"><div class="lab">Fatia média por vendedor</div><div class="val" id="m-media">—</div><div class="obs">se todos dividissem igualmente</div></div>
+      <div class="mblock p"><div class="lab">Suas unidades por mês</div><div class="val" id="m-unmes">—</div><div class="obs" id="m-undia"></div></div>
+      <div class="mblock g"><div class="lab">Seu teto de faturamento</div><div class="val" id="m-teto">—</div><div class="obs">por mês, com essa fatia</div></div>
+    </div>
+  </div>
+  <div class="verdict-strip" id="v-teto">—</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">A Leitura do Número</div>
+  <h2 class="disp">O teto vale<br>o esforço?</h2>
+  <p class="lead">Teto calculado, a pergunta muda: <b>esse número justifica o trabalho de entrar nesse nicho?</b> Porque entrar custa estoque, tempo de cadastro, aprendizado de anúncio e capital parado.</p>
+  <table class="faixa-tab" style="max-width:760px">
+    <thead><tr><th>Se o seu teto é</th><th>O que isso significa</th><th>Decisão</th></tr></thead>
+    <tbody>
+      <tr class="ruim"><td>Menor que a sua meta mensal</td><td>Nem vendendo tudo que você espera, esse produto sustenta o negócio</td><td>buscar outro produto ou outra faixa</td></tr>
+      <tr><td>Igual à sua meta</td><td>Depende de tudo dar certo — sem folga para erro</td><td>entrar com estoque pequeno e testar</td></tr>
+      <tr class="ok"><td>Duas vezes a sua meta ou mais</td><td>Há espaço para errar, aprender e ainda bater o objetivo</td><td>entrar com consistência</td></tr>
+    </tbody>
+  </table>
+  <div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange)"><b>Fatia realista para quem está entrando: de 3% a 8%.</b> Acima disso só com diferencial claro — preço, prazo, kit ou um buraco de atendimento que os concorrentes deixaram aberto.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Passo 3 de 4 · Margem</div>
+  <h2 class="disp">A conta que a<br>Shopee faz com você</h2>
+  <p class="lead">Preço de venda não é o que entra no seu bolso. Entre o que o cliente paga e o que sobra existem três descontos — e um deles muda de degrau conforme o preço.</p>
+  <table class="faixa-tab" style="max-width:720px">
+    <thead><tr><th>Faixa de preço</th><th class="n">Comissão</th><th class="n">Taxa fixa</th><th>O que isso significa</th></tr></thead>
+    <tbody>
+      <tr><td>até R$ 79,99</td><td class="n">20%</td><td class="n">R$ 4,00</td><td>percentual alto, taxa baixa</td></tr>
+      <tr><td>R$ 80 a R$ 99,99</td><td class="n">14%</td><td class="n">R$ 16,00</td><td>percentual cai, taxa sobe</td></tr>
+      <tr><td>R$ 100 a R$ 199,99</td><td class="n">14%</td><td class="n">R$ 20,00</td><td>degrau intermediário</td></tr>
+      <tr><td>acima de R$ 200</td><td class="n">14%</td><td class="n">R$ 26,00</td><td>taxa fixa maior, diluída no preço</td></tr>
+    </tbody>
+  </table>
+  <div class="verdict-strip" style="background:var(--red-soft);border-color:var(--red)"><b>A armadilha do centavo:</b> vender a R$ 79,99 custa <b>R$ 20,00</b> de comissão. Vender a R$ 80,00 custa <b>R$ 27,20</b>. Um centavo a mais no preço tira <b>R$ 7,20</b> do seu bolso em cada venda.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Passo 4 de 4 · Margem</div>
+  <h2 class="disp">O preço que<br>fecha a conta</h2>
+  <p class="lead">Agora o seu produto. Preencha o custo e veja <b>o que sobra em cada preço possível</b> — e qual retorno de anúncio cada um exige.</p>
+  <div class="metric-wrap">
+    <div class="calc">
+      <div class="brl">O seu produto</div>
+      <div class="field"><label>Custo de compra por unidade (R$)</label><input type="number" id="p-custo" value="28" step="1"></div>
+      <div class="field"><label>Embalagem + o frete que você paga (R$)</label><input type="number" id="p-frete" value="6" step="1"></div>
+      <div class="field"><label>Preço que você pretende praticar (R$)</label><input type="number" id="p-preco" value="89" step="1"></div>
+      <div class="out-row"><span>Comissão da faixa</span><b id="p-com">—</b></div>
+      <div class="out-row tot"><span>Sobra por venda</span><b id="p-sobra">—</b></div>
+    </div>
+    <div class="metric-blocks">
+      <div class="mblock"><div class="lab">Sua margem</div><div class="val" id="p-margem">—</div><div class="obs" id="p-margobs"></div></div>
+      <div class="mblock p"><div class="lab">ROAS mínimo</div><div class="val" id="p-roas">—</div><div class="obs">abaixo disso, a venda dá prejuízo</div></div>
+      <div class="mblock g"><div class="lab">Gasto máximo em Ads por venda</div><div class="val" id="p-cpa">—</div><div class="obs">o CPA que o seu preço comporta</div></div>
+    </div>
+  </div>
+  <div class="verdict-strip" id="v-preco">—</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">A Prova Real</div>
+  <h2 class="disp">A curva de preço<br>do mesmo produto</h2>
+  <p class="lead">Mesma peça, mesmo custo. Só o preço muda — e com ele a margem, o ROAS que você precisa e quantos pedidos a meta exige.</p>
+  <table class="faixa-tab" id="tab-curva" style="max-width:800px">
+    <thead><tr><th>Preço</th><th class="n">Comissão</th><th class="n">Sobra</th><th class="n">Margem</th><th class="n">ROAS mín.</th><th class="n">CPA máx.</th><th class="n">Pedidos p/ R$20k</th></tr></thead>
+    <tbody id="curva-body"></tbody>
+  </table>
+  <div class="verdict-strip" id="v-curva">—</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">A Prova Real</div>
+  <h2 class="disp">Margem alta não<br>é a resposta sozinha</h2>
+  <p class="lead">Duas decisões de compra diferentes, o mesmo capital de R$ 15 mil. O que decide não é a margem — é <b>margem vezes velocidade</b>.</p>
+  <table class="faixa-tab" style="max-width:800px">
+    <thead><tr><th>Cenário</th><th class="n">Margem</th><th class="n">Ciclo de venda</th><th class="n">Giros no ano</th><th class="n">Lucro no ano</th></tr></thead>
+    <tbody>
+      <tr class="ok"><td><b>A</b> · margem alta, giro rápido</td><td class="n">33%</td><td class="n">30 dias</td><td class="n">12,2</td><td class="n"><b>R$ 153k</b></td></tr>
+      <tr><td><b>B</b> · margem alta, giro lento</td><td class="n">33%</td><td class="n">90 dias</td><td class="n">4,1</td><td class="n">R$ 51k</td></tr>
+      <tr><td><b>C</b> · margem baixa, giro rápido</td><td class="n">17%</td><td class="n">15 dias</td><td class="n">24,3</td><td class="n"><b>R$ 182k</b></td></tr>
+      <tr class="ruim"><td><b>D</b> · margem baixa, giro lento</td><td class="n">17%</td><td class="n">60 dias</td><td class="n">6,1</td><td class="n">R$ 46k</td></tr>
+    </tbody>
+  </table>
+  <div class="verdict-strip" style="background:var(--orange-soft);border-color:var(--orange)"><b>A contra B:</b> mesma margem, três vezes de diferença no lucro — só pelo giro. <b>C contra B:</b> margem de 17% vence margem de 33%, porque gira seis vezes mais. A pergunta certa não é "qual a margem?", é <b>"qual a margem e em quanto tempo ela se repete?"</b></div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Prática · Ao Vivo</div>
+  <h2 class="disp">Os seus números<br>de hoje</h2>
+  <p class="lead">Tudo que você preencheu, reunido. <b>Anote estes quatro</b> — eles são o ponto de partida da aula de amanhã.</p>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px">
+    <div class="bigres"><div class="brl">Seu teto de faturamento</div><div class="brv" id="f-teto">—</div><div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:6px" id="f-tetosub">—</div></div>
+    <div class="bigres" style="background:linear-gradient(135deg,var(--purple-soft),transparent);border-color:var(--purple)"><div class="brl">Sua sobra por venda</div><div class="brv" id="f-sobra">—</div><div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:6px" id="f-margem">—</div></div>
+    <div class="bigres" style="background:linear-gradient(135deg,var(--orange-soft),transparent);border-color:var(--orange)"><div class="brl">Seu ROAS mínimo</div><div class="brv" id="f-roas">—</div><div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:6px">o seu piso, não o do mercado</div></div>
+    <div class="bigres" style="background:linear-gradient(135deg,var(--green-soft),transparent);border-color:var(--green)"><div class="brl">Pedidos por dia para o teto</div><div class="brv" id="f-ped">—</div><div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:6px" id="f-pedsub">—</div></div>
+  </div>
+  <div class="verdict-strip" id="v-final">—</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Resumo do Dia 1</div>
+  <h2 class="disp">O que levar</h2>
+  <div class="metric-blocks" style="grid-template-columns:repeat(2,1fr)">
+    <div class="mblock"><div class="lab">1</div><div class="val" style="font-size:16px;line-height:1.35">Mercado se lê antes de comprar</div><div class="obs">faixa de preço dominante, volume dos tops, concentração, avaliações e estabilidade</div></div>
+    <div class="mblock"><div class="lab">2</div><div class="val" style="font-size:16px;line-height:1.35">Todo produto tem um teto</div><div class="obs">unidades do nicho × sua fatia × preço. Se o teto não cobre a meta, o produto não é o problema certo</div></div>
+    <div class="mblock"><div class="lab">3</div><div class="val" style="font-size:16px;line-height:1.35">Fatia realista é 3% a 8%</div><div class="obs">acima disso só com diferencial claro</div></div>
+    <div class="mblock"><div class="lab">4</div><div class="val" style="font-size:16px;line-height:1.35">A faixa de comissão muda tudo</div><div class="obs">um centavo acima de R$ 79,99 custa R$ 7,20 por venda</div></div>
+    <div class="mblock"><div class="lab">5</div><div class="val" style="font-size:16px;line-height:1.35">ROAS saudável é o ROAS precificado</div><div class="obs">100 ÷ margem. Número fixo de mercado não é regra</div></div>
+    <div class="mblock"><div class="lab">6</div><div class="val" style="font-size:16px;line-height:1.35">Margem sem giro não paga conta</div><div class="obs">o que decide é margem × velocidade de repetição</div></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Sua tarefa até amanhã</div>
+  <h2 class="disp">Três números<br>e uma decisão</h2>
+  <div class="metric-blocks" style="grid-template-columns:repeat(3,1fr);margin-top:14px">
+    <div class="mblock"><div class="lab">1</div><div class="val" style="font-size:17px;line-height:1.3">Leia o seu nicho</div><div class="obs">abra o Radar 360 com a Shopee aberta e anote as cinco leituras do Passo 1</div></div>
+    <div class="mblock p"><div class="lab">2</div><div class="val" style="font-size:17px;line-height:1.3">Calcule o seu teto</div><div class="obs">e compare com a sua meta mensal — ele cobre?</div></div>
+    <div class="mblock g"><div class="lab">3</div><div class="val" style="font-size:17px;line-height:1.3">Defina o preço</div><div class="obs">o que fecha a sua conta, não o que o concorrente pratica</div></div>
+  </div>
+  <div class="verdict-strip" style="margin-top:18px;background:var(--orange-soft);border-color:var(--orange)">Amanhã a gente parte desse preço: <b>como estruturar o produto para ele valer o que você decidiu cobrar</b>, e <b>como levar gente até ele</b>. Traga o preço definido — sem ele, a aula de amanhã não tem onde se apoiar.</div>
+</section>
+
+</div>
+<canvas id="tela"></canvas>
+<div id="ferramentas">
+  <button class="fb" id="f-lapis" title="Lápis (D)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></button>
+  <button class="fb" id="f-borracha" title="Borracha (E)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 20H9l-5-5a2 2 0 0 1 0-3l8-8a2 2 0 0 1 3 0l6 6a2 2 0 0 1 0 3l-7 7"/><path d="M6 11l7 7"/></svg></button>
+  <button class="fb" id="f-limpa" title="Limpar (L)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+  <div class="fcores">
+    <b data-c="#ff4d1c" class="on" style="background:#ff4d1c"></b>
+    <b data-c="#ffffff" style="background:#fff"></b>
+    <b data-c="#1fd47a" style="background:#1fd47a"></b>
+    <b data-c="#7B2FFF" style="background:#7B2FFF"></b>
+  </div>
+</div>
+<div class="nav"><button id="prev">‹</button><div class="dots" id="dots"></div><span class="counter" id="counter">01 / 13</span><button id="next">›</button></div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+const dotsEl=document.getElementById('dots');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' on':'');d.onclick=()=>go(i);dotsEl.appendChild(d);});
+const dots=[...document.querySelectorAll('.dot')],counter=document.getElementById('counter'),prog=document.getElementById('prog');
+function go(i){if(i<0||i>=slides.length)return;slides[cur].classList.remove('active');dots[cur].classList.remove('on');
+ cur=i;slides[cur].classList.add('active');dots[cur].classList.add('on');
+ counter.textContent=String(cur+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+ prog.style.width=((cur+1)/slides.length*100)+'%';}
+document.getElementById('next').onclick=()=>go(cur+1);
+document.getElementById('prev').onclick=()=>go(cur-1);
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
+ if(e.key==='ArrowRight'||e.key===' ')go(cur+1); if(e.key==='ArrowLeft')go(cur-1);});
+go(0);
+
+const v=id=>+document.getElementById(id).value||0;
+const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
+const brl=n=>'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const brl0=n=>'R$ '+n.toLocaleString('pt-BR',{maximumFractionDigits:0});
+const nm=n=>n.toLocaleString('pt-BR',{maximumFractionDigits:0});
+const pc=(n,d=1)=>n.toFixed(d).replace('.',',')+'%';
+function comissao(p){
+  if(p<=79.99) return {v:p*0.20+4, t:'20% + R$ 4,00'};
+  if(p<=99.99) return {v:p*0.14+16,t:'14% + R$ 16,00'};
+  if(p<=199.99)return {v:p*0.14+20,t:'14% + R$ 20,00'};
+  return {v:p*0.14+26,t:'14% + R$ 26,00'};
+}
+function calc(){
+  /* ── mercado ── */
+  const un=v('m-un'), conc=v('m-conc'), pm=v('m-preco'), fat=v('m-fatia');
+  const media=conc?100/conc:0;
+  const minhas=un*fat/100, teto=minhas*pm;
+  set('m-media',pc(media,1));
+  set('m-unmes',nm(minhas)); set('m-undia',Math.ceil(minhas/30)+' unidades por dia');
+  set('m-teto',brl0(teto));
+  const vt=document.getElementById('v-teto'); vt.className='verdict-strip';
+  if(fat>media*1.8){ vt.style.background='var(--red-soft)'; vt.style.borderColor='var(--red)';
+    vt.innerHTML='Você está projetando <b>'+pc(fat,1)+'</b> do mercado, quando a fatia média entre '+conc+' vendedores é <b>'+pc(media,1)+'</b>. Isso só acontece com um diferencial muito claro. <b>Refaça com 3% a 8% e veja se o número ainda fecha.</b>'; }
+  else { vt.style.background='var(--green-soft)'; vt.style.borderColor='var(--green)';
+    vt.innerHTML='Com <b>'+pc(fat,1)+'</b> do mercado você venderia <b>'+nm(minhas)+' unidades por mês</b> — cerca de '+Math.ceil(minhas/30)+' por dia — e faturaria <b>'+brl0(teto)+'</b>. É um teto realista: a fatia média entre '+conc+' vendedores seria '+pc(media,1)+'.'; }
+
+  /* ── margem ── */
+  const cu=v('p-custo'), fr=v('p-frete'), pr=v('p-preco');
+  const c=comissao(pr), sobra=pr-cu-c.v-fr, mg=pr?sobra/pr*100:0;
+  set('p-com','− '+brl(c.v)+'  ('+c.t+')');
+  set('p-sobra',brl(sobra));
+  document.getElementById('p-sobra').style.color = sobra>0?'var(--green)':'var(--red)';
+  set('p-margem',pc(mg)); set('p-margobs','do preço de venda');
+  document.getElementById('p-margem').style.color = mg>=25?'var(--green)':mg>=15?'var(--yellow)':'var(--red)';
+  set('p-roas', mg>0 ? (100/mg).toFixed(1).replace('.',',')+'×' : '∞');
+  set('p-cpa', sobra>0 ? brl(sobra) : '—');
+  const vp=document.getElementById('v-preco'); vp.className='verdict-strip';
+  if(sobra<=0){ vp.style.background='var(--red-soft)'; vp.style.borderColor='var(--red)';
+    vp.innerHTML='Nesse preço <b>cada venda dá prejuízo</b> antes mesmo de entrar o anúncio. Ou o preço sobe, ou o custo de compra tem que cair.'; }
+  else if(mg<15){ vp.style.background='var(--red-soft)'; vp.style.borderColor='var(--red)';
+    vp.innerHTML='Margem de <b>'+pc(mg)+'</b> exige <b>ROAS '+(100/mg).toFixed(1).replace('.',',')+'×</b> só para empatar. É operação de volume: muito pedido para pouco dinheiro, e qualquer devolução apaga o lucro de várias vendas.'; }
+  else if(mg<25){ vp.style.background='var(--yellow-soft)'; vp.style.borderColor='var(--yellow)';
+    vp.innerHTML='Margem de <b>'+pc(mg)+'</b>: dá para trabalhar. Seu piso é <b>ROAS '+(100/mg).toFixed(1).replace('.',',')+'×</b> e você pode gastar até <b>'+brl(sobra)+'</b> de anúncio por venda.'; }
+  else { vp.style.background='var(--green-soft)'; vp.style.borderColor='var(--green)';
+    vp.innerHTML='Margem de <b>'+pc(mg)+'</b>: confortável. Você lucra a partir de <b>ROAS '+(100/mg).toFixed(1).replace('.',',')+'×</b> — bem abaixo do que a maioria persegue — e tem <b>'+brl(sobra)+'</b> de folga por venda para investir em anúncio.'; }
+
+  /* ── curva de preço ── */
+  const base=[0.75,0.85,0.95,1,1.15,1.35,1.6].map(x=>Math.round(pr*x));
+  const vistos=new Set(); const linhas=[];
+  base.forEach(p=>{ if(p<=0||vistos.has(p))return; vistos.add(p);
+    const cc=comissao(p), s=p-cu-cc.v-fr, m=p?s/p*100:0;
+    linhas.push({p,cc:cc.v,s,m,roas:m>0?100/m:0,ped:s>0?20000/s:0, atual:p===Math.round(pr)});});
+  document.getElementById('curva-body').innerHTML = linhas.map(l=>
+    `<tr class="${l.m>=25?'ok':(l.m<15?'ruim':'')}"><td><b>${brl0(l.p)}</b>${l.atual?' <span style="color:var(--orange);font-size:10px">← seu preço</span>':''}</td>`+
+    `<td class="n">${brl(l.cc)}</td><td class="n">${brl(l.s)}</td><td class="n">${pc(l.m)}</td>`+
+    `<td class="n">${l.m>0?l.roas.toFixed(1).replace('.',',')+'×':'—'}</td><td class="n">${l.s>0?brl(l.s):'—'}</td>`+
+    `<td class="n">${l.s>0?nm(l.ped):'—'}</td></tr>`).join('');
+  const melhor=linhas.filter(l=>l.s>0).sort((a,b)=>b.m-a.m)[0];
+  const vc=document.getElementById('v-curva'); vc.className='verdict-strip';
+  vc.style.background='var(--orange-soft)'; vc.style.borderColor='var(--orange)';
+  if(melhor) vc.innerHTML='Repare onde a margem <b>cai mesmo subindo o preço</b> — é o salto de faixa da comissão. No seu caso, a melhor margem da curva está em <b>'+brl0(melhor.p)+'</b>, com '+pc(melhor.m)+' e ROAS mínimo de <b>'+melhor.roas.toFixed(1).replace('.',',')+'×</b>. <b>O preço certo não é o mais alto nem o do concorrente: é o que te dá margem com demanda.</b>';
+
+  /* ── prática ao vivo ── */
+  set('f-teto',brl0(teto)); set('f-tetosub',nm(minhas)+' unidades por mês');
+  set('f-sobra',brl(sobra)); set('f-margem',pc(mg)+' de margem');
+  set('f-roas', mg>0?(100/mg).toFixed(1).replace('.',',')+'×':'∞');
+  const pedDia = sobra>0 ? Math.ceil(minhas/30) : 0;
+  set('f-ped', nm(pedDia)); set('f-pedsub','para sustentar o teto');
+  const vf=document.getElementById('v-final'); vf.className='verdict-strip';
+  const lucroTeto = sobra*minhas;
+  if(sobra>0){ vf.style.background='var(--green-soft)'; vf.style.borderColor='var(--green)';
+    vf.innerHTML='Se você atingir o teto vendendo a '+brl0(pr)+', o faturamento é <b>'+brl0(teto)+'</b> e sobram <b>'+brl0(lucroTeto)+'</b> antes das despesas fixas e do anúncio. É esse número que precisa justificar o estoque que você vai comprar.'; }
+  else { vf.style.background='var(--red-soft)'; vf.style.borderColor='var(--red)';
+    vf.innerHTML='Com a sobra negativa, não existe teto que compense. <b>Antes de pensar em escala, o preço ou o custo de compra precisam mudar.</b>'; }
+}
+['m-un','m-conc','m-preco','m-fatia','p-custo','p-frete','p-preco'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+calc();
+
+/* ── lápis e borracha ── */
+(function(){
+  const tela=document.getElementById('tela'), ctx=tela.getContext('2d');
+  let modo=null, pintando=false, cor='#ff4d1c'; const desenhos={};
+  function dim(){const r=devicePixelRatio||1;
+    tela.width=innerWidth*r; tela.height=innerHeight*r;
+    tela.style.width=innerWidth+'px'; tela.style.height=innerHeight+'px';
+    ctx.setTransform(r,0,0,r,0,0); ctx.lineCap='round'; ctx.lineJoin='round'; restaura();}
+  function restaura(){ctx.clearRect(0,0,innerWidth,innerHeight);
+    const d=desenhos[cur]; if(d){const i=new Image(); i.onload=()=>ctx.drawImage(i,0,0,innerWidth,innerHeight); i.src=d;}}
+  function salva(){desenhos[cur]=tela.toDataURL();}
+  tela.addEventListener('pointerdown',e=>{
+    if(!modo && e.pointerType!=='pen') return;
+    pintando=true; tela.setPointerCapture(e.pointerId);
+    ctx.beginPath(); ctx.moveTo(e.clientX,e.clientY);
+    if(modo==='borracha'){ctx.globalCompositeOperation='destination-out';ctx.lineWidth=26;}
+    else{ctx.globalCompositeOperation='source-over';ctx.strokeStyle=cor;
+      ctx.lineWidth=e.pointerType==='pen'?Math.max(1.8,(e.pressure||.5)*7):3.2;}});
+  tela.addEventListener('pointermove',e=>{if(!pintando)return;
+    if(modo!=='borracha'&&e.pointerType==='pen')ctx.lineWidth=Math.max(1.8,(e.pressure||.5)*7);
+    ctx.lineTo(e.clientX,e.clientY); ctx.stroke();});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>tela.addEventListener(ev,()=>{
+    if(pintando){pintando=false;ctx.globalCompositeOperation='source-over';salva();}}));
+  const bl=document.getElementById('f-lapis'), bb=document.getElementById('f-borracha');
+  function setModo(m){modo=(modo===m)?null:m;
+    document.body.classList.toggle('desenhando',modo==='lapis');
+    document.body.classList.toggle('apagando',modo==='borracha');
+    bl.classList.toggle('on',modo==='lapis'); bb.classList.toggle('on',modo==='borracha');}
+  bl.onclick=()=>setModo('lapis'); bb.onclick=()=>setModo('borracha');
+  document.getElementById('f-limpa').onclick=()=>{ctx.clearRect(0,0,innerWidth,innerHeight);delete desenhos[cur];};
+  document.querySelectorAll('.fcores b').forEach(b=>b.onclick=()=>{cor=b.dataset.c;
+    document.querySelectorAll('.fcores b').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    if(modo!=='lapis') setModo('lapis');});
+  document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
+    const k=e.key.toLowerCase();
+    if(k==='d')setModo('lapis'); else if(k==='e')setModo('borracha');
+    else if(k==='l')document.getElementById('f-limpa').click();});
+  const SEL='input,button,a,.dot,.nav,#ferramentas';
+  addEventListener('pointermove',e=>{if(pintando||!modo)return;
+    tela.style.pointerEvents='none';
+    const alvo=document.elementFromPoint(e.clientX,e.clientY);
+    tela.style.pointerEvents=(alvo&&alvo.closest(SEL))?'none':'auto';},true);
+  const goAntigo=window.go;
+  window.go=function(i){salva();goAntigo(i);restaura();};
+  addEventListener('resize',dim); dim(); setModo('lapis');
+})();
+</script></body></html>
