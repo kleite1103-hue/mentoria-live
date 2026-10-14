@@ -141,7 +141,9 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
 .fcor{display:flex;flex-direction:column;gap:8px;padding-top:10px;margin-top:4px;border-top:1px solid var(--line2)}
 .fcor b{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;margin:0 auto;display:block}
 .fcor b.on{border-color:#fff}
-</style></head><body>
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head><body>
 <div id="palco"><div id="tv">
 <div class="barra" id="barra"></div>
 <div class="marca">EFEITO <b>VENDAS</b></div>
@@ -198,8 +200,8 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
     <div class="drop" id="drop">
       <div class="ic">📄</div>
       <div class="t" id="drop-t">Solte o relatório do Radar</div>
-      <div class="s" id="drop-s">ou clique para escolher o arquivo</div>
-      <input type="file" id="arq" accept=".html,.htm" style="display:none">
+      <div class="s" id="drop-s">PDF ou HTML · clique para escolher</div>
+      <input type="file" id="arq" accept=".pdf,.html,.htm" style="display:none">
     </div>
     <div class="campo" style="margin-top:20px"><label>Vendas/mês no top 20</label><input type="number" id="t-vendas" value="148" step="1"></div>
     <div class="campo"><label>Preço que você vai praticar</label><input type="number" id="t-preco" value="89" step="1"></div>
@@ -541,25 +543,7 @@ var brl=function(n){return 'R$ '+n.toLocaleString('pt-BR',{maximumFractionDigits
 var nm=function(n){return n.toLocaleString('pt-BR',{maximumFractionDigits:0})};
 
 /* ── leitura do relatório do Radar ── */
-function lerRadar(texto){
-  var doc=new DOMParser().parseFromString(texto,'text/html');
-  var achou={};
-  /* KPIs: .kpi > .r (rótulo) + .v (valor) */
-  [].slice.call(doc.querySelectorAll('.kpi')).forEach(function(k){
-    var r=k.querySelector('.r'), v=k.querySelector('.v');
-    if(r&&v) achou[r.textContent.trim().toUpperCase()]=v.textContent.trim();
-  });
-  /* curva: linhas com "top 10 / 20 / 40" */
-  var curva={};
-  [].slice.call(doc.querySelectorAll('tr')).forEach(function(tr){
-    var td=tr.querySelectorAll('td');
-    if(td.length<2) return;
-    var rot=td[0].textContent.toLowerCase();
-    var m=rot.match(/top\s*(10|20|40)/);
-    if(m) curva[m[1]]=numBR(td[1].textContent);
-  });
-  return {kpi:achou, curva:curva};
-}
+var norm=function(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'').toUpperCase()};
 function numBR(s){
   if(!s) return 0;
   var t=String(s).replace(/[^\d.,]/g,'');
@@ -567,19 +551,93 @@ function numBR(s){
   else if((t.match(/\./g)||[]).length>0 && t.split('.').pop().length===3) t=t.replace(/\./g,'');
   var n=parseFloat(t); return isNaN(n)?0:n;
 }
+/* HTML: estrutura .kpi + tabela */
+function lerHTML(texto){
+  var doc=new DOMParser().parseFromString(texto,'text/html');
+  var kpi={}, curva={};
+  [].slice.call(doc.querySelectorAll('.kpi')).forEach(function(k){
+    var r=k.querySelector('.r'), v=k.querySelector('.v');
+    if(r&&v) kpi[norm(r.textContent)]=v.textContent.trim();
+  });
+  [].slice.call(doc.querySelectorAll('tr')).forEach(function(tr){
+    var td=tr.querySelectorAll('td');
+    if(td.length<2) return;
+    var m=td[0].textContent.toLowerCase().match(/top\s*(10|20|40)/);
+    if(m) curva[m[1]]=numBR(td[1].textContent);
+  });
+  return {kpi:kpi, curva:curva};
+}
+/* PDF: agrupa por linha usando a posição de cada pedaço de texto */
+async function lerPDF(buf){
+  var pdf = await pdfjsLib.getDocument({data:buf}).promise;
+  var linhas=[];
+  for(var p=1;p<=pdf.numPages;p++){
+    var pag=await pdf.getPage(p);
+    var tc=await pag.getTextContent();
+    var porY={};
+    tc.items.forEach(function(it){
+      if(!it.str || !it.str.trim()) return;
+      var y=Math.round(it.transform[5]);
+      var achou=null;
+      for(var k in porY){ if(Math.abs(k-y)<=3){achou=k;break;} }
+      var chave = achou!==null ? achou : y;
+      (porY[chave]=porY[chave]||[]).push({x:it.transform[4], s:it.str});
+    });
+    Object.keys(porY).sort(function(a,b){return b-a}).forEach(function(y){
+      var itens=porY[y].sort(function(a,b){return a.x-b.x});
+      linhas.push({y:+y, pag:p, itens:itens, txt:itens.map(function(i){return i.s}).join(' ')});
+    });
+  }
+  var kpi={}, curva={};
+  /* curva: linha que fala de top 10/20/40 */
+  linhas.forEach(function(L){
+    var m=L.txt.match(/top\s*(10|20|40)\b/i);
+    if(!m) return;
+    /* corta tudo até o rótulo, para o próprio 10/20/40 não virar o valor */
+    var resto=L.txt.slice(L.txt.indexOf(m[0])+m[0].length);
+    var nums=resto.match(/\d{1,3}(?:\.\d{3})*(?:,\d+)?/g);
+    if(nums && nums.length) curva[m[1]]=numBR(nums[0]);
+  });
+  /* KPI: rótulo numa linha, valor na linha de baixo, mesma coluna */
+  var ALVOS={'OMERCADOFATURA/MES':'fat','UNIDADES/MES':'un','LOJASVENDENDO':'lojas','PRECOMEDIANO':'preco','AS5PRIMEIRASLEVAM':'conc'};
+  linhas.forEach(function(L,i){
+    L.itens.forEach(function(it){
+      var n=norm(it.s);
+      for(var alvo in ALVOS){
+        if(n && alvo.indexOf(n)===0 && n.length>6){
+          for(var j=i+1;j<Math.min(i+4,linhas.length);j++){
+            var cand=linhas[j].itens.filter(function(x){return Math.abs(x.x-it.x)<90 && /[\d]/.test(x.s)});
+            if(cand.length){ kpi[ALVOS[alvo]]=cand[0].s.trim(); return; }
+          }
+        }
+      }
+    });
+    /* rótulo quebrado em vários pedaços: junta a linha inteira */
+    var nl=norm(L.txt);
+    for(var alvo2 in ALVOS){
+      if(nl.indexOf(alvo2)>-1 && !kpi[ALVOS[alvo2]]){
+        for(var j2=i+1;j2<Math.min(i+4,linhas.length);j2++){
+          var v=linhas[j2].txt.match(/R\$\s?[\d.,]+|\b\d{1,3}(?:\.\d{3})*(?:,\d+)?%?/);
+          if(v){ kpi[ALVOS[alvo2]]=v[0]; break; }
+        }
+      }
+    }
+  });
+  return {kpi:kpi, curva:curva};
+}
 var RADAR=null;
 function aplicarRadar(r){
   RADAR=r;
   if(r.curva['20']) g('t-vendas').value=Math.round(r.curva['20']);
-  var d=g('drop');
-  d.classList.add('ok');
+  else if(r.curva['10']) g('t-vendas').value=Math.round(r.curva['10']*0.47);
+  var d=g('drop'); d.classList.add('ok');
   var partes=[];
   if(r.curva['10']) partes.push('top 10: '+nm(r.curva['10']));
   if(r.curva['20']) partes.push('top 20: '+nm(r.curva['20']));
   if(r.curva['40']) partes.push('top 40: '+nm(r.curva['40']));
-  var fat=r.kpi['O MERCADO FATURA/MÊS']||r.kpi['FATURA/MÊS']||'';
-  set('drop-t','Relatório carregado');
-  set('drop-s', (fat?'nicho fatura '+fat+' · ':'') + (partes.length?partes.join(' · '):'curva não encontrada'));
+  set('drop-t', partes.length?'Relatório carregado':'Li o arquivo, mas não achei a curva');
+  set('drop-s', (r.kpi.fat?'nicho fatura '+r.kpi.fat+' · ':'') + (partes.length?partes.join(' · '):'preencha à mão abaixo'));
+  if(!partes.length) d.classList.remove('ok');
   calc();
 }
 (function(){
@@ -587,22 +645,25 @@ function aplicarRadar(r){
   if(!d) return;
   d.onclick=function(){inp.click()};
   inp.onchange=function(e){ var f=e.target.files[0]; if(f) ler(f); };
-  ['dragenter','dragover'].forEach(function(ev){
-    d.addEventListener(ev,function(e){e.preventDefault();d.classList.add('on')});
-  });
-  ['dragleave','drop'].forEach(function(ev){
-    d.addEventListener(ev,function(e){e.preventDefault();d.classList.remove('on')});
-  });
-  d.addEventListener('drop',function(e){
-    var f=e.dataTransfer.files[0]; if(f) ler(f);
-  });
+  ['dragenter','dragover'].forEach(function(ev){ d.addEventListener(ev,function(e){e.preventDefault();d.classList.add('on')}); });
+  ['dragleave','drop'].forEach(function(ev){ d.addEventListener(ev,function(e){e.preventDefault();d.classList.remove('on')}); });
+  d.addEventListener('drop',function(e){ var f=e.dataTransfer.files[0]; if(f) ler(f); });
   function ler(f){
+    set('drop-t','Lendo o arquivo…'); set('drop-s','');
+    var ehPDF = /\.pdf$/i.test(f.name) || f.type==='application/pdf';
     var fr=new FileReader();
     fr.onload=function(){
-      try{ aplicarRadar(lerRadar(fr.result)); }
-      catch(err){ set('drop-t','Não consegui ler esse arquivo'); set('drop-s','use o relatório que o Radar gera, em HTML'); }
+      try{
+        if(ehPDF){
+          lerPDF(new Uint8Array(fr.result)).then(aplicarRadar).catch(function(){
+            set('drop-t','Não consegui ler esse PDF'); set('drop-s','preencha os números à mão abaixo');
+          });
+        } else {
+          aplicarRadar(lerHTML(fr.result));
+        }
+      }catch(err){ set('drop-t','Não consegui ler esse arquivo'); set('drop-s','preencha os números à mão abaixo'); }
     };
-    fr.readAsText(f);
+    if(ehPDF) fr.readAsArrayBuffer(f); else fr.readAsText(f);
   }
 })();
 
