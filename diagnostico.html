@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Diagnóstico da Loja | Efeito Vendas</title>
+<meta name="description" content="Jogue os números da sua loja e descubra onde ela está travando — e quanto vale corrigir.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080a;--bg2:#0e1116;--card:#12161c;--line:#1c222b;--line2:#2a323d;
+ --t1:#f4f6f9;--t2:#9aa2b1;--t3:#5b6472;
+ --orange:#ff4d1c;--orange-soft:rgba(255,77,28,.10);--green:#1fd47a;--green-soft:rgba(31,212,122,.10);
+ --purple:#7B2FFF;--yellow:#ffc53d;--yellow-soft:rgba(255,197,61,.10);--red:#ff3b5c;--red-soft:rgba(255,59,92,.10);
+ --disp:'Bebas Neue',sans-serif;--mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);line-height:1.5;
+ -webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:1100px;margin:0 auto;padding:34px 20px 70px}
+.brand{font-family:var(--disp);font-size:20px;letter-spacing:2.5px;color:var(--t2)}
+.brand b{color:var(--orange);font-weight:400}
+h1{font-family:var(--disp);font-size:clamp(36px,7vw,62px);line-height:.95;letter-spacing:1px;margin:10px 0 0}
+h1 span{color:var(--orange)}
+.sub{color:var(--t2);font-size:16px;max-width:620px;margin-top:12px}
+.grid{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start;margin-top:26px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+.card h2{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--t3);font-weight:600;margin-bottom:16px}
+.f{margin-bottom:14px}
+.f label{display:block;font-size:13px;color:var(--t2);margin-bottom:6px}
+.f .inp{position:relative;display:flex;align-items:center}
+.f .pre,.f .suf{position:absolute;font-family:var(--mono);font-size:13px;color:var(--t3);pointer-events:none}
+.f .pre{left:13px}.f .suf{right:13px}
+.f input{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:11px;padding:13px 14px 13px 40px;
+ color:var(--t1);font-family:var(--mono);font-size:17px;font-weight:600;outline:none;-moz-appearance:textfield}
+.f input.np{padding-left:14px;padding-right:40px}
+.f input::-webkit-outer-spin-button,.f input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.f input:focus{border-color:var(--orange);background:#0a0d11}
+.hero{background:linear-gradient(135deg,var(--orange-soft),transparent);border:1px solid var(--orange);
+ border-radius:16px;padding:22px;margin-bottom:16px}
+.hero .l{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--orange)}
+.hero .big{font-family:var(--disp);font-size:clamp(30px,5.5vw,46px);line-height:1.05;margin-top:6px}
+.hero .note{color:var(--t2);font-size:15px;margin-top:8px}
+.etapas{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:620px){.etapas{grid-template-columns:repeat(2,1fr)}}
+.et{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px;border-top:3px solid var(--c);text-align:center}
+.et .n{font-family:var(--mono);font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--t3)}
+.et .v{font-family:var(--disp);font-size:28px;line-height:1.05;color:var(--c);margin:3px 0}
+.et .s{font-size:11.5px;color:var(--t2)}
+.item{display:grid;grid-template-columns:40px 1fr;gap:14px;background:var(--card);border:1px solid var(--line);
+ border-left:4px solid var(--c);border-radius:13px;padding:16px 18px;margin-bottom:10px}
+.item .ic{font-family:var(--disp);font-size:26px;color:var(--c);line-height:1;text-align:center}
+.item b{display:block;font-size:17px;line-height:1.2}
+.item p{font-size:14px;color:var(--t2);margin-top:4px}
+.item .ganho{display:inline-block;font-family:var(--mono);font-size:13px;color:var(--c);
+ border:1px solid var(--c);border-radius:999px;padding:3px 11px;margin-top:9px}
+.strip{border-radius:12px;padding:15px 18px;margin-top:14px;font-size:14.5px;line-height:1.55;
+ background:var(--card);border:1px solid var(--line);border-left:3px solid var(--orange);color:var(--t2)}
+.strip b{color:var(--t1)}
+.strip.ok{background:var(--green-soft);border-color:var(--green);border-left-color:var(--green)}
+.strip.warn{background:var(--yellow-soft);border-color:var(--yellow);border-left-color:var(--yellow)}
+.strip.bad{background:var(--red-soft);border-color:var(--red);border-left-color:var(--red)}
+.btn{display:inline-flex;align-items:center;gap:9px;background:var(--orange);color:#fff;border:none;border-radius:12px;
+ padding:14px 24px;font-family:'Outfit';font-size:15px;font-weight:600;cursor:pointer}
+.btn:hover{background:#ff6a40}
+.acao{display:flex;justify-content:center;margin-top:22px}
+footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--t3);
+ display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media print{.btn,.acao{display:none!important}body{background:#fff;color:#111}.card,.item,.et{background:#fff;border-color:#ddd}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="brand">EFEITO <b>VENDAS</b></div>
+<h1>Diagnóstico<br><span>da sua loja</span></h1>
+<p class="sub">Jogue os sete números dos últimos 30 dias. Em segundos você vê <b>em qual etapa o seu produto está travando</b>, quanto vale corrigir e o que fazer primeiro.</p>
+
+<div class="grid">
+  <div class="card">
+    <h2>Últimos 30 dias</h2>
+    <div class="f"><label>Faturamento</label><div class="inp"><span class="pre">R$</span><input type="number" id="fat" value="50000" step="1000" inputmode="decimal"></div></div>
+    <div class="f"><label>Pedidos pagos</label><div class="inp"><input class="np" type="number" id="ped" value="700" step="10" inputmode="numeric"><span class="suf">un</span></div></div>
+    <div class="f"><label>Visitantes</label><div class="inp"><input class="np" type="number" id="vis" value="45000" step="1000" inputmode="numeric"><span class="suf">un</span></div></div>
+    <div class="f"><label>Investimento em anúncio</label><div class="inp"><span class="pre">R$</span><input type="number" id="inv" value="4500" step="100" inputmode="decimal"></div></div>
+    <div class="f"><label>ROAS do anúncio</label><div class="inp"><input class="np" type="number" id="roas" value="7" step="0.5" inputmode="decimal"><span class="suf">×</span></div></div>
+    <div class="f"><label>CTR do anúncio</label><div class="inp"><input class="np" type="number" id="ctr" value="1.1" step="0.1" inputmode="decimal"><span class="suf">%</span></div></div>
+    <div class="f"><label>Custo do produto + embalagem</label><div class="inp"><span class="pre">R$</span><input type="number" id="custo" value="28" step="1" inputmode="decimal"></div></div>
+  </div>
+
+  <div>
+    <div class="hero">
+      <div class="l">O seu gargalo é</div>
+      <div class="big" id="h-gargalo">—</div>
+      <div class="note" id="h-nota">—</div>
+    </div>
+
+    <div class="etapas">
+      <div class="et" style="--c:var(--purple)"><div class="n">Ticket médio</div><div class="v" id="e-tk">—</div><div class="s">por venda</div></div>
+      <div class="et" style="--c:var(--orange)"><div class="n">CTR</div><div class="v" id="e-ctr">—</div><div class="s" id="e-ctrs">—</div></div>
+      <div class="et" style="--c:var(--green)"><div class="n">Conversão</div><div class="v" id="e-conv">—</div><div class="s" id="e-convs">—</div></div>
+      <div class="et" style="--c:var(--yellow)"><div class="n">Margem por venda</div><div class="v" id="e-marg">—</div><div class="s" id="e-margs">—</div></div>
+    </div>
+
+    <div id="acoes"></div>
+    <div class="strip" id="resumo">—</div>
+  </div>
+</div>
+
+<div class="acao">
+  <button class="btn" onclick="window.print()">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M3 17v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3"/></svg>
+    Salvar o meu diagnóstico
+  </button>
+</div>
+
+<footer>
+  <span>Efeito Vendas · diagnóstico da loja</span>
+  <span>Aula ao vivo toda quinta, 16h</span>
+</footer>
+</div>
+
+<script>
+(function(){
+  var g=function(i){return document.getElementById(i)};
+  var v=function(i){var n=parseFloat(g(i).value);return isNaN(n)?0:n};
+  var set=function(i,t){var e=g(i);if(e)e.textContent=t};
+  var brl=function(n){return 'R$ '+n.toLocaleString('pt-BR',{maximumFractionDigits:0})};
+  var brl2=function(n){return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})};
+  var nm=function(n){return n.toLocaleString('pt-BR',{maximumFractionDigits:0})};
+  var pc=function(n,d){return n.toFixed(d===undefined?2:d).replace('.',',')+'%'};
+  function comissao(p){
+    if(p<=79.99) return p*0.20+4.5;
+    if(p<=99.99) return p*0.14+16;
+    if(p<=199.99) return p*0.14+20;
+    return p*0.14+26;
+  }
+
+  function calc(){
+    var fat=v('fat'), ped=v('ped'), vis=v('vis'), inv=v('inv'), roas=v('roas'), ctr=v('ctr'), custo=v('custo');
+    var tk = ped? fat/ped : 0;
+    var conv = vis? ped/vis*100 : 0;
+    var marg = tk - custo - comissao(tk) - tk*0.08;
+    var fatAds = inv*roas, pctAds = fat? fatAds/fat*100 : 0;
+    var cpa = (tk&&fatAds)? inv/(fatAds/tk) : 0;
+
+    set('e-tk', tk?brl2(tk):'—');
+    set('e-ctr', ctr?pc(ctr,1):'—');
+    set('e-ctrs', ctr<1?'abaixo do aceitável':ctr<2?'aceitável':'competitivo');
+    set('e-conv', conv?pc(conv):'—');
+    set('e-convs', conv<1?'baixa':conv<2.5?'na média':'boa');
+    set('e-marg', marg?brl2(marg):'—');
+    set('e-margs', tk? pc(marg/tk*100,0)+' do preço' : '—');
+
+    /* onde está o gargalo — escolhe pelo maior ganho possível */
+    var cand=[];
+    if(marg<=0){
+      cand.push({ord:0,k:'preco',ganho:1e12,nome:'O PREÇO',
+        nota:'Nesse preço cada venda já sai no vermelho antes do anúncio. Nenhum ajuste de campanha resolve isso.',
+        acoes:[{c:'var(--red)',t:'Refaça o preço agora',p:'Produto, embalagem, imposto, comissão da faixa e o anúncio precisam caber antes do lucro.',g:0},
+               {c:'var(--red)',t:'Confira a faixa de comissão',p:'Preço logo acima de um degrau paga a taxa fixa maior sem ter o preço que a justifica.',g:0}]});
+    }
+    if(ctr>0 && ctr<2){
+      var alvo=Math.min(2.5,ctr*1.8);
+      var g1=fatAds*((alvo/ctr)-1)*0.5;
+      cand.push({ord:1,k:'ctr',ganho:g1,nome:'A VITRINE',
+        nota:'Com CTR de '+pc(ctr,1)+', a maioria vê o seu anúncio e não clica. O problema acontece antes da sua página.',
+        acoes:[{c:'var(--orange)',t:'Troque a primeira foto',p:'Produto grande no quadro, fundo branco, sem texto cobrindo. É ela que disputa a vitrine.',g:g1},
+               {c:'var(--orange)',t:'Reescreva o título',p:'Comece pelo termo que o cliente digita, não pelo nome da sua marca. Depois cor, tamanho e uso.',g:0}]});
+    }
+    if(conv>0 && conv<2.5){
+      var g2=vis*((2.5-conv)/100)*tk;
+      cand.push({ord:2,k:'conv',ganho:g2,nome:'A PÁGINA',
+        nota:'Só '+pc(conv)+' de quem clica compra. A pessoa chega e não encontra o que precisa para decidir.',
+        acoes:[{c:'var(--green)',t:'Monte as nove imagens',p:'Capa, frente e costas, material, detalhes, caimento, como medir, corpos diferentes, cores e ocasiões de uso.',g:g2},
+               {c:'var(--green)',t:'Complete atributos e variações',p:'Cada campo vazio é um filtro onde você não aparece. Variação sem foto ou sem estoque mata a venda no último clique.',g:0}]});
+    }
+    if(pctAds>70){
+      var g3=fat*0.15;
+      cand.push({ord:3,k:'dep',ganho:g3,nome:'A DEPENDÊNCIA DE ANÚNCIO',
+        nota:Math.round(pctAds)+'% do que você fatura vem de mídia paga. No dia em que o orçamento acabar, a loja para.',
+        acoes:[{c:'var(--purple)',t:'Ligue o programa de afiliados',p:'Você só paga depois da venda. É a porta de menor risco para abrir agora.',g:g3},
+               {c:'var(--purple)',t:'Poste três vídeos por semana',p:'Alcance que a plataforma distribui de graça hoje. Celular e luz natural bastam.',g:0}]});
+    }
+    if(marg>0 && tk && marg/tk<0.22){
+      var g4=ped*tk*0.05;
+      cand.push({ord:4,k:'marg',ganho:g4,nome:'A MARGEM',
+        nota:'Sobram só '+brl2(marg)+' por venda ('+pc(marg/tk*100,0)+' do preço). Vender mais nesse patamar aumenta o trabalho, não o lucro.',
+        acoes:[{c:'var(--yellow)',t:'Revise o preço e a faixa de comissão',p:'Confira se o seu preço não caiu logo acima de um degrau — ali você paga a taxa maior sem o preço que a justifica.',g:g4},
+               {c:'var(--yellow)',t:'Negocie ou troque de origem',p:'Cada real que sai do custo vai inteiro para o seu bolso. Importação e marca própria mudam a conta de vez.',g:0}]});
+    }
+    var escolha;
+    if(cand.length){
+      cand.sort(function(a,b){ return (b.ganho-a.ganho) || (a.ord-b.ord); });
+      escolha=cand[0];
+    } else {
+      escolha={k:'vol',nome:'O VOLUME',
+        nota:'Os seus indicadores estão saudáveis. Aqui o caminho não é arrumar — é escalar o que já funciona.',
+        acoes:[{c:'var(--green)',t:'Suba o orçamento em 20%',p:'Com CTR e conversão nesse patamar, há espaço. Confirme o resultado por duas semanas antes do próximo passo.',g:fat*0.2},
+               {c:'var(--green)',t:'Abra mais uma porta de tráfego',p:'Live, vídeo ou afiliados — a que estiver zerada na sua loja.',g:0}]};
+    }
+    var gargalo=escolha.nome, nota=escolha.nota, acoes=escolha.acoes.slice(0,2);
+    /* terceira ação: o segundo maior problema, ou prova social */
+    var segundo=cand.filter(function(x){return x.k!==escolha.k})[0];
+    if(segundo) acoes.push({c:'var(--purple)',t:segundo.acoes[0].t,p:'Depois do primeiro: '+segundo.acoes[0].p,g:0});
+    else acoes.push({c:'var(--purple)',t:'Trabalhe as dez primeiras avaliações',p:'Produto sem nota converte muito menos. Embalagem caprichada, bilhete e acompanhamento da entrega.',g:0});
+    acoes=acoes.map(function(a,i){ a.i=String(i+1); return a; });
+
+    set('h-gargalo',gargalo);
+    set('h-nota',nota);
+    g('acoes').innerHTML = acoes.map(function(a){
+      return '<div class="item" style="--c:'+a.c+'"><div class="ic">'+a.i+'</div><div><b>'+a.t+'</b><p>'+a.p+'</p>'+
+        (a.g>0?'<span class="ganho">vale cerca de '+brl(a.g)+'/mês</span>':'')+'</div></div>';
+    }).join('');
+
+    var r=g('resumo');
+    if(marg<=0){ r.className='strip bad';
+      r.innerHTML='<b>Resolva o preço antes de qualquer outra coisa.</b> Com margem negativa, cada venda nova aumenta o prejuízo.'; }
+    else if(gargalo==='O VOLUME'){ r.className='strip ok';
+      r.innerHTML='A sua loja está com os fundamentos no lugar: ticket de <b>'+brl2(tk)+'</b>, conversão de <b>'+pc(conv)+'</b> e margem de <b>'+brl2(marg)+'</b> por venda. <b>Escale com segurança.</b>'; }
+    else { r.className='strip';
+      r.innerHTML='Comece pela ação <b>1</b>. Arrumar a etapa errada não move o resultado — se a pessoa nem clica, mexer em cupom não adianta. <b>Resolva uma de cada vez e meça por duas semanas.</b>'; }
+  }
+
+  ['fat','ped','vis','inv','roas','ctr','custo'].forEach(function(i){
+    g(i).addEventListener('input',calc); g(i).addEventListener('change',calc);
+  });
+  calc();
+})();
+</script>
+</body>
+</html>
