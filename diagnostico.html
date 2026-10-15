@@ -73,7 +73,7 @@ footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-si
 
 <div class="brand">EFEITO <b>VENDAS</b></div>
 <h1>Diagnóstico<br><span>da sua loja</span></h1>
-<p class="sub">Jogue os sete números dos últimos 30 dias. Em segundos você vê <b>em qual etapa o seu produto está travando</b>, quanto vale corrigir e o que fazer primeiro.</p>
+<p class="sub">Serve para qualquer nicho. Jogue os sete números dos últimos 30 dias e veja <b>em qual etapa o seu produto está travando</b>, quanto vale corrigir e o que fazer primeiro.</p>
 
 <div class="grid">
   <div class="card">
@@ -164,14 +164,14 @@ footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-si
       var g1=fatAds*((alvo/ctr)-1)*0.5;
       cand.push({ord:1,k:'ctr',ganho:g1,nome:'A VITRINE',
         nota:'Com CTR de '+pc(ctr,1)+', a maioria vê o seu anúncio e não clica. O problema acontece antes da sua página.',
-        acoes:[{c:'var(--orange)',t:'Troque a primeira foto',p:'Produto grande no quadro, fundo branco, sem texto cobrindo. É ela que disputa a vitrine.',g:g1},
+        acoes:[{c:'var(--orange)',t:'Troque a primeira foto',p:'Produto grande no quadro, fundo branco, sem texto cobrindo o que importa. É ela que disputa a vitrine.',g:g1},
                {c:'var(--orange)',t:'Reescreva o título',p:'Comece pelo termo que o cliente digita, não pelo nome da sua marca. Depois cor, tamanho e uso.',g:0}]});
     }
     if(conv>0 && conv<2.5){
       var g2=vis*((2.5-conv)/100)*tk;
       cand.push({ord:2,k:'conv',ganho:g2,nome:'A PÁGINA',
         nota:'Só '+pc(conv)+' de quem clica compra. A pessoa chega e não encontra o que precisa para decidir.',
-        acoes:[{c:'var(--green)',t:'Monte as nove imagens',p:'Capa, frente e costas, material, detalhes, caimento, como medir, corpos diferentes, cores e ocasiões de uso.',g:g2},
+        acoes:[{c:'var(--green)',t:'Monte as nove imagens',p:'Capa, ângulos, material e acabamento, detalhes com setas, o produto em uso, medidas ou dimensões, variações e situações de uso.',g:g2},
                {c:'var(--green)',t:'Complete atributos e variações',p:'Cada campo vazio é um filtro onde você não aparece. Variação sem foto ou sem estoque mata a venda no último clique.',g:0}]});
     }
     if(pctAds>70){
@@ -202,7 +202,7 @@ footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-si
     /* terceira ação: o segundo maior problema, ou prova social */
     var segundo=cand.filter(function(x){return x.k!==escolha.k})[0];
     if(segundo) acoes.push({c:'var(--purple)',t:segundo.acoes[0].t,p:'Depois do primeiro: '+segundo.acoes[0].p,g:0});
-    else acoes.push({c:'var(--purple)',t:'Trabalhe as dez primeiras avaliações',p:'Produto sem nota converte muito menos. Embalagem caprichada, bilhete e acompanhamento da entrega.',g:0});
+    else acoes.push({c:'var(--purple)',t:'Trabalhe as dez primeiras avaliações',p:'Produto sem nota converte muito menos, em qualquer categoria. Embalagem caprichada, bilhete e acompanhamento da entrega.',g:0});
     acoes=acoes.map(function(a,i){ a.i=String(i+1); return a; });
 
     set('h-gargalo',gargalo);
