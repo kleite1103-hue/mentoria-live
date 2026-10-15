@@ -145,6 +145,13 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
 .fcor b{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;margin:0 auto;display:block}
 .fcor b.on{border-color:#fff}
 
+.ck2{display:flex;gap:12px;align-items:center;cursor:pointer;padding:12px 14px;border:1px solid var(--line2);border-radius:12px;margin-top:10px;background:var(--bg2);font-size:19px}
+.ck2 input{position:absolute;opacity:0;width:0;height:0}
+.ck2 .tk{width:24px;height:24px;border-radius:7px;border:2px solid var(--line2);flex:none;display:flex;align-items:center;justify-content:center;transition:.15s}
+.ck2 input:checked + .tk{background:var(--orange);border-color:var(--orange)}
+.ck2 input:checked + .tk::after{content:'✓';color:#fff;font-size:14px;font-weight:700}
+.ck2 i{font-style:normal;color:var(--t3);font-size:16px}
+
 .alav{display:grid;grid-template-columns:1fr 420px;gap:30px;margin-top:18px}
 .ganho{background:linear-gradient(135deg,var(--green-soft),transparent);border:2px solid var(--green);border-radius:22px;padding:28px;text-align:center}
 .ganho .l{font-family:var(--mono);font-size:15px;letter-spacing:3px;text-transform:uppercase;color:var(--green)}
@@ -425,8 +432,13 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
     <div class="campo"><label>Preço que o cliente paga</label><input type="number" id="r-preco" value="69" step="1"></div>
     <div class="campo"><label>Custo do produto</label><input type="number" id="r-custo" value="27" step="1"></div>
     <div class="campo"><label>Embalagem</label><input type="number" id="r-emb" value="2" step="0.5"></div>
-    <div class="campo"><label>Imposto (%)</label><input type="number" id="r-imp" value="6" step="1"></div>
+    <div class="c2" style="margin-top:0;gap:14px">
+      <div class="campo"><label>Imposto (%)</label><input type="number" id="r-imp" value="6" step="1"></div>
+      <div class="campo"><label>Acelera (%)</label><input type="number" id="r-ace" value="0" step="0.5"></div>
+    </div>
     <div class="campo"><label>Lucro que você quer por venda</label><input type="number" id="r-lucro" value="10" step="1"></div>
+    <label class="ck2"><input type="checkbox" id="r-dest"><span class="tk"></span><span>Campanha de Destaque <i>+2,5% na comissão</i></span></label>
+    <label class="ck2"><input type="checkbox" id="r-dev"><span class="tk"></span><span>Devolução Fácil <i>R$ 0,49 por item</i></span></label>
   </div>
   <div>
     <div class="caixa">
@@ -434,6 +446,8 @@ body.apagando #tela{pointer-events:auto;cursor:cell}
       <div class="linha"><span>− produto e embalagem</span><b id="r-l2">—</b></div>
       <div class="linha"><span>− comissão <span id="r-faixa" style="color:var(--t3);font-size:17px"></span></span><b id="r-l3">—</b></div>
       <div class="linha"><span>− imposto</span><b id="r-l4">—</b></div>
+      <div class="linha"><span>− devolução fácil</span><b id="r-l5">—</b></div>
+      <div class="linha"><span>− Shopee Acelera</span><b id="r-l6">—</b></div>
       <div class="linha tot"><span>Sobra para anúncio e lucro</span><b id="r-sobra">—</b></div>
     </div>
     <div class="c2" style="margin-top:14px;gap:16px">
@@ -709,7 +723,7 @@ function aplicarRadar(r){
     if(k==='d') setModo('lapis'); else if(k==='e') setModo('borracha');
     else if(k==='l') g('f-limpa').click();
   });
-  var SEL='input,button,select,textarea,.dot,.nav,#ferr,.drop,.gi,#zoom';
+  var SEL='input,button,select,textarea,label,.ck2,.dot,.nav,#ferr,.drop,.gi,#zoom';
   function ajusta(x,y){
     if(pintando||!modo) return;
     tela.style.pointerEvents='none';
@@ -781,11 +795,21 @@ function motor(){
 
   /* ROAS com preço */
   var rp=val('r-preco'), rc=val('r-custo'), re_=val('r-emb'), ri=val('r-imp')/100, rl=val('r-lucro');
+  var race=(g('r-ace')?val('r-ace'):0)/100;
+  var rdest=(g('r-dest')&&g('r-dest').checked)?0.025:0;
+  var rdev=(g('r-dev')&&g('r-dev').checked)?0.49:0;
   if(rp>0){
-    var rcom=comissao(rp), rimp=rp*ri, rsobra=rp-rc-re_-rcom-rimp;
+    var base=rp<=79.99?{p:0.20,f:4.5,l:'20% + R$ 4,50'}:rp<=99.99?{p:0.14,f:16,l:'14% + R$ 16'}:rp<=199.99?{p:0.14,f:20,l:'14% + R$ 20'}:{p:0.14,f:26,l:'14% + R$ 26'};
+    var rcom=rp*(base.p+rdest)+base.f;
+    var rimp=rp*ri;
+    var raceV=(rp-rcom)>0 ? (rp-rcom)*race : 0;
+    var rsobra=rp-rc-re_-rcom-rimp-rdev-raceV;
     set('r-l1',brl2(rp)); set('r-l2','− '+brl2(rc+re_)); set('r-l3','− '+brl2(rcom));
-    set('r-faixa','('+(rp<=79.99?'20% + R$ 4,50':rp<=99.99?'14% + R$ 16':rp<=199.99?'14% + R$ 20':'14% + R$ 26')+')');
-    set('r-l4','− '+brl2(rimp)); set('r-sobra',brl2(rsobra));
+    set('r-faixa','('+(rdest?((base.p*100+2.5).toFixed(1).replace('.',',')+'% + R$ '+brl2(base.f).replace('R$ ','')):base.l)+')');
+    set('r-l4','− '+brl2(rimp));
+    set('r-l5', rdev?'− '+brl2(rdev):'—');
+    set('r-l6', raceV?'− '+brl2(raceV):'—');
+    set('r-sobra',brl2(rsobra));
     if(g('r-sobra')) g('r-sobra').style.color = rsobra>0?'var(--green)':'var(--red)';
     var equi = rsobra>0 ? rp/rsobra : 0;
     var cpaIdeal = rsobra-rl, ideal = cpaIdeal>0 ? rp/cpaIdeal : 0;
@@ -817,7 +841,8 @@ function motor(){
       '<b>Sem risco:</b> se não vender, você não paga nada.'+(ind>0?' E repare: <b>'+Math.round(ind/(dir+ind)*100)+'% vieram de produtos que o afiliado nem divulgou.</b>':'');
   }
 }
-['n-fat','n-ped','n-vis','n-conv','n-inv','n-roas','n-ctr','n-custo','af-com','af-dir','af-ind','r-preco','r-custo','r-emb','r-imp','r-lucro']
+['n-fat','n-ped','n-vis','n-conv','n-inv','n-roas','n-ctr','n-custo','af-com','af-dir','af-ind','r-preco','r-custo','r-emb','r-imp','r-lucro','r-ace']
  .forEach(function(id){ var e=g(id); if(e) e.addEventListener('input',motor); });
+['r-dest','r-dev'].forEach(function(id){ var e=g(id); if(e) e.addEventListener('change',motor); });
 motor();
 </script></body></html>
