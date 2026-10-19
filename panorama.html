@@ -391,7 +391,7 @@ function montar({nome,di,ads,prod,adsp,ini,fim}){
   <div class="bx ${pAds>70?'vm':'vd'}"><div class="t">${pAds>70?'O risco concreto':'A posição é confortável'}</div><p>${pAds>70
     ?`Se o orçamento de anúncio parar por qualquer motivo, a loja perde <b>${br(pAds,0)}% do faturamento no mesmo dia</b>. Não é hipótese: é a composição atual.`
     :`Com ${br(100-pAds,0)}% do faturamento vindo de canais que não cobram por aparição, a loja continua vendendo mesmo se o anúncio parar.`}</p></div>
-  ${pAfi<10?`<div class="bx am"><div class="t">O canal subutilizado</div><p>Afiliados está em <b>${br(pAfi,1)}%</b> contra <b>10,2%</b> da média da carteira. É o único canal em que se paga depois da venda — diferença de cerca de <b>${rs(R.faturamento*(0.102-pAfi/100))}</b> por mês.</p></div>`:''}`:''}
+  ${pAfi<10?`<div class="bx am"><div class="t">Afiliados abaixo da média</div><p>Está em <b>${br(pAfi,1)}%</b> contra <b>10,2%</b> da média da carteira — diferença de cerca de <b>${rs(R.faturamento*(0.102-pAfi/100))}</b> por mês num canal que só cobra depois da venda. <b>Antes de agir, abra o painel de afiliados:</b> o número agregado não distingue programa parado de programa que perdeu criadores, e a ação é oposta em cada caso. Se os cliques seguem chegando e a venda caiu, criador parou de divulgar — aí é Colaborar com quem já vendia, não campanha nova.</p></div>`:''}`:''}
   ${adsp.length?`<h4>Os anúncios do mês</h4>
   <table><thead><tr><th>Anúncio</th><th class="n">Investido</th><th class="n">Faturamento</th><th class="n">ROAS</th><th class="n">CTR</th></tr></thead><tbody>
   ${adsp.filter(p=>p.mes_referencia===adsp[0].mes_referencia).slice(0,7).map(p=>{const r=f(p.roas),c=f(p.ctr);
@@ -403,7 +403,7 @@ function montar({nome,di,ads,prod,adsp,ini,fim}){
   /* execução */
   const acoes=[];
   if(garg.k==='TICKET'||tk<40) acoes.push(['Montar o primeiro kit','O ticket está em '+rs2(tk)+'. Kit com preço acima de R$ 45 — anúncio novo, ID próprio, sem mexer nos que já rodam. Conferir a faixa de comissão antes de fechar o preço.']);
-  if(pAfi<10&&temCanal) acoes.push(['Ligar o programa de afiliados','Está em '+br(pAfi,1)+'% contra 10,2% da carteira. Comissão competitiva nos três produtos de maior conversão, não no catálogo inteiro.']);
+  if(pAfi<10&&temCanal) acoes.push(['Abrir o painel de afiliados','Está em '+br(pAfi,1)+'% contra 10,2% da carteira. Conferir se o programa está parado ou se perdeu criadores: se os cliques continuam e a venda caiu, use Colaborar com quem já vendia, com comissão dirigida no produto certo. Se está parado mesmo, comissão competitiva nos três de maior conversão.']);
   if(cv<2.5) acoes.push(['Refazer a página do carro-chefe','As nove imagens na sequência, atributos completos, medidas e descrição respondendo às objeções. É a ação de maior impacto e não custa mídia.']);
   if(ctrAds>0&&ctrAds<2) acoes.push(['Trocar a foto principal dos campeões','CTR de '+pc(ctrAds,2)+' significa que a vitrine não está vencendo a comparação. Produto grande no quadro, fundo branco, sem texto cobrindo.']);
   acoes.push(['Separar o que escala do que sustenta','Anúncios acima de 10× sobem 20% uma vez e medem por 15 dias. Abaixo de 8× saem da escala até a página melhorar.']);
