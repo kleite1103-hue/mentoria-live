@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Panorama de Conta | Efeito Vendas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080a;--bg2:#0e1116;--card:#12161c;--line:#1c222b;--line2:#2a323d;
+ --t1:#f4f6f9;--t2:#9aa2b1;--t3:#5b6472;--orange:#ff4d1c;--green:#1fd47a;--purple:#7B2FFF;
+ --yellow:#ffc53d;--red:#ff3b5c;--blue:#2d7ff9;--disp:'Bebas Neue',sans-serif;--mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:30px 20px 60px}
+.brand{font-family:var(--disp);font-size:20px;letter-spacing:2.5px;color:var(--t2)}
+.brand b{color:var(--orange);font-weight:400}
+h1{font-family:var(--disp);font-size:clamp(32px,6vw,54px);line-height:.95;margin:8px 0 0}
+h1 span{color:var(--orange)}
+.sub{color:var(--t2);font-size:15px;max-width:620px;margin-top:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin-top:22px}
+.f{margin-bottom:14px}
+.f label{display:block;font-size:13px;color:var(--t2);margin-bottom:6px}
+.f input,.f select{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:11px;
+ padding:13px 14px;color:var(--t1);font-family:var(--mono);font-size:15px;outline:none}
+.f input:focus,.f select:focus{border-color:var(--orange)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.row{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--orange);color:#fff;border:none;border-radius:12px;
+ padding:14px 26px;font-family:'Outfit';font-size:15px;font-weight:600;cursor:pointer}
+.btn:hover{background:#ff6a40}.btn:disabled{opacity:.5;cursor:default}
+.btn.sec{background:transparent;border:1px solid var(--line2);color:var(--t2)}
+.erro{color:var(--red);font-size:13.5px;margin-top:10px;min-height:18px}
+.hint{font-size:12px;color:var(--t3);margin-top:5px}
+#status{font-family:var(--mono);font-size:13px;color:var(--t2);margin-top:14px;white-space:pre-line}
+
+/* relatório */
+#rel{display:none}
+.pg{width:210mm;min-height:297mm;background:#fff;color:#1a1d23;padding:16mm 15mm 14mm;margin:0 auto 10px;
+ position:relative;page-break-after:always;overflow:hidden}
+.pg.capa,.pg.div{background:#07080a;color:#fff}
+.pg.div{background:#12161c}
+.capa .tag{font-family:var(--mono);font-size:8.5pt;letter-spacing:3px;color:#ff4d1c;text-transform:uppercase;font-weight:600}
+.capa h2{font-family:var(--disp);font-size:42pt;line-height:.95;margin-top:10mm;color:#fff}
+.capa h2 span{color:#ff4d1c}
+.capa .sb{font-size:10.5pt;color:#9aa2b1;margin-top:6mm;max-width:138mm;line-height:1.5}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin-top:9mm}
+.kp div{border:1px solid #2a323d;border-radius:2.5mm;padding:3.5mm}
+.kp .l{font-family:var(--mono);font-size:6.5pt;letter-spacing:1.2px;color:#5b6472;text-transform:uppercase}
+.kp .v{font-family:var(--disp);font-size:19pt;margin-top:1mm}
+.capa .rd{position:absolute;bottom:14mm;left:15mm;right:15mm;border-top:1px solid #2a323d;padding-top:4mm;
+ display:flex;justify-content:space-between;font-size:8.5pt;color:#9aa2b1}
+.div .et{font-family:var(--mono);font-size:9pt;letter-spacing:4px;color:var(--c);text-transform:uppercase;font-weight:600}
+.div h2{font-family:var(--disp);font-size:46pt;line-height:.95;margin-top:5mm;color:#fff}
+.div h2 span{color:var(--c)}
+.div p{color:#9aa2b1;font-size:11pt;margin-top:6mm;max-width:135mm}
+.div .lst{margin-top:8mm}
+.div .lst div{font-size:10pt;color:#c9ced6;padding:2.5mm 0;border-bottom:1px solid #2a323d}
+.div .lst b{color:#fff}
+.pg .olho{font-family:var(--mono);font-size:7.5pt;letter-spacing:2.5px;text-transform:uppercase;color:#ff4d1c;font-weight:600;margin-bottom:2mm}
+.pg .olho.k{color:#7B2FFF}
+.pg h3{font-family:var(--disp);font-size:24pt;line-height:1;margin-bottom:3mm;color:#1a1d23}
+.pg h4{font-size:11pt;font-weight:700;margin:4.5mm 0 1.5mm;color:#1a1d23}
+.pg p{font-size:9.6pt;line-height:1.5;color:#3d434d;margin-bottom:2mm}
+.pg p b{color:#1a1d23}
+.pg .lead{font-size:10.3pt}
+.bx{border-radius:2.5mm;padding:3.5mm 4.5mm;margin:2.5mm 0;background:#f6f7f9;border-left:3px solid #ff4d1c}
+.bx.vd{background:#eefaf2;border-left-color:#1a9e52}.bx.vm{background:#fdeeef;border-left-color:#c0392b}
+.bx.am{background:#fff8e8;border-left-color:#d99a00}.bx.rx{background:#f4efff;border-left-color:#7B2FFF}
+.bx .t{font-family:var(--mono);font-size:7pt;letter-spacing:1.8px;text-transform:uppercase;font-weight:600;color:#ff4d1c;margin-bottom:1.2mm}
+.bx.vd .t{color:#1a9e52}.bx.vm .t{color:#c0392b}.bx.am .t{color:#d99a00}.bx.rx .t{color:#7B2FFF}
+.bx p{margin:0;font-size:9.6pt}
+.pg table{width:100%;border-collapse:collapse;font-size:8.8pt;margin:2.5mm 0}
+.pg th{text-align:left;font-family:var(--mono);font-size:6.8pt;letter-spacing:.8px;text-transform:uppercase;color:#8a919c;padding:2mm;border-bottom:1.5px solid #1a1d23}
+.pg td{padding:2mm;border-bottom:1px solid #eceef1;vertical-align:top;color:#3d434d}
+.pg td b{color:#1a1d23}
+.pg td.n{text-align:right;font-family:var(--mono)}
+.pg tr.ok td{background:#f2fbf6}.pg tr.ruim td{background:#fdf3f4}.pg tr.at td{background:#fff8e8}
+.ks{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin:3mm 0}
+.ki{border:1px solid #e6e8ec;border-radius:2.5mm;padding:3.2mm;border-top:3px solid var(--c)}
+.ki .l{font-family:var(--mono);font-size:6.2pt;letter-spacing:.8px;text-transform:uppercase;color:#8a919c}
+.ki .v{font-family:var(--disp);font-size:18pt;color:var(--c);line-height:1.1;margin:.5mm 0}
+.ki .s{font-size:7.8pt;color:#6b727c;line-height:1.3}
+.nm{display:flex;gap:3.5mm;margin-bottom:2.5mm}
+.nm .n{font-family:var(--disp);font-size:15pt;color:var(--c,#ff4d1c);line-height:1;width:6mm;flex:none}
+.nm b{display:block;font-size:9.8pt;color:#1a1d23}
+.nm span{font-size:9pt;color:#3d434d;line-height:1.4;display:block}
+.lg{display:flex;gap:6mm;font-size:8.3pt;color:#6b727c;margin-top:1mm}
+.lg i{display:inline-block;width:10px;height:8px;border-radius:2px;margin-right:4px}
+.sf3{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin:3mm 0}
+.sfc{border-radius:2.5mm;padding:3.5mm;border:1px solid #e6e8ec;border-left:4px solid var(--c)}
+.sfc .t{font-family:var(--disp);font-size:13pt;color:var(--c)}
+.sfc p{font-size:8.8pt;margin:1mm 0 0}
+.rd2{position:absolute;bottom:6mm;left:15mm;right:15mm;display:flex;justify-content:space-between;font-size:7pt;color:#b0b5bd}
+.barra{position:sticky;top:0;background:var(--bg);padding:14px 0;z-index:9;display:flex;gap:10px;justify-content:center;border-bottom:1px solid var(--line)}
+@media print{
+ body{background:#fff}.wrap{padding:0;max-width:none}
+ #form,.barra,#status{display:none!important}
+ .pg{margin:0;box-shadow:none}
+ @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="form">
+  <div class="brand">EFEITO <b>VENDAS</b></div>
+  <h1>Panorama<br><span>de conta</span></h1>
+  <p class="sub">Gera o relatório completo de uma conta nas duas visões — consultor e Karina — lendo os dados do sistema e aplicando o método da base.</p>
+
+  <div class="card" id="box-login">
+    <div class="row">
+      <div class="f"><label>E-mail</label><input type="email" id="email" autocomplete="username"></div>
+      <div class="f"><label>Senha</label><input type="password" id="senha" autocomplete="current-password"></div>
+    </div>
+    <button class="btn" id="entrar">Entrar</button>
+    <div class="erro" id="erro-login"></div>
+  </div>
+
+  <div class="card" id="box-conta" style="display:none">
+    <div class="f"><label>Conta</label><select id="conta"></select></div>
+    <div class="row">
+      <div class="f"><label>Período — início</label><input type="date" id="ini"></div>
+      <div class="f"><label>Período — fim</label><input type="date" id="fim"></div>
+    </div>
+    <div class="f"><label>Nome que aparece no relatório</label><input type="text" id="rotulo" placeholder="deixe em branco para usar o nome da conta">
+      <div class="hint">use um apelido se o relatório for circular fora da empresa</div></div>
+    <button class="btn" id="gerar">Gerar panorama</button>
+    <div class="erro" id="erro-ger"></div>
+    <div id="status"></div>
+  </div>
+</div>
+
+<div id="rel">
+  <div class="barra">
+    <button class="btn" onclick="window.print()">Salvar como PDF</button>
+    <button class="btn sec" onclick="location.reload()">Gerar outro</button>
+  </div>
+  <div id="paginas"></div>
+</div>
+
+</div>
+<script>
+const SB='https://tglzziptzshwhtovoike.supabase.co';
+const SK='sb_publishable_BE3sdf2BU14g-gdBxBLYlg_sRId5nOv';
+let token=null, contas=[];
+const $=id=>document.getElementById(id);
+const api=async p=>{const r=await fetch(SB+'/rest/v1/'+p,{headers:{apikey:SK,Authorization:'Bearer '+token}});
+  if(!r.ok) throw new Error('HTTP '+r.status); return r.json();};
+const f=v=>(v===null||v===undefined||v==='')?0:(+v||0);
+const br=(v,d=0)=>v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const rs=v=>'R$ '+br(v,0), rs2=v=>'R$ '+br(v,2), pc=(v,d=2)=>br(v,d)+'%', xx=v=>br(v,1)+'×', nn=v=>br(v,0);
+const MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const rot=m=>MES[+m.slice(5)-1];
+const st=t=>{$('status').textContent=t};
+
+$('entrar').onclick=async()=>{
+  $('erro-login').textContent=''; $('entrar').disabled=true;
+  try{
+    const r=await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',
+      headers:{apikey:SK,'Content-Type':'application/json'},
+      body:JSON.stringify({email:$('email').value.trim(),password:$('senha').value})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.msg||d.error_description||'E-mail ou senha incorretos');
+    token=d.access_token;
+    contas=await api('contas?ativa=eq.true&select=id,nome,username_shopee&order=nome');
+    $('conta').innerHTML=contas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+    const hoje=new Date(), ini=new Date(hoje); ini.setMonth(ini.getMonth()-6);
+    $('fim').value=hoje.toISOString().slice(0,10); $('ini').value=ini.toISOString().slice(0,10);
+    $('box-login').style.display='none'; $('box-conta').style.display='';
+  }catch(e){ $('erro-login').textContent=e.message; }
+  $('entrar').disabled=false;
+};
+
+$('gerar').onclick=async()=>{
+  $('erro-ger').textContent=''; $('gerar').disabled=true;
+  const cid=$('conta').value, ini=$('ini').value, fim=$('fim').value;
+  const conta=contas.find(c=>c.id==cid);
+  const nome=$('rotulo').value.trim()||conta.nome;
+  try{
+    st('Lendo métricas diárias…');
+    const di=await api(`metricas_diarias?conta_id=eq.${cid}&data=gte.${ini}&data=lte.${fim}&order=data&limit=1000`);
+    if(!di.length) throw new Error('Essa conta não tem dados no período escolhido.');
+    st('Lendo dados de anúncio…');
+    const ads=await api(`metricas_ads?conta_id=eq.${cid}&order=mes_referencia&limit=30`);
+    st('Lendo produtos e anúncios…');
+    const prod=await api(`metricas_produtos?conta_id=eq.${cid}&order=mes_referencia.desc,gmv.desc&limit=80`);
+    const adsp=await api(`metricas_ads_produtos?conta_id=eq.${cid}&order=mes_referencia.desc,gmv.desc&limit=60`);
+    st('Montando o panorama…');
+    montar({nome,di,ads,prod,adsp,ini,fim});
+    $('form').style.display='none'; $('rel').style.display='block'; window.scrollTo(0,0);
+  }catch(e){ $('erro-ger').textContent=e.message; st(''); }
+  $('gerar').disabled=false;
+};
+
+/* ───────── gráficos ───────── */
+function gLinha(serie,{cor='#ff4d1c',fmt=v=>br(v,0),meta=null,metaL=''}={}){
+  const w=760,h=230,L=66,T=18,R=20,B=32,pw=w-L-R,ph=h-T-B;
+  const mx=Math.max(...serie.map(s=>s[1]))*1.15||1;
+  const X=i=>L+pw*i/Math.max(1,serie.length-1), Y=v=>T+ph-v/mx*ph;
+  let o='';
+  for(let t=0;t<5;t++){const v=mx*t/4,y=Y(v);
+    o+=`<line x1="${L}" y1="${y.toFixed(0)}" x2="${w-R}" y2="${y.toFixed(0)}" stroke="#e8eaee"/><text x="${L-8}" y="${(y+4).toFixed(0)}" text-anchor="end" font-size="9" fill="#9aa0a8">${fmt(v)}</text>`;}
+  if(meta!==null&&meta<mx){const y=Y(meta);
+    o+=`<line x1="${L}" y1="${y.toFixed(0)}" x2="${w-R}" y2="${y.toFixed(0)}" stroke="#1a9e52" stroke-width="1.4" stroke-dasharray="5,4"/><text x="${w-R}" y="${(y-5).toFixed(0)}" text-anchor="end" font-size="8.5" fill="#1a9e52" font-weight="700">${metaL}</text>`;}
+  o+=`<polyline points="${serie.map((s,i)=>X(i).toFixed(0)+','+Y(s[1]).toFixed(0)).join(' ')}" fill="none" stroke="${cor}" stroke-width="2.5"/>`;
+  serie.forEach((s,i)=>{o+=`<circle cx="${X(i).toFixed(0)}" cy="${Y(s[1]).toFixed(0)}" r="3.2" fill="${cor}"/><text x="${X(i).toFixed(0)}" y="${h-9}" text-anchor="middle" font-size="9" fill="#6b727c">${s[0]}</text>`;});
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit">${o}</svg>`;
+}
+function gBarras(serie,{cor='#ff4d1c'}={}){
+  const w=760,h=230,L=66,T=18,R=20,B=32,pw=w-L-R,ph=h-T-B;
+  const mx=Math.max(...serie.map(s=>s[1]))*1.15||1, bw=pw/serie.length*0.52;
+  let o='';
+  for(let t=0;t<5;t++){const v=mx*t/4,y=T+ph-v/mx*ph;
+    o+=`<line x1="${L}" y1="${y.toFixed(0)}" x2="${w-R}" y2="${y.toFixed(0)}" stroke="#e8eaee"/><text x="${L-8}" y="${(y+4).toFixed(0)}" text-anchor="end" font-size="9" fill="#9aa0a8">${br(v/1000,0)}k</text>`;}
+  serie.forEach((s,i)=>{const cx=L+pw*(i+0.5)/serie.length, alt=s[1]/mx*ph;
+    o+=`<rect x="${(cx-bw/2).toFixed(0)}" y="${(T+ph-alt).toFixed(0)}" width="${bw.toFixed(0)}" height="${alt.toFixed(0)}" fill="${cor}" rx="2"/>`;
+    o+=`<text x="${cx.toFixed(0)}" y="${(T+ph-alt-5).toFixed(0)}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#3d434d">${br(s[1]/1000,0)}k</text>`;
+    o+=`<text x="${cx.toFixed(0)}" y="${h-9}" text-anchor="middle" font-size="9" fill="#6b727c">${s[0]}</text>`;});
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit">${o}</svg>`;
+}
+function gArea(serie){
+  const w=760,h=230,L=56,T=18,R=46,B=32,pw=w-L-R,ph=h-T-B;
+  const ch=[['ads','#ff4d1c'],['org','#1a9e52'],['afi','#7B2FFF'],['liv','#ffc53d']];
+  const n=serie.length, X=i=>L+pw*i/Math.max(1,n-1);
+  let o='';
+  for(let t=0;t<5;t++){const v=100*t/4,y=T+ph-v/100*ph;
+    o+=`<line x1="${L}" y1="${y.toFixed(0)}" x2="${w-R}" y2="${y.toFixed(0)}" stroke="#e8eaee"/><text x="${L-8}" y="${(y+4).toFixed(0)}" text-anchor="end" font-size="9" fill="#9aa0a8">${v}%</text>`;}
+  let acc=new Array(n).fill(0);
+  ch.forEach(([k,cor])=>{
+    if(!serie.some(s=>s[1][k]>0)) return;
+    const base=[...acc]; serie.forEach((s,i)=>acc[i]+=s[1][k]);
+    const cima=serie.map((s,i)=>X(i).toFixed(0)+','+(T+ph-acc[i]/100*ph).toFixed(0)).join(' ');
+    const baixo=serie.map((s,i)=>i).reverse().map(i=>X(i).toFixed(0)+','+(T+ph-base[i]/100*ph).toFixed(0)).join(' ');
+    o+=`<polygon points="${cima} ${baixo}" fill="${cor}" opacity=".88"/>`;
+    const d=acc[n-1]-base[n-1];
+    if(d>=10) o+=`<text x="${(X(n-1)-8).toFixed(0)}" y="${(T+ph-(acc[n-1]+base[n-1])/2/100*ph+5).toFixed(0)}" text-anchor="end" font-size="11" font-weight="700" fill="#fff">${br(d,0)}%</text>`;
+  });
+  serie.forEach((s,i)=>{o+=`<text x="${X(i).toFixed(0)}" y="${h-9}" text-anchor="middle" font-size="9" fill="#6b727c">${s[0]}</text>`;});
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" font-family="Outfit">${o}</svg>`;
+}
+</script>
+<script>/* ───────── motor do panorama ───────── */
+function montar({nome,di,ads,prod,adsp,ini,fim}){
+  /* agrupa por mês */
+  const M={}, C={};
+  di.forEach(x=>{const m=x.data.slice(0,7); M[m]=M[m]||{}; C[m]=(C[m]||0)+1;
+    ['faturamento','pedidos','visitantes','cliques','vendas_ads','vendas_organico','vendas_afiliado','vendas_lives','vendas_videos','pedidos_cancelados','vendas_canceladas','compradores_novos','compradores_existentes'].forEach(k=>M[m][k]=(M[m][k]||0)+f(x[k]));
+  });
+  const meses=Object.keys(M).sort();
+  const ultimo=meses[meses.length-1];
+  const diasUlt=C[ultimo]||0;
+  /* mês de referência: o último com pelo menos 20 dias, senão o anterior */
+  const ref = diasUlt>=20 ? ultimo : (meses[meses.length-2]||ultimo);
+  const cheios=meses.filter(m=>C[m]>=20);
+  const pri=cheios[0]||meses[0];
+  const R=M[ref], P=M[pri];
+  const tk=R.pedidos?R.faturamento/R.pedidos:0;
+  const cv=R.visitantes?R.pedidos/R.visitantes*100:0;
+  const rec=(R.compradores_novos+R.compradores_existentes)?R.compradores_existentes/(R.compradores_novos+R.compradores_existentes)*100:0;
+  const canc=R.faturamento?R.vendas_canceladas/R.faturamento*100:0;
+  const cresc=P.faturamento?(R.faturamento/P.faturamento-1)*100:0;
+  /* ads */
+  const aRef=ads.find(a=>a.mes_referencia===ref)||ads[ads.length-1]||{};
+  const roas=f(aRef.roas), invAds=f(aRef.despesas_total), gmvAds=f(aRef.gmv_total);
+  const ctrAds=f(aRef.impressoes_total)?f(aRef.cliques_total)/f(aRef.impressoes_total)*100:0;
+  const convClique=f(aRef.cliques_total)?f(aRef.conversoes_total)/f(aRef.cliques_total)*100:0;
+  const tacos=R.faturamento?invAds/R.faturamento*100:0;
+  /* canais */
+  const canalTot=['vendas_ads','vendas_organico','vendas_afiliado','vendas_lives','vendas_videos'].reduce((s,k)=>s+R[k],0);
+  const pAds=canalTot?R.vendas_ads/canalTot*100:0, pOrg=canalTot?R.vendas_organico/canalTot*100:0;
+  const pAfi=canalTot?R.vendas_afiliado/canalTot*100:0, pLiv=canalTot?(R.vendas_lives+R.vendas_videos)/canalTot*100:0;
+  const temCanal=canalTot>0;
+
+  /* ───── diagnóstico pelo protocolo ───── */
+  const sinais=[];
+  if(ctrAds>0) sinais.push({k:'ctr',ok:ctrAds>=2,txt:`CTR de ${pc(ctrAds,2)}`,
+    diag: ctrAds<1?'a vitrine não está competindo':ctrAds<2?'aceitável, com dinheiro na mesa':'a vitrine vence a comparação',
+    acao: ctrAds<2?'foto principal, título e preço de vitrine':'manter e replicar o padrão'});
+  if(cv>0) sinais.push({k:'conv',ok:cv>=2.5,txt:`conversão de ${pc(cv,2)}`,
+    diag: cv<1?'a página não responde a dúvida':cv<2.5?'na média do mercado':cv<4?'página boa, estrutura funcionando':'acima de 4% — o gargalo passa a ser tráfego',
+    acao: cv<2.5?'as nove imagens, atributos e avaliações':'não é aqui o gargalo'});
+  if(temCanal) sinais.push({k:'dep',ok:pAds<=70,txt:`${br(pAds,0)}% vindo de anúncio`,
+    diag: pAds>80?'dependência crítica de mídia paga':pAds>70?'no limite do que consideramos frágil':'a loja tem tráfego próprio',
+    acao: pAds>70?'abrir afiliados, vídeo e live':'há espaço para escalar com segurança'});
+  sinais.push({k:'rec',ok:rec>=20,txt:`recompra de ${pc(rec,1)}`,
+    diag: rec<10?'cliente não está voltando':rec<20?'abaixo da meta de 20%':'base fiel',
+    acao: rec<20?'cupom de retorno e régua de pós-venda':'manter'});
+  if(roas>0) sinais.push({k:'roas',ok:roas>=8,txt:`ROAS de ${xx(roas)}`,
+    diag: roas<4?'abaixo do piso saudável':roas<8?'apertado, revisar meta por anúncio':'acima do piso',
+    acao: roas<8?'calcular o equilíbrio com a margem real':'proteger o que funciona'});
+  if(tk>0&&tk<40) sinais.push({k:'tk',ok:false,txt:`ticket de ${rs2(tk)}`,
+    diag:'ticket abaixo de R$ 40 limita o quanto a conta comporta pagar por aparição',
+    acao:'kit, combo e leve-mais-por-menos'});
+
+  /* escolhe o gargalo pelo maior ganho */
+  const cand=[];
+  if(ctrAds>0&&ctrAds<2) cand.push({k:'VITRINE',ganho:gmvAds*((Math.min(2.5,ctrAds*1.8)/ctrAds)-1)*0.5,
+    nota:`Com CTR de ${pc(ctrAds,2)}, a maioria vê o anúncio e não clica. O problema acontece antes da página.`});
+  if(cv>0&&cv<2.5) cand.push({k:'PÁGINA',ganho:R.visitantes*((2.5-cv)/100)*tk,
+    nota:`Só ${pc(cv,2)} de quem entra compra. A página não está respondendo a dúvida de quem chega.`});
+  if(temCanal&&pAds>70) cand.push({k:'DEPENDÊNCIA DE ANÚNCIO',ganho:R.faturamento*0.15,
+    nota:`${br(pAds,0)}% do faturamento vem de mídia paga. No dia em que o orçamento parar, a loja para junto.`});
+  if(tk>0&&tk<40) cand.push({k:'TICKET',ganho:R.faturamento*0.25,
+    nota:`Ticket de ${rs2(tk)} limita o faturamento por pedido e o quanto a conta comporta pagar para aparecer.`});
+  if(roas>0&&roas<8) cand.push({k:'EFICIÊNCIA DO ANÚNCIO',ganho:invAds*2,
+    nota:`ROAS de ${xx(roas)} está abaixo do piso. Cada real investido devolve menos do que a conta precisa.`});
+  cand.sort((a,b)=>b.ganho-a.ganho);
+  const garg = cand[0]||{k:'VOLUME',ganho:R.faturamento*0.2,nota:'Os indicadores estão equilibrados. Aqui o caminho é escalar o que já funciona.'};
+
+  /* ───── montagem ───── */
+  const rodC=n=>`<div class="rd2"><span>Efeito Vendas · ${nome} · visão do consultor</span><span>${n}</span></div>`;
+  const rodK=n=>`<div class="rd2"><span>Efeito Vendas · ${nome} · visão da Karina</span><span>${n}</span></div>`;
+  const per=`${ini.split('-').reverse().join('/')} a ${fim.split('-').reverse().join('/')}`;
+  let H='';
+
+  /* capa */
+  H+=`<div class="pg capa">
+  <div class="tag">Efeito Vendas · Panorama de conta</div>
+  <h2>${nome}<br><span>onde está hoje<br>e onde pode chegar</span></h2>
+  <p class="sb">Leitura do período de ${per}, com diagnóstico pelo Protocolo KAIA, as três alavancas aplicadas aos números reais e o plano de execução em duas visões.</p>
+  <div class="kp">
+   <div><div class="l">Faturamento · ${rot(ref)}</div><div class="v">${rs(R.faturamento)}</div></div>
+   <div><div class="l">Crescimento no período</div><div class="v" style="color:${cresc>=0?'#1fd47a':'#ff3b5c'}">${cresc>=0?'+':''}${br(cresc,0)}%</div></div>
+   <div><div class="l">Conversão</div><div class="v" style="color:${cv>=2.5?'#1fd47a':'#ffc53d'}">${pc(cv,2)}</div></div>
+   <div><div class="l">Ticket médio</div><div class="v" style="color:${tk>=40?'#1fd47a':'#ffc53d'}">${rs2(tk)}</div></div>
+  </div>
+  <div class="rd"><span>Mês de referência: <b style="color:#fff">${rot(ref)}</b></span><span>${new Date().toLocaleDateString('pt-BR')}</span></div></div>`;
+
+  /* resumo */
+  const fortes=sinais.filter(s=>s.ok), fracos=sinais.filter(s=>!s.ok);
+  H+=`<div class="pg"><div class="olho">Resumo executivo</div>
+  <h3>O retrato em uma página</h3>
+  <p class="lead">No período analisado o faturamento ${cresc>=0?'cresceu':'caiu'} <b>${br(Math.abs(cresc),0)}%</b>. O gargalo de maior impacto hoje é <b>${garg.k.toLowerCase()}</b> — ${garg.nota}</p>
+  ${gBarras(cheios.map(m=>[rot(m),M[m].faturamento]))}
+  <div class="lg"><span><i style="background:#ff4d1c"></i>Faturamento por mês · só meses completos</span></div>
+  <div class="sf3">
+   <div class="sfc" style="--c:#1a9e52"><div class="t">O QUE ESTÁ FORTE</div><p>${fortes.length?fortes.map(s=>s.txt).join(' · '):'ainda sem indicador no verde'}</p></div>
+   <div class="sfc" style="--c:#d99a00"><div class="t">O QUE LIMITA</div><p>${fracos.length?fracos.map(s=>s.txt).join(' · '):'nenhum ponto crítico'}</p></div>
+   <div class="sfc" style="--c:#7B2FFF"><div class="t">O GARGALO</div><p><b>${garg.k}</b> — maior ganho disponível, cerca de ${rs(garg.ganho)}/mês</p></div>
+  </div>
+  <h4>Os números do mês de referência</h4>
+  <table><thead><tr><th>Indicador</th><th class="n">${rot(ref)}</th><th class="n">${rot(pri)}</th><th>Leitura</th></tr></thead><tbody>
+   <tr class="${cresc>=0?'ok':'ruim'}"><td>Faturamento</td><td class="n">${rs(R.faturamento)}</td><td class="n">${rs(P.faturamento)}</td><td>${cresc>=0?'em crescimento':'em queda'}</td></tr>
+   <tr><td>Pedidos</td><td class="n">${nn(R.pedidos)}</td><td class="n">${nn(P.pedidos)}</td><td>volume de vendas</td></tr>
+   <tr><td>Visitantes</td><td class="n">${nn(R.visitantes)}</td><td class="n">${nn(P.visitantes)}</td><td>tráfego total da loja</td></tr>
+   <tr class="${cv>=2.5?'ok':'at'}"><td>Taxa de conversão</td><td class="n">${pc(cv,2)}</td><td class="n">${pc(P.visitantes?P.pedidos/P.visitantes*100:0,2)}</td><td>${cv>=4?'acima de 4%: o gargalo vira tráfego':cv>=2.5?'página funcionando':'abaixo da média'}</td></tr>
+   <tr class="${tk>=40?'ok':'ruim'}"><td>Ticket médio</td><td class="n">${rs2(tk)}</td><td class="n">${rs2(P.pedidos?P.faturamento/P.pedidos:0)}</td><td>${tk<40?'abaixo de R$ 40 limita exposição':'comporta lance competitivo'}</td></tr>
+   ${roas?`<tr class="${roas>=8?'ok':'ruim'}"><td>ROAS do anúncio</td><td class="n">${xx(roas)}</td><td class="n">—</td><td>${roas>=8?'acima do piso saudável':'abaixo do piso de 8×'}</td></tr>`:''}
+   <tr class="${rec>=20?'ok':'at'}"><td>Recompra</td><td class="n">${pc(rec,1)}</td><td class="n">${pc((P.compradores_novos+P.compradores_existentes)?P.compradores_existentes/(P.compradores_novos+P.compradores_existentes)*100:0,1)}</td><td>${rec>=20?'base fiel':'abaixo da meta de 20%'}</td></tr>
+   <tr class="${canc<=2?'ok':'ruim'}"><td>Cancelamento</td><td class="n">${pc(canc,1)}</td><td class="n">${pc(P.faturamento?P.vendas_canceladas/P.faturamento*100:0,1)}</td><td>${canc<=2?'operação limpa':'acima do aceitável'}</td></tr>
+  </tbody></table>
+  ${rodC(2)}</div>`;
+
+  /* divisor consultor */
+  H+=`<div class="pg div" style="--c:#ff4d1c"><div class="et">Parte 1 de 2</div>
+  <h2>Visão do<br><span>consultor</span></h2>
+  <p>A leitura operacional: o que os números dizem, onde está o gargalo pelo Protocolo KAIA e o que executar nas próximas quatro semanas.</p>
+  <div class="lst"><div><b>Diagnóstico</b> — os pontos do protocolo aplicados à conta</div>
+  <div><b>Canais</b> — de onde vem o dinheiro e qual o risco disso</div>
+  <div><b>Anúncios</b> — o que escalar, o que segurar, o que reformular</div>
+  <div><b>Execução</b> — o plano das próximas quatro semanas</div></div></div>`;
+
+  /* diagnóstico */
+  H+=`<div class="pg"><div class="olho">Visão do consultor · diagnóstico</div>
+  <h3>Os pontos do protocolo</h3>
+  <p class="lead">A ordem de leitura que usamos em qualquer conta, aplicada aos números desta.</p>
+  <table><thead><tr><th>O que olhar</th><th class="n">Na conta</th><th>Diagnóstico</th><th>O que fazer</th></tr></thead><tbody>
+  ${sinais.map(s=>`<tr class="${s.ok?'ok':'ruim'}"><td><b>${s.k==='ctr'?'CTR do anúncio':s.k==='conv'?'Conversão':s.k==='dep'?'Dependência de canal':s.k==='rec'?'Recompra':s.k==='roas'?'ROAS':'Ticket médio'}</b></td><td class="n">${s.txt.replace(/^[^0-9R]*/,'')}</td><td>${s.diag}</td><td>${s.acao}</td></tr>`).join('')}
+  </tbody></table>
+  <div class="bx"><div class="t">O que o protocolo conclui</div><p>O gargalo de maior impacto é <b>${garg.k}</b>. ${garg.nota} <b>Arrumar a etapa errada não move o resultado</b> — por isso o plano começa por ele.</p></div>
+  <h4>A conversão ao longo do período</h4>
+  ${gLinha(meses.map(m=>[rot(m),M[m].visitantes?M[m].pedidos/M[m].visitantes*100:0]),{cor:'#1a9e52',fmt:v=>br(v,1)+'%',meta:4,metaL:'acima de 4% = boa'})}
+  <div class="lg"><span><i style="background:#1a9e52"></i>Taxa de conversão por mês</span></div>
+  ${rodC(4)}</div>`;
+
+  /* canais */
+  const serieCanal=meses.filter(m=>['vendas_ads','vendas_organico','vendas_afiliado'].reduce((s,k)=>s+M[m][k],0)>0)
+    .map(m=>{const t=['vendas_ads','vendas_organico','vendas_afiliado','vendas_lives','vendas_videos'].reduce((s,k)=>s+M[m][k],0);
+      return [rot(m),{ads:M[m].vendas_ads/t*100,org:M[m].vendas_organico/t*100,afi:M[m].vendas_afiliado/t*100,liv:(M[m].vendas_lives+M[m].vendas_videos)/t*100}];});
+  H+=`<div class="pg"><div class="olho">Visão do consultor · canais</div>
+  <h3>De onde vem o dinheiro</h3>
+  ${serieCanal.length?gArea(serieCanal)+`<div class="lg"><span><i style="background:#ff4d1c"></i>Anúncio</span><span><i style="background:#1a9e52"></i>Orgânico</span><span><i style="background:#7B2FFF"></i>Afiliados</span><span><i style="background:#ffc53d"></i>Live e vídeo</span></div>`
+   :'<p>Não há divisão por canal informada no período. Suba o relatório de canais para esta leitura aparecer.</p>'}
+  ${temCanal?`<div class="ks">
+   <div class="ki" style="--c:#ff4d1c"><div class="l">Anúncio</div><div class="v">${br(pAds,0)}%</div><div class="s">${rs(R.vendas_ads)}</div></div>
+   <div class="ki" style="--c:#1a9e52"><div class="l">Orgânico</div><div class="v">${br(pOrg,0)}%</div><div class="s">${rs(R.vendas_organico)}</div></div>
+   <div class="ki" style="--c:#7B2FFF"><div class="l">Afiliados</div><div class="v">${br(pAfi,0)}%</div><div class="s">${rs(R.vendas_afiliado)}</div></div>
+   <div class="ki" style="--c:#ffc53d"><div class="l">Live e vídeo</div><div class="v">${br(pLiv,0)}%</div><div class="s">${rs(R.vendas_lives+R.vendas_videos)}</div></div>
+  </div>
+  <div class="bx ${pAds>70?'vm':'vd'}"><div class="t">${pAds>70?'O risco concreto':'A posição é confortável'}</div><p>${pAds>70
+    ?`Se o orçamento de anúncio parar por qualquer motivo, a loja perde <b>${br(pAds,0)}% do faturamento no mesmo dia</b>. Não é hipótese: é a composição atual.`
+    :`Com ${br(100-pAds,0)}% do faturamento vindo de canais que não cobram por aparição, a loja continua vendendo mesmo se o anúncio parar.`}</p></div>
+  ${pAfi<10?`<div class="bx am"><div class="t">O canal subutilizado</div><p>Afiliados está em <b>${br(pAfi,1)}%</b> contra <b>10,2%</b> da média da carteira. É o único canal em que se paga depois da venda — diferença de cerca de <b>${rs(R.faturamento*(0.102-pAfi/100))}</b> por mês.</p></div>`:''}`:''}
+  ${adsp.length?`<h4>Os anúncios do mês</h4>
+  <table><thead><tr><th>Anúncio</th><th class="n">Investido</th><th class="n">Faturamento</th><th class="n">ROAS</th><th class="n">CTR</th></tr></thead><tbody>
+  ${adsp.filter(p=>p.mes_referencia===adsp[0].mes_referencia).slice(0,7).map(p=>{const r=f(p.roas),c=f(p.ctr);
+    return `<tr class="${r>=10?'ok':r<8?'ruim':'at'}"><td>${(p.nome_anuncio||'').slice(0,44)}</td><td class="n">${rs(f(p.despesas))}</td><td class="n">${rs(f(p.gmv))}</td><td class="n">${xx(r)}</td><td class="n">${br(c<1?c*100:c,2)}%</td></tr>`;}).join('')}
+  </tbody></table>
+  <div class="bx am"><div class="t">A leitura dos anúncios</div><p><b>Acima de 10× escala</b> — esses podem subir 20%. <b>De 8× a 10× observa.</b> <b>Abaixo de 8× reformula</b>: quando o CTR também está baixo, o problema é vitrine, não lance.</p></div>`:''}
+  ${rodC(5)}</div>`;
+
+  /* execução */
+  const acoes=[];
+  if(garg.k==='TICKET'||tk<40) acoes.push(['Montar o primeiro kit','O ticket está em '+rs2(tk)+'. Kit com preço acima de R$ 45 — anúncio novo, ID próprio, sem mexer nos que já rodam. Conferir a faixa de comissão antes de fechar o preço.']);
+  if(pAfi<10&&temCanal) acoes.push(['Ligar o programa de afiliados','Está em '+br(pAfi,1)+'% contra 10,2% da carteira. Comissão competitiva nos três produtos de maior conversão, não no catálogo inteiro.']);
+  if(cv<2.5) acoes.push(['Refazer a página do carro-chefe','As nove imagens na sequência, atributos completos, medidas e descrição respondendo às objeções. É a ação de maior impacto e não custa mídia.']);
+  if(ctrAds>0&&ctrAds<2) acoes.push(['Trocar a foto principal dos campeões','CTR de '+pc(ctrAds,2)+' significa que a vitrine não está vencendo a comparação. Produto grande no quadro, fundo branco, sem texto cobrindo.']);
+  acoes.push(['Separar o que escala do que sustenta','Anúncios acima de 10× sobem 20% uma vez e medem por 15 dias. Abaixo de 8× saem da escala até a página melhorar.']);
+  if(pLiv<1) acoes.push(['Começar vídeo e live','Alcance que a plataforma distribui de graça hoje. Três vídeos por semana dos produtos campeões.']);
+  if(rec<20) acoes.push(['Cupom de recompra','A recompra está em '+pc(rec,1)+'. Cupom de retorno para quem comprou nos últimos 60 dias aproxima dos 20% que é a meta.']);
+  H+=`<div class="pg"><div class="olho">Visão do consultor · execução</div>
+  <h3>As próximas quatro semanas</h3>
+  ${acoes.slice(0,6).map((a,i)=>`<div class="nm"><span class="n">${i+1}</span><div><b>${a[0]}</b><span>${a[1]}</span></div></div>`).join('')}
+  <h4>O que não fazer</h4>
+  <div class="bx vm"><div class="t">Três erros que custariam caro</div><p><b>1.</b> Aumentar orçamento nos anúncios abaixo de 8× — compra mais tráfego ruim. <b>2.</b> Editar anúncio que está acima de 10× — o algoritmo reinicia o aprendizado e você perde de 7 a 14 dias. <b>3.</b> Baixar a meta de ROAS para dar um gás — joga fora o histórico construído.</p></div>
+  ${rodC(6)}</div>`;
+
+  /* divisor Karina */
+  H+=`<div class="pg div" style="--c:#7B2FFF"><div class="et">Parte 2 de 2</div>
+  <h2>Visão da<br><span>Karina</span></h2>
+  <p>A leitura estratégica: por que esses números são o que são, qual alavanca escolher e por quê, e o que a conta pode ser em doze meses.</p>
+  <div class="lst"><div><b>A fórmula mestra</b> — onde a conta está em cada variável</div>
+  <div><b>A escolha da alavanca</b> — qual puxar primeiro e por quê</div>
+  <div><b>O efeito no leilão</b> — por que ticket decide exposição</div>
+  <div><b>O horizonte</b> — o cenário de doze meses em etapas</div></div></div>`;
+
+  /* fórmula mestra */
+  const alavanca = cv<2.5?'CONVERSÃO':(tk<40?'TICKET':'TRÁFEGO');
+  H+=`<div class="pg"><div class="olho k">Visão da Karina · a fórmula</div>
+  <h3>Tráfego × conversão × ticket = faturamento</h3>
+  <p class="lead">Todo crescimento na Shopee passa por essas três variáveis, e só por elas. <b>O trabalho da gestão é saber qual puxar em cada momento</b> — puxar a errada é onde se queima dinheiro.</p>
+  <table><thead><tr><th>Variável</th><th class="n">Hoje</th><th>Diagnóstico</th><th>O que fazer</th></tr></thead><tbody>
+  <tr class="${alavanca==='TRÁFEGO'?'at':'ok'}"><td><b>Tráfego</b><br><span style="font-size:7.8pt;color:#6b727c">${nn(R.visitantes)} visitas/mês</span></td><td class="n">${temCanal&&pAds>70?'concentrado em mídia paga':'distribuído'}</td><td>${pAds>70?'uma fonte só responde por quase tudo':'há mais de uma porta aberta'}</td><td>${pAds>70?'abrir afiliados e vídeo antes de comprar mais':'pode escalar'}</td></tr>
+  <tr class="${cv>=2.5?'ok':'ruim'}"><td><b>Conversão</b><br><span style="font-size:7.8pt;color:#6b727c">${pc(cv,2)}</span></td><td class="n">${cv>=4?'excelente':cv>=2.5?'boa':'abaixo da média'}</td><td>${cv>=4?'<b>não é o gargalo</b> — acima de 4% o problema passa a ser tráfego':cv>=2.5?'funciona, mas tem folga':'<b>é aqui que a conta perde dinheiro</b>'}</td><td>${cv>=2.5?'manter':'nove imagens, atributos e avaliações'}</td></tr>
+  <tr class="${tk>=40?'ok':'ruim'}"><td><b>Ticket</b><br><span style="font-size:7.8pt;color:#6b727c">${rs2(tk)}</span></td><td class="n">${tk>=40?'competitivo':'baixo'}</td><td>${tk<40?'<b>limita exposição no leilão</b>':'comporta lance competitivo'}</td><td>${tk<40?'kit, combo e leve-mais-por-menos':'manter'}</td></tr>
+  </tbody></table>
+  ${gLinha(meses.map(m=>[rot(m),M[m].pedidos?M[m].faturamento/M[m].pedidos:0]),{cor:'#d99a00',fmt:v=>'R$ '+br(v,0),meta:40,metaL:'piso para lance competitivo'})}
+  <div class="lg"><span><i style="background:#ffc53d"></i>Ticket médio por mês</span></div>
+  <div class="bx rx"><div class="t">A alavanca que eu puxaria primeiro</div><p><b>${alavanca}.</b> ${alavanca==='CONVERSÃO'
+   ?'Com conversão abaixo de 2,5%, cada real gasto em tráfego rende menos do que poderia. É a única alavanca sem risco: só melhora o resultado.'
+   :alavanca==='TICKET'?'Quando a conversão passa de 2,5%, o gargalo deixa de ser a página. O ticket é a única alavanca que aumenta faturamento sem aumentar custo de mídia — e nesta conta ele está em '+rs2(tk)+'.'
+   :'Com conversão e ticket no lugar, o que falta é volume. Aqui comprar tráfego funciona, desde que as portas gratuitas sejam abertas junto.'}</p></div>
+  ${rodK(8)}</div>`;
+
+  /* leilão */
+  H+=`<div class="pg"><div class="olho k">Visão da Karina · o leilão</div>
+  <h3>Por que ticket decide o quanto você aparece</h3>
+  <p class="lead">Esta é a parte que amarra tudo. <b>O ticket não afeta só o quanto entra por venda — afeta o quanto a plataforma te mostra.</b></p>
+  <div class="nm" style="--c:#7B2FFF"><span class="n">1</span><div><b>A plataforma precifica a sua aparição</b><span>Desde maio de 2026 a cobrança do GMV Max é por impressão. Ela estima quanto espera faturar te mostrando, e essa estimativa nasce de quantos clicam, quantos compram e <b>quanto vale cada compra</b>.</span></div></div>
+  <div class="nm" style="--c:#7B2FFF"><span class="n">2</span><div><b>A conta desta loja</b><span>Com conversão de ${pc(cv,2)} e ticket de ${rs2(tk)}, cada 100 visitas valem cerca de <b>${rs(cv/100*100*tk)}</b> em venda esperada. Com ticket de ${rs2(Math.max(50,tk*1.5))}, as mesmas 100 visitas valeriam <b>${rs(cv/100*100*Math.max(50,tk*1.5))}</b>.</span></div></div>
+  <div class="nm" style="--c:#7B2FFF"><span class="n">3</span><div><b>Por isso o kit é duplo ganho</b><span>Ele aumenta o faturamento por pedido <b>e</b> aumenta o quanto você consegue pagar para aparecer. Uma mexida, dois efeitos — nenhuma outra alavanca faz isso.</span></div></div>
+  <h4>O que acontece em cada cenário</h4>
+  <table><thead><tr><th>Cenário</th><th class="n">Ticket</th><th class="n">Faturamento/mês</th><th class="n">Ganho</th></tr></thead><tbody>
+  <tr><td>Hoje</td><td class="n">${rs2(tk)}</td><td class="n">${rs(R.faturamento)}</td><td class="n">—</td></tr>
+  <tr class="at"><td>Kit em parte do catálogo</td><td class="n">${rs2(tk*1.2)}</td><td class="n">${rs(R.faturamento*1.2)}</td><td class="n" style="color:#1a9e52">+${rs(R.faturamento*0.2)}</td></tr>
+  <tr class="ok"><td>Kit consolidado</td><td class="n">${rs2(tk*1.4)}</td><td class="n">${rs(R.faturamento*1.4)}</td><td class="n" style="color:#1a9e52">+${rs(R.faturamento*0.4)}</td></tr>
+  </tbody></table>
+  <p style="font-size:8.3pt;color:#8a919c">Projeção mantendo tráfego e conversão atuais. Não considera o ganho adicional de impressão que o ticket maior traz no leilão — na prática tende a ser superior.</p>
+  ${rodK(9)}</div>`;
+
+  /* horizonte */
+  const et=[];
+  let acum=R.faturamento;
+  if(tk<40){acum*=1.2; et.push(['Mês 1 a 2','kit nos produtos campeões',R.faturamento*0.2,acum]);}
+  if(pAfi<10&&temCanal){const g=R.faturamento*(0.102-pAfi/100); acum+=g; et.push(['Mês 2 a 3','afiliados na média da carteira',g,acum]);}
+  if(cv<2.5){const g=R.visitantes*((2.5-cv)/100)*tk; acum+=g; et.push(['Mês 2 a 4','página refeita nos campeões',g,acum]);}
+  if(pLiv<1){const g=acum*0.1; acum+=g; et.push(['Mês 3 a 6','vídeo e live rodando',g,acum]);}
+  {const g=acum*0.3; acum+=g; et.push(['Mês 6 a 12','escala do anúncio sobre a base nova',g,acum]);}
+  H+=`<div class="pg"><div class="olho k">Visão da Karina · o horizonte</div>
+  <h3>O que essa conta pode ser em doze meses</h3>
+  <p class="lead">Não é projeção otimista. É o que acontece se as alavancas forem puxadas <b>na ordem certa</b>, uma de cada vez.</p>
+  <table><thead><tr><th>Etapa</th><th>O que se faz</th><th class="n">Efeito no mês</th><th class="n">Acumulado</th></tr></thead><tbody>
+  <tr><td><b>Hoje</b></td><td>situação atual</td><td class="n">—</td><td class="n">${rs(R.faturamento)}</td></tr>
+  ${et.map((e,i)=>`<tr class="${i===et.length-1?'ok':'at'}"><td><b>${e[0]}</b></td><td>${e[1]}</td><td class="n" style="color:#1a9e52">+${rs(e[2])}</td><td class="n">${i===et.length-1?'<b>'+rs(e[3])+'</b>':rs(e[3])}</td></tr>`).join('')}
+  </tbody></table>
+  <p style="font-size:8.3pt;color:#8a919c">Cada etapa pressupõe a anterior consolidada. A última assume escala de 20% a cada quinze dias com ROAS mantido.</p>
+  <div class="bx vd"><div class="t">Por que a ordem importa mais que a velocidade</div><p>${tk<40
+   ?'Se a escala vier antes do kit, você compra tráfego caro para vender um ticket de '+rs2(tk)+' — e o ROAS cai mais rápido do que o faturamento sobe. <b>Com o ticket resolvido primeiro, o mesmo investimento rende mais.</b>'
+   :'Com conversão e ticket no lugar, a escala é matemática: dobrar o tráfego dobra o faturamento mantendo a margem. <b>O risco está em escalar antes de a base aguentar.</b>'}</p></div>
+  <h4>Os três riscos para vigiar</h4>
+  <div class="sf3">
+   <div class="sfc" style="--c:#c0392b"><div class="t">ESTOQUE</div><p>Escalar sem estoque para 30 dias derruba o posicionamento construído.</p></div>
+   <div class="sfc" style="--c:#d99a00"><div class="t">EDIÇÃO DE ANÚNCIO</div><p>Mexer nos que rodam bem reinicia o aprendizado. Kit entra como anúncio novo, sempre.</p></div>
+   <div class="sfc" style="--c:#7B2FFF"><div class="t">DEPENDÊNCIA</div><p>Se o anúncio crescer mais que os outros canais, a fragilidade aumenta mesmo com o faturamento subindo.</p></div>
+  </div>
+  ${rodK(10)}</div>`;
+
+  document.getElementById('paginas').innerHTML=H;
+}
+</script>
+</body>
+</html>
